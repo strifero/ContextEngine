@@ -79,6 +79,34 @@ Here's a representative excerpt from a generated `CLAUDE.md` for a Next.js + Pri
 
 The actual output reflects the conventions and structure found in your specific project — file layout, detected dependencies, and config file patterns all shape what gets written.
 
+Here's what a generated `SKILL.md` looks like for the React skill:
+
+```markdown
+# React
+
+## Component patterns
+- Prefer function components. Never use class components in new code.
+- Keep components small and focused — if a component renders meaningfully different things based on a prop, split it.
+- Co-locate component-specific styles, types, and helpers in the same directory as the component file.
+
+## Hook rules
+- Never call hooks conditionally or inside loops.
+- Extract repeated stateful logic into custom hooks in `hooks/`.
+- Avoid `useEffect` for derived state — compute it directly during render or with `useMemo`.
+
+## Client vs. server responsibilities (Next.js App Router)
+- Components are Server Components by default. Add `"use client"` only when the component needs interactivity, browser APIs, or React state.
+- Do not fetch data in Client Components — pass data down as props from Server Components or fetch in a Server Action.
+- Keep the client boundary as deep in the tree as possible.
+
+## What to avoid
+- Avoid prop drilling more than two levels deep — use composition or context.
+- Do not mutate state directly — always return new objects/arrays from reducers and state setters.
+- Do not use `index` as a key in lists that can reorder or filter.
+```
+
+Each skill file reflects guidance specific to that technology, not generic advice recycled across frameworks.
+
 ---
 
 ## Skill File Quality
