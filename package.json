@@ -1,5 +1,5 @@
 {
-  "name": "contextengine",
+  "name": "@strifero/contextengine",
   "version": "1.2.0",
   "description": "One command gives any AI agent your entire codebase. Auto-detects your stack, generates context files for Claude Code, Cursor, Copilot, and Codex.",
   "keywords": [
