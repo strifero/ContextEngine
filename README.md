@@ -77,7 +77,7 @@ Here's a representative excerpt from a generated `CLAUDE.md` for a Next.js + Pri
 - Do not import server-only modules into `components/`
 ```
 
-And here's a representative excerpt from a generated `CLAUDE.md` for a Python + Django project:
+Here's a representative excerpt from a generated `CLAUDE.md` for a Python + Django project:
 
 ```markdown
 # Project Context
@@ -104,6 +104,56 @@ And here's a representative excerpt from a generated `CLAUDE.md` for a Python + 
 - Do not use `python manage.py` commands in production without confirming migration state first
 ```
 
+Here's a representative excerpt from a generated `CLAUDE.md` for a Go project:
+
+```markdown
+# Project Context
+
+## Stack
+- Go
+- PostgreSQL
+
+## Conventions
+- Follow standard Go module layout — `cmd/` for entry points, `internal/` for packages not intended for external use
+- Errors are returned, not panicked — wrap with context using `fmt.Errorf("doing x: %w", err)`
+- Interfaces are defined at the consumer, not the producer
+- Use the standard library first; add dependencies deliberately
+
+## Architecture Notes
+- `cmd/` — main packages and entry points
+- `internal/` — application packages, unexported outside this module
+- `pkg/` — packages intended for external use, if any
+
+## What to avoid
+- Do not use `init()` for side effects that affect program behavior
+- Do not ignore returned errors
+```
+
+Here's a representative excerpt from a generated `CLAUDE.md` for a Rust project:
+
+```markdown
+# Project Context
+
+## Stack
+- Rust
+- Cargo
+
+## Conventions
+- Follow Cargo's standard workspace layout when multiple crates are involved
+- Use `thiserror` for library error types, `anyhow` for application error handling
+- Prefer `Result` over `unwrap` in library code; reserve `unwrap` and `expect` for tests or clearly unreachable branches
+- Format with `rustfmt` and lint with `clippy` before committing
+
+## Architecture Notes
+- `src/lib.rs` — library root
+- `src/main.rs` — binary entry point
+- `src/` subdirectories map to module hierarchy
+
+## What to avoid
+- Do not use `unwrap()` in library code where callers cannot recover
+- Do not suppress `clippy` warnings without a documented reason
+```
+
 The actual output reflects the conventions and structure found in your specific project — file layout, detected dependencies, and config file patterns all shape what gets written.
 
 ---
@@ -128,7 +178,23 @@ Best practices evolve. When the guidance in a bundled skill file changes — bec
 
 Because ContextEngine runs via `npx`, you always pull the latest published version by default. If you have a pinned version in a script or workflow, bump it periodically to get updated skill content.
 
-When a bundled skill is updated, running `--update` in your project will sync the new content for any skills you have not edited. Skills you have modified by hand are never overwritten — `--update` only touches files that match the original generated content. If you want to pull in upstream skill improvements while keeping your own additions, open the relevant skill file alongside the current version in `src/skills/` in the repository and merge the changes manually.
+When a bundled skill is updated, running `--update` in your project will sync the new content for any skills you have not edited. Skills you have modified by hand are never overwritten — `--update` only touches files that match the original generated content.
+
+### How `--update` determines what to overwrite
+
+ContextEngine compares each generated skill file against the version it originally wrote. If the file on disk matches what the tool generated at the time, it is considered unedited and `--update` will replace it with the latest content. If the file has been changed — any change — it is left alone.
+
+When `--update` runs, it prints a summary of what happened:
+
+```
+✔ Updated: .claude/skills/react/SKILL.md
+✔ Updated: .claude/skills/prisma/SKILL.md
+~ Skipped (edited): .claude/skills/typescript/SKILL.md
++ Added: .claude/skills/vite/SKILL.md
+- Removed: .claude/skills/webpack/SKILL.md (no longer detected)
+```
+
+If a skill you have edited has received significant upstream changes and you want to incorporate them, the process is manual: open the skill file in your project alongside the current version in `src/skills/` in the repository, and merge the changes you want to keep. The `--update` output will always tell you which files were skipped so you know exactly where to look.
 
 If you believe a skill's guidance is outdated or incorrect, the skills are plain markdown and contributions are straightforward — see the Contributing section below.
 
@@ -203,7 +269,9 @@ npx @strifero/contextengine --no-agents
 | C# | `.csproj`, `.sln`, `.cs` files |
 | Bun | `bun.lockb` |
 
-The table above reflects every technology that currently has a corresponding skill file in the library — one skill per detected technology. Don't see yours? [Open an issue](https://github.com/strifero/ContextEngine/issues) or submit a PR.
+Detection is based on the signal files listed above. Projects that follow the standard conventions for each ecosystem — placing config files at the root, using canonical dependency manifests — will be detected reliably. Projects with non-standard layouts (config files in subdirectories, monorepos where manifests live in workspaces rather than the root, or bespoke build setups) may not detect every technology correctly. If detection misses part of your stack, you can run ContextEngine from the relevant subdirectory using `--dir`, or open an issue describing your layout so detection logic can be improved.
+
+Don't see your stack in the table? [Open an issue](https://github.com/strifero/ContextEngine/issues) or submit a PR.
 
 ---
 
