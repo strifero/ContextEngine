@@ -46,6 +46,19 @@ Generates all of the above in a single run.
 
 ---
 
+## Subagents (Claude Code)
+
+Claude Code supports invoking specialized subagents — separate agent definitions that Claude can spin up and delegate tasks to during a session. Each subagent is defined by a markdown file in `.claude/agents/` and carries its own focused context: the tools it should use, the conventions it should follow, and the part of the codebase it owns.
+
+ContextEngine generates two subagents by default:
+
+- **`backend-engineer.md`** — scoped to server-side work: API routes, database queries, service logic, and backend conventions detected in your project. When Claude delegates a backend task, this agent picks it up with the right context already loaded.
+- **`code-reviewer.md`** — focused on review heuristics: consistency with your detected stack's conventions, common anti-patterns for your frameworks, and the rules expressed in your skill files.
+
+You can edit these files freely — they are plain markdown. Use `--no-agents` to skip generating them if you prefer to write your own from scratch.
+
+---
+
 ## Example Output
 
 Here's a representative excerpt from a generated `CLAUDE.md` for a Next.js + Prisma + TypeScript project:
@@ -78,34 +91,6 @@ Here's a representative excerpt from a generated `CLAUDE.md` for a Next.js + Pri
 ```
 
 The actual output reflects the conventions and structure found in your specific project — file layout, detected dependencies, and config file patterns all shape what gets written.
-
-Here's what a generated `SKILL.md` looks like for the React skill:
-
-```markdown
-# React
-
-## Component patterns
-- Prefer function components. Never use class components in new code.
-- Keep components small and focused — if a component renders meaningfully different things based on a prop, split it.
-- Co-locate component-specific styles, types, and helpers in the same directory as the component file.
-
-## Hook rules
-- Never call hooks conditionally or inside loops.
-- Extract repeated stateful logic into custom hooks in `hooks/`.
-- Avoid `useEffect` for derived state — compute it directly during render or with `useMemo`.
-
-## Client vs. server responsibilities (Next.js App Router)
-- Components are Server Components by default. Add `"use client"` only when the component needs interactivity, browser APIs, or React state.
-- Do not fetch data in Client Components — pass data down as props from Server Components or fetch in a Server Action.
-- Keep the client boundary as deep in the tree as possible.
-
-## What to avoid
-- Avoid prop drilling more than two levels deep — use composition or context.
-- Do not mutate state directly — always return new objects/arrays from reducers and state setters.
-- Do not use `index` as a key in lists that can reorder or filter.
-```
-
-Each skill file reflects guidance specific to that technology, not generic advice recycled across frameworks.
 
 ---
 
@@ -162,6 +147,17 @@ npx @strifero/contextengine --force
 npx @strifero/contextengine --no-agents
 ```
 
+### Monorepos and nested app directories
+
+If your repository root is not the application directory — for example, a monorepo where apps live under `packages/`, `apps/`, or `services/` — point ContextEngine at the specific directory you want scanned:
+
+```bash
+npx @strifero/contextengine --dir ./apps/web
+npx @strifero/contextengine --dir ./packages/api
+```
+
+Detection runs relative to the directory you specify, so the generated `CLAUDE.md` and skill files will reflect that app's stack rather than whatever happens to be at the repository root. If you have multiple apps in a monorepo, run the command once per app directory. Each invocation deposits its output inside the target directory — for Claude Code, that means `.claude/` will sit alongside the app's own config files rather than at the repo root.
+
 ---
 
 ## Detected Stacks
@@ -203,7 +199,7 @@ Don't see yours? [Open an issue](https://github.com/strifero/ContextEngine/issue
 
 With `--update`, ContextEngine re-runs detection and syncs non-destructively — new skills are added, stale ones removed, and everything you've written by hand is preserved.
 
-Each skill file follows the [Agent Skills open standard](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) — compatible with Claude Code, Cursor, Codex CLI, and any other agent that supports `SKILL.md`.
+Each skill file follows the [Agent Skills open standard](https://platform.google.com/docs/en/agents-and-tools/agent-skills/overview) — compatible with Claude Code, Cursor, Codex CLI, and any other agent that supports `SKILL.md`.
 
 ---
 
