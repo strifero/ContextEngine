@@ -1,0 +1,893 @@
+// skills.ts — Skill and agent file content library
+// Each entry is a self-contained SKILL.md following the Agent Skills open standard.
+// https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview
+
+export interface SkillFile {
+  path: string;     // relative path inside .claude/
+  content: string;
+}
+
+// ---------------------------------------------------------------------------
+// Skills
+// ---------------------------------------------------------------------------
+
+export const SKILL_TYPESCRIPT: SkillFile = {
+  path: 'skills/typescript/SKILL.md',
+  content: `---
+name: typescript
+description: TypeScript patterns, type definitions, async conventions, and module structure. Use whenever writing, editing, or reviewing TypeScript code, defining types or interfaces, handling async logic, or structuring modules. Also trigger for strict mode errors, generics, or type inference questions.
+---
+
+# TypeScript Conventions
+
+## Compiler Settings
+- \`"strict": true\` — non-negotiable
+- \`noUncheckedIndexedAccess: true\` — always guard array/object access
+- \`exactOptionalPropertyTypes: true\`
+- Target \`ES2022\` or later
+
+## Type Definitions
+- Prefer \`interface\` for object shapes; \`type\` for unions, intersections, and primitives
+- Never use \`any\` — use \`unknown\` and narrow with type guards
+- Avoid type assertions (\`as X\`) unless you control both sides
+- Export types from a dedicated \`types.ts\` per module
+
+## Async Patterns
+- Always \`async/await\` — never raw \`.then()\` chains in application code
+- Wrap external calls in try/catch; rethrow with context
+- Use \`Promise.all()\` for independent parallel operations
+
+## Error Handling
+- API boundaries: return \`{ error: string }\` with the appropriate HTTP status
+- Never swallow errors silently — always log at minimum
+
+## Naming
+- Files: \`kebab-case.ts\`
+- Classes/Interfaces/Types: \`PascalCase\`
+- Functions/variables: \`camelCase\`
+- Constants: \`SCREAMING_SNAKE_CASE\`
+- Booleans: prefix with \`is\`, \`has\`, \`can\`, \`should\`
+
+## Imports
+- Use path aliases (\`@/lib/...\`) — no deep relative paths
+- Group: external → internal → types → relative
+`,
+};
+
+export const SKILL_NODEJS: SkillFile = {
+  path: 'skills/nodejs/SKILL.md',
+  content: `---
+name: nodejs
+description: Node.js runtime conventions, environment configuration, process management, and server bootstrap patterns. Use whenever writing server entry points, handling env vars, setting up process signals, or debugging Node.js runtime issues.
+---
+
+# Node.js Conventions
+
+## Runtime
+- Node.js 20+ LTS — use native \`fetch\`, \`crypto\`
+- Always specify \`"engines": { "node": ">=20" }\` in package.json
+
+## Environment Variables
+- Validate all required env vars at startup — fail fast
+\`\`\`typescript
+const required = ['DATABASE_URL', 'API_KEY'];
+for (const key of required) {
+  if (!process.env[key]) throw new Error(\`Missing env var: \${key}\`);
+}
+\`\`\`
+- Never read \`process.env\` deep in business logic — read at startup, pass down
+
+## Process Management
+- Handle \`SIGTERM\` and \`SIGINT\` for graceful shutdown
+- Register \`process.on('unhandledRejection', ...)\` at startup — log + exit(1)
+
+## Logging
+- Structured JSON logging (pino or similar) in production
+- Log level via \`LOG_LEVEL\` env var
+- Always include: timestamp, level, message, module
+
+## Package Conventions
+- Commit \`package-lock.json\`
+- Pin exact versions for infrastructure packages
+- Scripts: always define \`start\`, \`build\`, \`dev\`, \`typecheck\`, \`lint\`
+`,
+};
+
+export const SKILL_EXPRESS: SkillFile = {
+  path: 'skills/express/SKILL.md',
+  content: `---
+name: express
+description: Express.js route structure, middleware patterns, error handling, and API response conventions. Use whenever creating routes, middleware, request validation, or error handlers. Also trigger for REST API design, auth middleware, or CORS questions.
+---
+
+# Express.js Conventions
+
+## Router Structure
+- One router per domain (\`routes/users.ts\`, \`routes/orders.ts\`)
+- Routers are thin — all logic lives in \`lib/\`
+- Mount routers in \`app.ts\`, not \`server.ts\`
+
+\`\`\`typescript
+router.get('/:id', async (req: Request, res: Response) => {
+  try {
+    const item = await getItem(req.params.id);
+    if (!item) { res.status(404).json({ error: 'Not found' }); return; }
+    res.json(item);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    res.status(500).json({ error: message });
+  }
+});
+\`\`\`
+
+## Response Conventions
+- Error: \`{ error: string }\` — always the \`error\` key
+- 400 — validation failure | 401 — no auth | 403 — forbidden
+- 404 — not found | 409 — conflict | 500 — server error
+
+## Middleware Order
+1. \`express.json()\`  2. CORS  3. Logging  4. Routes  5. 404 handler  6. Error handler
+`,
+};
+
+export const SKILL_NEXTJS: SkillFile = {
+  path: 'skills/nextjs/SKILL.md',
+  content: `---
+name: nextjs
+description: Next.js App Router conventions — Server Components, Client Components, API routes, data fetching, and project structure. Use whenever building or editing Next.js pages, layouts, API routes, or server actions. Also trigger for routing, metadata, or image optimization questions.
+---
+
+# Next.js App Router Conventions
+
+## Structure
+\`\`\`
+app/
+├── layout.tsx
+├── page.tsx
+├── (marketing)/
+├── dashboard/
+│   ├── layout.tsx
+│   └── page.tsx
+└── api/
+    └── route.ts
+\`\`\`
+
+## Server vs Client Components
+- Default: Server Component (no \`'use client'\`)
+- Add \`'use client'\` only for: hooks, browser APIs, event listeners
+- Keep Client Components as leaf nodes
+
+## Data Fetching
+\`\`\`typescript
+export default async function Page() {
+  const data = await fetchData();
+  return <UI data={data} />;
+}
+\`\`\`
+
+## API Routes
+\`\`\`typescript
+export async function GET(req: NextRequest) {
+  const id = req.nextUrl.searchParams.get('id');
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+  return NextResponse.json(await getData(id));
+}
+\`\`\`
+
+## Environment Variables
+- Server-only: \`SOME_KEY\`
+- Client-exposed: \`NEXT_PUBLIC_SOME_KEY\`
+`,
+};
+
+export const SKILL_REACT: SkillFile = {
+  path: 'skills/react/SKILL.md',
+  content: `---
+name: react
+description: React component patterns, hooks, state management, and accessibility conventions. Use whenever building React components, managing state, handling forms, writing custom hooks, or composing UI.
+---
+
+# React Conventions
+
+## Component Structure
+\`\`\`typescript
+interface Props { id: string; onDone?: () => void; }
+
+export function MyComponent({ id, onDone }: Props) {
+  // 1. Hooks  2. Derived state  3. Handlers  4. Effects  5. Render
+}
+\`\`\`
+- Named exports (except Next.js pages)
+
+## State Management
+- Local: \`useState\` / \`useReducer\`
+- Server state: React Query / SWR — never \`useEffect\` + \`fetch\`
+- Global: Zustand
+- URL state: \`useSearchParams\`
+
+## Performance
+- \`memo()\` only after measuring
+- Key prop: stable IDs, never array index
+
+## Accessibility
+- Keyboard navigable interactive elements
+- Descriptive \`alt\` on all images
+- \`<label>\` associated with every form field
+- Semantic HTML: \`<button>\`, \`<nav>\`, \`<main>\`
+`,
+};
+
+export const SKILL_VITE: SkillFile = {
+  path: 'skills/vite/SKILL.md',
+  content: `---
+name: vite
+description: Vite project conventions — config structure, environment variables, build optimization, and plugin setup.
+---
+
+# Vite Conventions
+
+## Config
+\`\`\`typescript
+export default defineConfig({
+  plugins: [],
+  resolve: { alias: { '@': '/src' } },
+  build: { target: 'es2022', sourcemap: false },
+});
+\`\`\`
+
+## Environment Variables
+- Prefix with \`VITE_\` to expose to client
+- Access via \`import.meta.env.VITE_API_URL\`
+- \`.env.local\` for local overrides — never commit
+
+## Build
+- Dynamic \`import()\` for route-level code splitting
+- \`vite-bundle-visualizer\` to diagnose large bundles
+`,
+};
+
+export const SKILL_VUE: SkillFile = {
+  path: 'skills/vue/SKILL.md',
+  content: `---
+name: vue
+description: Vue 3 Composition API patterns, component structure, reactivity, and routing.
+---
+
+# Vue 3 Conventions
+
+## Always \`<script setup>\`
+\`\`\`vue
+<script setup lang="ts">
+interface Props { id: string; }
+const props = defineProps<Props>();
+const count = ref(0);
+const doubled = computed(() => count.value * 2);
+</script>
+\`\`\`
+
+## Composables
+\`\`\`typescript
+export function useUser(id: string) {
+  const user = ref<User | null>(null);
+  const isLoading = ref(false);
+  return { user, isLoading };
+}
+\`\`\`
+
+## State — Pinia (Composition API style only)
+\`\`\`typescript
+export const useCartStore = defineStore('cart', () => {
+  const items = ref<Item[]>([]);
+  function add(item: Item) { items.value.push(item); }
+  return { items, add };
+});
+\`\`\`
+`,
+};
+
+export const SKILL_TAILWIND: SkillFile = {
+  path: 'skills/tailwind/SKILL.md',
+  content: `---
+name: tailwind
+description: Tailwind CSS utility class patterns, responsive design, and component composition.
+---
+
+# Tailwind CSS Conventions
+
+## Core
+- Utility-first: compose in JSX, extract when reused 3+ times
+- Use \`cn()\` (clsx + tailwind-merge) for conditional classes
+
+## Responsive (mobile-first)
+\`\`\`
+className="flex flex-col md:flex-row gap-4"
+\`\`\`
+
+## Common Patterns
+\`\`\`
+Card:   rounded-xl border bg-card p-6 shadow-sm
+Button: inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium
+Input:  flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm
+\`\`\`
+
+## Colors
+- Define brand colors in \`tailwind.config.ts\` under \`theme.extend.colors\`
+- Semantic names: \`primary\`, \`secondary\`, \`destructive\`, \`muted\`
+- Dark mode via \`class\` strategy
+`,
+};
+
+export const SKILL_SWIFTUI: SkillFile = {
+  path: 'skills/swiftui/SKILL.md',
+  content: `---
+name: swiftui
+description: Swift and SwiftUI patterns — view composition, @Observable state, async/await, navigation, and iOS architecture.
+---
+
+# SwiftUI / Swift Conventions
+
+## State — @Observable
+\`\`\`swift
+@Observable
+final class ViewModel {
+  var items: [Item] = []
+  var isLoading = false
+
+  func load() async {
+    isLoading = true
+    defer { isLoading = false }
+    do { items = try await service.fetchAll() }
+    catch { self.error = error.localizedDescription }
+  }
+}
+\`\`\`
+
+## Async
+- \`.task { }\` for lifecycle-tied work
+- \`@MainActor\` on UI-updating classes
+- No \`DispatchQueue.main.async\`
+
+## Quality Bar
+- No force unwraps (\`!\`) in production
+- Every async op has loading + error state
+`,
+};
+
+export const SKILL_STRIPE: SkillFile = {
+  path: 'skills/stripe/SKILL.md',
+  content: `---
+name: stripe
+description: Stripe integration — payments, subscriptions, webhooks, and the customer portal.
+---
+
+# Stripe Conventions
+
+## Webhook — Verify Signature Every Time
+\`\`\`typescript
+router.post('/webhooks/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'] as string;
+  let event: Stripe.Event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
+  } catch {
+    res.status(400).json({ error: 'Invalid signature' }); return;
+  }
+  switch (event.type) {
+    case 'customer.subscription.updated': await handleUpdate(event.data.object); break;
+    case 'invoice.payment_failed':        await handleFailed(event.data.object);  break;
+  }
+  res.json({ received: true });
+});
+\`\`\`
+
+## Active Status
+\`\`\`typescript
+const isActive = ['active', 'trialing'].includes(subscription.status);
+\`\`\`
+
+## Testing
+- Card: \`4242 4242 4242 4242\`
+- Local webhooks: \`stripe listen --forward-to localhost:3000/webhooks/stripe\`
+`,
+};
+
+export const SKILL_PRISMA: SkillFile = {
+  path: 'skills/prisma/SKILL.md',
+  content: `---
+name: prisma
+description: Prisma ORM patterns — schema design, migrations, typed queries, and connection pooling.
+---
+
+# Prisma Conventions
+
+## Client Singleton
+\`\`\`typescript
+import { PrismaClient } from '@prisma/client';
+const g = globalThis as { prisma?: PrismaClient };
+export const prisma = g.prisma ?? new PrismaClient({ log: ['error'] });
+if (process.env.NODE_ENV !== 'production') g.prisma = prisma;
+\`\`\`
+
+## Schema
+\`\`\`prisma
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+\`\`\`
+
+## Migrations
+\`\`\`bash
+npx prisma migrate dev --name describe_change
+npx prisma migrate deploy   # production
+\`\`\`
+`,
+};
+
+export const SKILL_POSTGRESQL: SkillFile = {
+  path: 'skills/postgresql/SKILL.md',
+  content: `---
+name: postgresql
+description: PostgreSQL patterns — schema design, indexes, parameterized queries, and connection pooling.
+---
+
+# PostgreSQL Conventions
+
+## Always Parameterized
+\`\`\`typescript
+const { rows } = await pool.query<User>(
+  'SELECT id, email FROM users WHERE id = $1 AND deleted_at IS NULL',
+  [userId]
+);
+\`\`\`
+
+## Schema
+- Primary keys: \`gen_random_uuid()\`
+- Always \`TIMESTAMPTZ\` not \`TIMESTAMP\`
+- Soft deletes: \`deleted_at TIMESTAMPTZ\`
+
+## Indexes
+\`\`\`sql
+CREATE INDEX CONCURRENTLY idx_orders_user ON orders(user_id);
+CREATE INDEX CONCURRENTLY idx_active ON users(email) WHERE deleted_at IS NULL;
+\`\`\`
+`,
+};
+
+export const SKILL_MONGODB: SkillFile = {
+  path: 'skills/mongodb/SKILL.md',
+  content: `---
+name: mongodb
+description: MongoDB and Mongoose conventions — schema design, queries, indexes, and connection management.
+---
+
+# MongoDB / Mongoose Conventions
+
+## Schema
+\`\`\`typescript
+const userSchema = new Schema({
+  email: { type: String, required: true, unique: true, lowercase: true },
+}, { timestamps: true });
+\`\`\`
+
+## Queries
+\`\`\`typescript
+const user = await User.findById(id).lean();
+const users = await User.find({ active: true }).select('email name').lean();
+\`\`\`
+
+## Indexes
+\`\`\`typescript
+userSchema.index({ email: 1 });
+userSchema.index({ userId: 1, createdAt: -1 });
+\`\`\`
+`,
+};
+
+export const SKILL_AZURE: SkillFile = {
+  path: 'skills/azure/SKILL.md',
+  content: `---
+name: azure
+description: Azure infrastructure conventions — Container Apps, Key Vault, Azure CLI, and deployment patterns.
+---
+
+# Azure Conventions
+
+## Resource Naming
+\`\`\`
+Container App:  ca-<appname>-<env>
+Cosmos:         cosmos-<appname>-<env>
+Key Vault:      kv-<appname>-<env>
+Container Reg:  cr<appname><env>
+\`\`\`
+
+## Container Apps
+- Scale to zero (min 0) for cost efficiency
+- Liveness probe on \`/health\`
+- Secrets from Key Vault — never hardcode
+- Start: \`0.5 vCPU / 1Gi\`
+
+## Deploy
+1. Build + push image to ACR
+2. \`az containerapp update --image <new-image>\`
+3. Verify \`/health\`
+`,
+};
+
+export const SKILL_DOCKER: SkillFile = {
+  path: 'skills/docker/SKILL.md',
+  content: `---
+name: docker
+description: Docker and container conventions — multi-stage builds, health checks, and docker-compose patterns.
+---
+
+# Docker Conventions
+
+## Multi-Stage Build
+\`\`\`dockerfile
+FROM node:22-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM node:22-alpine AS runner
+WORKDIR /app
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package*.json ./
+RUN npm ci --omit=dev
+USER appuser
+EXPOSE 3000
+CMD ["node", "dist/index.js"]
+\`\`\`
+
+## Best Practices
+- Pin base image tags — never \`latest\`
+- Non-root user in production
+- \`.dockerignore\` excludes \`node_modules\`, \`.env\`, \`.git\`
+`,
+};
+
+export const SKILL_GO: SkillFile = {
+  path: 'skills/go/SKILL.md',
+  content: `---
+name: go
+description: Go conventions — project structure, error handling, HTTP handlers, and concurrency patterns.
+---
+
+# Go Conventions
+
+## Error Handling
+\`\`\`go
+if err != nil {
+    return fmt.Errorf("getUserByID %s: %w", id, err)
+}
+var ErrNotFound = errors.New("not found")
+\`\`\`
+
+## HTTP Handler
+\`\`\`go
+func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
+    id := r.PathValue("id")
+    user, err := h.svc.GetUser(r.Context(), id)
+    if errors.Is(err, ErrNotFound) {
+        http.Error(w, "not found", http.StatusNotFound); return
+    }
+    json.NewEncoder(w).Encode(user)
+}
+\`\`\`
+
+## Concurrency
+- \`context.Context\` for cancellation — always first parameter
+- Channels for communication, mutexes for shared state
+`,
+};
+
+export const SKILL_PYTHON: SkillFile = {
+  path: 'skills/python/SKILL.md',
+  content: `---
+name: python
+description: Python conventions — project structure, type hints, async patterns, and error handling.
+---
+
+# Python Conventions
+
+## Type Hints — Always
+\`\`\`python
+def get_user(user_id: str) -> Optional[User]:
+    ...
+\`\`\`
+
+## Async (FastAPI)
+\`\`\`python
+@app.get("/users/{user_id}")
+async def get_user(user_id: str) -> User:
+    user = await db.get_user(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Not found")
+    return user
+\`\`\`
+
+## Tooling
+- \`uv\` or \`pip\` with \`pyproject.toml\`
+- \`ruff\` for linting and formatting
+- \`mypy\` for type checking in CI
+`,
+};
+
+export const SKILL_DJANGO: SkillFile = {
+  path: 'skills/django/SKILL.md',
+  content: `---
+name: django
+description: Django conventions — settings, models, migrations, and REST Framework patterns.
+---
+
+# Django Conventions
+
+## Settings
+- Split: \`settings/base.py\`, \`settings/dev.py\`, \`settings/prod.py\`
+- Secrets via \`django-environ\` — never committed
+
+## Models
+\`\`\`python
+class Article(models.Model):
+    title      = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+\`\`\`
+
+## Query Optimization
+- \`select_related()\` for FK, \`prefetch_related()\` for M2M
+- Django Debug Toolbar in dev to catch N+1
+`,
+};
+
+export const SKILL_RUST: SkillFile = {
+  path: 'skills/rust/SKILL.md',
+  content: `---
+name: rust
+description: Rust conventions — error handling with Result/Option, async with Tokio, and project structure.
+---
+
+# Rust Conventions
+
+## Error Handling
+\`\`\`rust
+#[derive(Debug, thiserror::Error)]
+pub enum AppError {
+    #[error("not found: {0}")]
+    NotFound(String),
+    #[error("database error: {0}")]
+    Database(#[from] sqlx::Error),
+}
+\`\`\`
+- Never \`unwrap()\` in production — use \`?\`
+
+## Async — Tokio
+\`\`\`rust
+#[tokio::main]
+async fn main() -> anyhow::Result<()> { ... }
+\`\`\`
+
+## Ownership
+- Prefer borrowing (\`&T\`) over cloning
+- \`Arc<T>\` for shared state across threads
+`,
+};
+
+export const SKILL_BUN: SkillFile = {
+  path: 'skills/bun/SKILL.md',
+  content: `---
+name: bun
+description: Bun runtime conventions — server, file I/O, built-in test runner, and package management.
+---
+
+# Bun Conventions
+
+## HTTP Server
+\`\`\`typescript
+Bun.serve({
+  port: 3000,
+  async fetch(req) {
+    const url = new URL(req.url);
+    if (url.pathname === '/health') return new Response('ok');
+    return new Response('Not found', { status: 404 });
+  },
+});
+\`\`\`
+
+## File I/O
+\`\`\`typescript
+const text = await Bun.file('data.txt').text();
+await Bun.write('output.txt', 'hello');
+\`\`\`
+
+## Tests
+\`\`\`typescript
+import { describe, it, expect } from 'bun:test';
+describe('math', () => {
+  it('adds', () => expect(1 + 1).toBe(2));
+});
+\`\`\`
+- Auto-loads \`.env\` — no dotenv needed
+`,
+};
+
+export const SKILL_PHP: SkillFile = {
+  path: 'skills/php/SKILL.md',
+  content: `---
+name: php
+description: PHP conventions — modern PHP patterns, Composer, and WordPress plugin development.
+---
+
+# PHP Conventions
+
+## Modern PHP (8.1+)
+- \`declare(strict_types=1);\` at top of every file
+- Constructor promotion:
+\`\`\`php
+public function __construct(
+    private readonly UserRepository $repo,
+) {}
+\`\`\`
+
+## WordPress Plugins
+- Prefix all functions, classes, hooks, option keys with plugin slug
+- Never access superglobals directly — use \`sanitize_*()\`, \`esc_*()\`, \`wp_verify_nonce()\`
+- Database writes via \`$wpdb->prepare()\`
+- Enqueue scripts via \`wp_enqueue_scripts\` hook
+`,
+};
+
+export const SKILL_CSHARP: SkillFile = {
+  path: 'skills/csharp/SKILL.md',
+  content: `---
+name: csharp
+description: C# and .NET conventions — async/await, LINQ, and .NET MAUI cross-platform development.
+---
+
+# C# / .NET Conventions
+
+## Async/Await
+- All I/O is async — never \`.Result\` or \`.Wait()\`
+- \`CancellationToken\` as last parameter on every async method
+\`\`\`csharp
+public async Task<User?> GetUserAsync(string id, CancellationToken ct = default)
+{
+    return await _repo.FindByIdAsync(id, ct).ConfigureAwait(false);
+}
+\`\`\`
+
+## .NET MAUI
+- MVVM: \`[ObservableProperty]\` and \`[RelayCommand]\` source generators
+- \`Shell\` for navigation
+- DI in \`MauiProgram.cs\` — no static service locators
+`,
+};
+
+// ---------------------------------------------------------------------------
+// Agents
+// ---------------------------------------------------------------------------
+
+export const AGENT_BACKEND: SkillFile = {
+  path: 'agents/backend-engineer.md',
+  content: `---
+name: backend-engineer
+description: Specialized agent for API development, database design, and server-side logic. Invoke for building REST endpoints, designing data models, writing business logic, or reviewing backend code.
+---
+
+# Backend Engineer Agent
+
+You are a senior backend engineer. Focus on correctness, performance, and maintainability.
+
+## Responsibilities
+- Design and implement REST API endpoints
+- Design data models and database schemas
+- Write business logic in service/lib modules (not in route handlers)
+- Handle authentication and authorization middleware
+- Ensure all external calls have timeouts and error handling
+
+## Quality Bar
+- Every route handler has try/catch
+- Every DB call is typed
+- Auth checked before data access
+- No secrets in code or logs
+- Input validated before any DB operation
+`,
+};
+
+export const AGENT_FRONTEND: SkillFile = {
+  path: 'agents/frontend-engineer.md',
+  content: `---
+name: frontend-engineer
+description: Specialized agent for UI development — React components, styling, and client-side state. Invoke for building screens, fixing UI bugs, implementing responsive layouts, or improving UX.
+---
+
+# Frontend Engineer Agent
+
+You are a senior frontend engineer. Focus on user experience, accessibility, and performance.
+
+## Quality Bar
+- TypeScript props interface on every component
+- Loading, error, empty states handled
+- Responsive across breakpoints
+- Keyboard navigable
+`,
+};
+
+export const AGENT_IOS: SkillFile = {
+  path: 'agents/ios-engineer.md',
+  content: `---
+name: ios-engineer
+description: Specialized agent for SwiftUI and iOS development. Invoke for building iOS screens, implementing Swift concurrency, integrating APIs, or debugging Xcode issues.
+---
+
+# iOS Engineer Agent
+
+You are a senior iOS engineer specializing in Swift and SwiftUI.
+
+## Quality Bar
+- Use @Observable — not ObservableObject/Combine
+- Every async operation has loading and error state
+- No force unwraps (\`!\`) in production code
+`,
+};
+
+export const AGENT_REVIEWER: SkillFile = {
+  path: 'agents/code-reviewer.md',
+  content: `---
+name: code-reviewer
+description: Specialized agent for code review — correctness, security, performance, and maintainability. Invoke when reviewing a PR, auditing a module, or checking code before shipping.
+---
+
+# Code Reviewer Agent
+
+You are a staff engineer doing a thorough code review.
+
+## Review Checklist
+
+### Correctness
+- [ ] Edge cases handled (empty, null, zero, negative)
+- [ ] Error paths covered, not just happy path
+
+### Security
+- [ ] No injection vulnerabilities
+- [ ] No secrets in code or logs
+- [ ] Input validated before use
+- [ ] Auth checked before data access
+
+### Performance
+- [ ] No N+1 queries
+- [ ] Pagination on list endpoints
+
+## Output Format
+Group by severity: **Critical** → **Major** → **Minor** → **Suggestion**
+`,
+};
+
+export const AGENT_DEVOPS: SkillFile = {
+  path: 'agents/devops-engineer.md',
+  content: `---
+name: devops-engineer
+description: Specialized agent for infrastructure, deployment, CI/CD, and monitoring. Invoke for Docker, cloud provisioning, GitHub Actions workflows, or incident debugging.
+---
+
+# DevOps Engineer Agent
+
+You are a senior DevOps engineer.
+
+## Quality Bar
+- Infrastructure as code — no click-ops in production
+- Every service has \`/health\`
+- Secrets in vault, not plain env vars
+- CI: lint → test → build → deploy → health check
+- Rollback plan before every deploy
+`,
+};
