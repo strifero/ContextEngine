@@ -12,6 +12,73 @@ npx @strifero/contextengine
 
 ---
 
+## What Gets Generated (Real Example)
+
+Running ContextEngine on a Next.js + TypeScript + Prisma + Tailwind project produces output like this:
+
+**`.claude/CLAUDE.md`** (excerpt):
+```markdown
+# Project Context
+
+## Stack
+- Next.js 14 (App Router)
+- TypeScript (strict mode)
+- Prisma ORM → PostgreSQL
+- Tailwind CSS
+
+## Conventions
+- Components live in `src/components/`, colocated with their styles
+- Server actions in `src/actions/`, named `[resource]Actions.ts`
+- Database access only through Prisma client in `src/lib/db.ts` — never raw SQL
+- All API routes validated with Zod before touching the database
+
+## Architecture Notes
+- App Router layouts handle auth via middleware
+- `src/lib/` holds shared utilities; nothing in here should import from `src/components/`
+```
+
+**`.claude/skills/next.js/SKILL.md`** (excerpt):
+```markdown
+# Next.js — Agent Skill
+
+## Routing
+- This project uses the App Router (`app/` directory), not Pages Router
+- Dynamic segments follow `[param]` convention; catch-all routes use `[...param]`
+- Layouts at `app/layout.tsx` wrap all child routes — mutations should invalidate
+  via `revalidatePath()` or `revalidateTag()`, not full page reloads
+
+## Data Fetching
+- Prefer React Server Components for data fetching; avoid `useEffect` for initial loads
+- Server Actions are the pattern here — see `src/actions/` for existing examples
+- `fetch()` calls in Server Components are automatically deduped; no need for a
+  separate caching layer for read-only requests
+
+## Common Pitfalls
+- `"use client"` should be pushed as far down the tree as possible
+- Don't import Server Components into Client Components
+```
+
+This is what a real skill file looks like — not a generic framework summary, but guidance written against how agents actually work with code.
+
+---
+
+## Framework-Specific Output
+
+Detection goes beyond "React is present." ContextEngine distinguishes between meaningfully different configurations and adjusts generated content accordingly.
+
+**Next.js vs. plain React:**
+A Next.js project gets a dedicated `next.js/SKILL.md` covering App Router vs. Pages Router routing conventions, Server Components, Server Actions, and `next.config.*` patterns. A plain React + Vite project gets a `react/SKILL.md` focused on component patterns and a `vite/SKILL.md` covering build config — without any Next.js-specific guidance that would be irrelevant or misleading.
+
+**TypeScript with strict mode:**
+`tsconfig.json` is read to understand compiler options. A project running `"strict": true` gets skill content that reflects stricter type patterns. A project without TypeScript at all gets none of the TypeScript skill files.
+
+**Co-detected stacks compound:**
+When Prisma and PostgreSQL are both detected, the generated context notes the ORM layer and discourages raw SQL — rather than treating each technology in isolation.
+
+The goal is that an AI agent reading your generated files has accurate, project-relevant guidance — not a generic tutorial it could have retrieved from documentation.
+
+---
+
 ## What It Generates
 
 **Claude Code** (default):
