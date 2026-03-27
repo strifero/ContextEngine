@@ -7,7 +7,7 @@ Stop re-explaining your stack every session. ContextEngine scans your project, d
 Free. Open source. No account required.
 
 ```bash
-npx contextengine
+npx @strifero/contextengine
 ```
 
 ---
@@ -50,24 +50,24 @@ Generates all of the above in a single run.
 
 ```bash
 # First run — detect stack and generate context files
-npx contextengine
+npx @strifero/contextengine
 
 # Target a specific AI tool
-npx contextengine --tool cursor
-npx contextengine --tool copilot
-npx contextengine --tool all
+npx @strifero/contextengine --tool cursor
+npx @strifero/contextengine --tool copilot
+npx @strifero/contextengine --tool all
 
 # Stack changed? Re-sync without losing your edits
-npx contextengine --update
+npx @strifero/contextengine --update
 
 # Specify a directory
-npx contextengine --dir /path/to/project
+npx @strifero/contextengine --dir /path/to/project
 
 # Overwrite existing context files
-npx contextengine --force
+npx @strifero/contextengine --force
 
 # Skip agent generation (Claude Code only)
-npx contextengine --no-agents
+npx @strifero/contextengine --no-agents
 ```
 
 ---
@@ -126,7 +126,7 @@ Each skill file follows the [Agent Skills open standard](https://platform.claude
 
 Skills are plain markdown files. To add a new stack:
 
-1. Create `src/skills/<name>.ts` with the skill content
+1. Create `src/skills/<n>.ts` with the skill content
 2. Add detection logic to `src/detect.ts`
 3. Wire it up in `src/registry.ts`
 4. Open a PR
