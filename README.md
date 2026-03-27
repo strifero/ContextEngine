@@ -10,8 +10,6 @@ Free. Open source. No account required.
 npx @strifero/contextengine
 ```
 
-Everything runs locally. Your code never leaves your machine.
-
 ---
 
 ## What It Generates
@@ -91,7 +89,19 @@ Skill files are not generic boilerplate. Each one is authored with opinionated, 
 - The **Prisma** skill covers query patterns, relation loading, and migration workflow
 - The **TypeScript** skill covers compiler options, type narrowing patterns, and what to avoid in strict mode
 
-Skills are plain markdown, stored in `src/skills/` in the repository. You can read any of them before running the tool, and edit the generated output freely.
+Skills are plain markdown, stored in `src/skills/` in the repository. You can read any of them before running the tool, and edit the generated output freely — `--update` will never overwrite your changes.
+
+---
+
+## Keeping Skills Up to Date
+
+Best practices evolve. When the guidance in a bundled skill file changes — because a framework releases a major version, community conventions shift, or better patterns emerge — the skill is updated in the repository and that change ships as part of a normal package release.
+
+Because ContextEngine runs via `npx`, you always pull the latest published version by default. If you have a pinned version in a script or workflow, bump it periodically to get updated skill content.
+
+When a bundled skill is updated, running `--update` in your project will sync the new content for any skills you have not edited. Skills you have modified by hand are never overwritten — `--update` only touches files that match the original generated content. If you want to pull in upstream skill improvements while keeping your own additions, open the relevant skill file alongside the current version in `src/skills/` in the repository and merge the changes manually.
+
+If you believe a skill's guidance is outdated or incorrect, the skills are plain markdown and contributions are straightforward — see the Contributing section below.
 
 ---
 
@@ -108,19 +118,7 @@ ContextEngine generates different output formats depending on the target tool:
 
 Cursor and Copilot do not read `SKILL.md` files directly. When you target those tools, ContextEngine converts the same underlying skill content into the format each tool expects — `.mdc` rule files for Cursor, a single consolidated markdown file for Copilot. The `--tool all` flag runs all conversions in one pass.
 
-### Agent Skills open standard
-
-Skill files in `.claude/skills/` follow the [Agent Skills open standard](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) — a common markdown format for tool-consumable knowledge files defined by Anthropic. The standard specifies how agents discover, load, and apply skill files at runtime.
-
-The practical benefit: any agent that adopts this standard can read a `SKILL.md` file without adaptation. You write the knowledge once, and it travels across compatible tools. Claude Code and Codex CLI both support it natively today. As other tools adopt the standard, the same files will work there too — no reformatting required.
-
----
-
-## Claude Code Subagents
-
-When generating for Claude Code, ContextEngine creates agent definition files under `.claude/agents/`. Claude Code supports a subagents mechanism: you can define specialized agents as markdown files, each scoped to a specific role — a backend engineer, a code reviewer, a migration writer. When Claude Code spawns a subagent to handle a task, it loads the relevant agent file to give that agent role-specific instructions and constraints.
-
-ContextEngine generates a starter set of these agent files based on your detected stack. The generated agents are plain markdown — you can read, edit, or delete them like any other file in your project.
+Skill files in `.claude/skills/` follow the [Agent Skills open standard](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview), which defines a common markdown format for tool-consumable knowledge files. Any agent that adopts this standard can read them directly without adaptation.
 
 ---
 
@@ -138,7 +136,7 @@ npx @strifero/contextengine --tool all
 # Stack changed? Re-sync without losing your edits
 npx @strifero/contextengine --update
 
-# Specify a directory (useful for monorepos or non-root app directories)
+# Specify a directory
 npx @strifero/contextengine --dir /path/to/project
 
 # Overwrite existing context files
@@ -147,33 +145,6 @@ npx @strifero/contextengine --force
 # Skip agent generation (Claude Code only)
 npx @strifero/contextengine --no-agents
 ```
-
-### Using --update
-
-As your project evolves — new dependencies added, packages removed, architecture decisions made — your context files can drift out of sync. `--update` re-runs detection against your current project state and reconciles the results with whatever is already on disk.
-
-Specifically, `--update`:
-
-- Adds skill files for newly detected technologies
-- Removes skill files for technologies no longer detected
-- Leaves any file you have manually edited exactly as you left it — your content is not overwritten
-
-There is no risk of losing hand-written additions. ContextEngine does not touch files it did not generate, and any edits you have made to generated files are preserved. Running `--update` regularly as your stack grows is the intended workflow.
-
-### Monorepos and non-root app directories
-
-If your project uses a monorepo layout — or if the application code lives in a subdirectory rather than the repository root — use `--dir` to point ContextEngine at the right location:
-
-```bash
-# Generate context for a specific app in a monorepo
-npx @strifero/contextengine --dir packages/api
-npx @strifero/contextengine --dir apps/web
-
-# Or an absolute path
-npx @strifero/contextengine --dir /path/to/project
-```
-
-Detection runs relative to the directory you specify, so the generated context reflects the stack of that package rather than the repository root. You can run ContextEngine separately for each package in a monorepo and get independent context files per app.
 
 ---
 
@@ -213,8 +184,6 @@ Don't see yours? [Open an issue](https://github.com/strifero/ContextEngine/issue
 2. **Detects** your tech stack automatically
 3. **Selects** the relevant skills from a curated library
 4. **Generates** context files for your chosen AI tool
-
-Everything runs locally as a CLI process. No data is sent to any server, no account is created, and no telemetry is collected. The tool reads your project files to detect your stack and writes output files to your project directory — that is the full extent of what it does.
 
 With `--update`, ContextEngine re-runs detection and syncs non-destructively — new skills are added, stale ones removed, and everything you've written by hand is preserved.
 
