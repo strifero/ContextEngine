@@ -12,73 +12,6 @@ npx @strifero/contextengine
 
 ---
 
-## What Gets Generated (Real Example)
-
-Running ContextEngine on a Next.js + TypeScript + Prisma + Tailwind project produces output like this:
-
-**`.claude/CLAUDE.md`** (excerpt):
-```markdown
-# Project Context
-
-## Stack
-- Next.js 14 (App Router)
-- TypeScript (strict mode)
-- Prisma ORM → PostgreSQL
-- Tailwind CSS
-
-## Conventions
-- Components live in `src/components/`, colocated with their styles
-- Server actions in `src/actions/`, named `[resource]Actions.ts`
-- Database access only through Prisma client in `src/lib/db.ts` — never raw SQL
-- All API routes validated with Zod before touching the database
-
-## Architecture Notes
-- App Router layouts handle auth via middleware
-- `src/lib/` holds shared utilities; nothing in here should import from `src/components/`
-```
-
-**`.claude/skills/next.js/SKILL.md`** (excerpt):
-```markdown
-# Next.js — Agent Skill
-
-## Routing
-- This project uses the App Router (`app/` directory), not Pages Router
-- Dynamic segments follow `[param]` convention; catch-all routes use `[...param]`
-- Layouts at `app/layout.tsx` wrap all child routes — mutations should invalidate
-  via `revalidatePath()` or `revalidateTag()`, not full page reloads
-
-## Data Fetching
-- Prefer React Server Components for data fetching; avoid `useEffect` for initial loads
-- Server Actions are the pattern here — see `src/actions/` for existing examples
-- `fetch()` calls in Server Components are automatically deduped; no need for a
-  separate caching layer for read-only requests
-
-## Common Pitfalls
-- `"use client"` should be pushed as far down the tree as possible
-- Don't import Server Components into Client Components
-```
-
-This is what a real skill file looks like — not a generic framework summary, but guidance written against how agents actually work with code.
-
----
-
-## Framework-Specific Output
-
-Detection goes beyond "React is present." ContextEngine distinguishes between meaningfully different configurations and adjusts generated content accordingly.
-
-**Next.js vs. plain React:**
-A Next.js project gets a dedicated `next.js/SKILL.md` covering App Router vs. Pages Router routing conventions, Server Components, Server Actions, and `next.config.*` patterns. A plain React + Vite project gets a `react/SKILL.md` focused on component patterns and a `vite/SKILL.md` covering build config — without any Next.js-specific guidance that would be irrelevant or misleading.
-
-**TypeScript with strict mode:**
-`tsconfig.json` is read to understand compiler options. A project running `"strict": true` gets skill content that reflects stricter type patterns. A project without TypeScript at all gets none of the TypeScript skill files.
-
-**Co-detected stacks compound:**
-When Prisma and PostgreSQL are both detected, the generated context notes the ORM layer and discourages raw SQL — rather than treating each technology in isolation.
-
-The goal is that an AI agent reading your generated files has accurate, project-relevant guidance — not a generic tutorial it could have retrieved from documentation.
-
----
-
 ## What It Generates
 
 **Claude Code** (default):
@@ -110,6 +43,70 @@ The goal is that an AI agent reading your generated files has accurate, project-
 
 **All tools at once** (`--tool all`):
 Generates all of the above in a single run.
+
+---
+
+## Example Output
+
+Here's a representative excerpt from a generated `CLAUDE.md` for a Next.js + Prisma + TypeScript project:
+
+```markdown
+# Project Context
+
+## Stack
+- Next.js 14 (App Router)
+- TypeScript (strict mode)
+- Prisma ORM → PostgreSQL
+- Tailwind CSS
+
+## Conventions
+- All new routes go under `app/` using the App Router file convention
+- Server Components by default; add `"use client"` only when necessary
+- Database access only in Server Components or Route Handlers — never in Client Components
+- Prisma client is a singleton at `lib/prisma.ts`
+- Prefer `zod` for all runtime validation at API boundaries
+
+## Architecture Notes
+- `app/` — Next.js routes and layouts
+- `components/` — shared UI, always client-safe unless explicitly noted
+- `lib/` — server-side utilities and service clients
+- `prisma/` — schema and migrations
+
+## What to avoid
+- Do not use `getServerSideProps` or `getStaticProps` — this project uses the App Router exclusively
+- Do not import server-only modules into `components/`
+```
+
+The actual output reflects the conventions and structure found in your specific project — file layout, detected dependencies, and config file patterns all shape what gets written.
+
+---
+
+## Skill File Quality
+
+Skill files are not generic boilerplate. Each one is authored with opinionated, framework-specific guidance drawn from current best practices for that technology. For example:
+
+- The **React** skill covers component patterns, hook rules, and when to split client and server responsibilities
+- The **Prisma** skill covers query patterns, relation loading, and migration workflow
+- The **TypeScript** skill covers compiler options, type narrowing patterns, and what to avoid in strict mode
+
+Skills are plain markdown, stored in `src/skills/` in the repository. You can read any of them before running the tool, and edit the generated output freely — `--update` will never overwrite your changes.
+
+---
+
+## Tool Compatibility
+
+ContextEngine generates different output formats depending on the target tool:
+
+| Tool | Format generated | Native consumption |
+|---|---|---|
+| Claude Code | `SKILL.md` per technology, `CLAUDE.md` project file | Yes — Claude Code reads both natively |
+| Cursor | `.mdc` rule files in `.cursor/rules/` | Yes — Cursor loads `.mdc` files natively |
+| GitHub Copilot | `copilot-instructions.md` in `.github/` | Yes — Copilot reads this file natively |
+| Codex CLI | `SKILL.md` files | Yes — follows the Agent Skills open standard |
+
+Cursor and Copilot do not read `SKILL.md` files directly. When you target those tools, ContextEngine converts the same underlying skill content into the format each tool expects — `.mdc` rule files for Cursor, a single consolidated markdown file for Copilot. The `--tool all` flag runs all conversions in one pass.
+
+Skill files in `.claude/skills/` follow the [Agent Skills open standard](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview), which defines a common markdown format for tool-consumable knowledge files. Any agent that adopts this standard can read them directly without adaptation.
 
 ---
 
