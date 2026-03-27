@@ -12,6 +12,38 @@ npx @strifero/contextengine
 
 ---
 
+## Already Writing CLAUDE.md by Hand?
+
+If you're an experienced Claude Code user with an existing `CLAUDE.md`, you know the value of a well-structured context file — and you also know how much effort it takes to keep it accurate as your project evolves.
+
+ContextEngine doesn't replace your judgment. It handles the parts that are mechanical: detecting your stack, selecting the right skill files, and scaffolding the structure Claude Code expects. Your conventions, architectural decisions, and project-specific notes stay yours to write and own.
+
+Run `--update` at any point to sync in new or changed skills without touching anything you've edited by hand. If you've already written a `CLAUDE.md`, read it alongside the generated output and take what's useful — ContextEngine's output is plain markdown and intended to be edited freely.
+
+---
+
+## Start With One Tool
+
+ContextEngine works without any flags. Running it bare generates Claude Code context — a `CLAUDE.md`, tech-specific skill files, and specialized subagents — for your current project directory.
+
+```bash
+npx @strifero/contextengine
+```
+
+That's the complete workflow for Claude Code users. No additional configuration required.
+
+When you're ready to extend to other tools:
+
+```bash
+npx @strifero/contextengine --tool cursor
+npx @strifero/contextengine --tool copilot
+npx @strifero/contextengine --tool all
+```
+
+The underlying skill content is the same regardless of target tool. ContextEngine converts it into the format each tool expects — `.mdc` rule files for Cursor, a single consolidated markdown file for Copilot.
+
+---
+
 ## What It Generates
 
 **Claude Code** (default):
@@ -105,6 +137,26 @@ If you believe a skill's guidance is outdated or incorrect, the skills are plain
 
 ---
 
+## Regulated and Compliance-Conscious Projects
+
+ContextEngine generates plain markdown files that live in your repository. There is no account, no telemetry, no data sent to external services, and no runtime dependency after generation. The generated files are static — you can read, audit, and version-control everything that gets written to your project.
+
+For teams working in regulated industries or environments with strict controls on third-party tooling, this matters. The tool runs locally, produces inspectable output, and requires no ongoing network access. Everything it generates can be committed to your repository and reviewed like any other file.
+
+If your organization requires approval for dependencies, the generated context files themselves have no dependencies — they are markdown. The `npx` invocation can be run once in a controlled environment and the output committed, without requiring developers to run the tool themselves.
+
+---
+
+## The Agent Skills Open Standard
+
+Skill files in `.claude/skills/` follow the [Agent Skills open standard](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview), which defines a common markdown format for tool-consumable knowledge files. This is the same standard Claude Code uses natively.
+
+ContextEngine's skill library was built against this standard from the start. The practical consequence is that any agent platform adopting the Agent Skills format can read `.claude/skills/` files directly, without conversion or adaptation. You're not locked into ContextEngine's output format, and the files you generate today will remain readable by compliant tools as the standard evolves.
+
+For Cursor and Copilot, ContextEngine converts the same underlying skill content into each tool's native format. The source of truth is the skill library — the tool-specific files are derived outputs.
+
+---
+
 ## Tool Compatibility
 
 ContextEngine generates different output formats depending on the target tool:
@@ -119,24 +171,6 @@ ContextEngine generates different output formats depending on the target tool:
 Cursor and Copilot do not read `SKILL.md` files directly. When you target those tools, ContextEngine converts the same underlying skill content into the format each tool expects — `.mdc` rule files for Cursor, a single consolidated markdown file for Copilot. The `--tool all` flag runs all conversions in one pass.
 
 Skill files in `.claude/skills/` follow the [Agent Skills open standard](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview), which defines a common markdown format for tool-consumable knowledge files. Any agent that adopts this standard can read them directly without adaptation.
-
----
-
-## The Agent Skills Open Standard
-
-When an AI agent starts a session in your project, it typically has no memory of previous sessions and no built-in knowledge of your specific codebase. The usual workaround is to paste context into the chat manually, add instructions to a config file, or simply re-explain things as you go.
-
-The Agent Skills open standard is a specification for solving this at the file level. It defines a common markdown format — the `SKILL.md` file — that an AI agent can read to gain structured, technology-specific knowledge before it writes a single line of code. Rather than each tool inventing its own convention, the standard gives any compliant agent a predictable place to look and a consistent structure to parse.
-
-In practical terms, this means:
-
-- **You write (or generate) skill files once.** A `SKILL.md` for TypeScript describes how TypeScript is used in your project — compiler settings, patterns to follow, things to avoid. That file sits in `.claude/skills/typescript/` and any agent that supports the standard reads it automatically at the start of a session.
-- **You are not locked to one tool.** Because the format is open, a skill file written for Claude Code today can be read by any other agent that adopts the standard tomorrow — without reformatting or re-authoring.
-- **The knowledge travels with the repository.** Commit your skill files alongside your code and every contributor, every CI environment, and every new team member's AI assistant starts from the same shared understanding of the project.
-
-ContextEngine generates `SKILL.md` files that conform to this standard. For Claude Code and Codex CLI, those files are consumed natively. For tools that use a different format (Cursor, Copilot), ContextEngine converts the same underlying content into the format each tool expects — so you author once and the tool handles the translation.
-
-You do not need to understand the full specification to use ContextEngine. But if you want to read the standard directly or check whether another tool in your workflow supports it, the reference is at [platform.claude.com](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview).
 
 ---
 
