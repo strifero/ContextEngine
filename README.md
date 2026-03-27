@@ -122,6 +122,24 @@ Skill files in `.claude/skills/` follow the [Agent Skills open standard](https:/
 
 ---
 
+## The Agent Skills Open Standard
+
+When an AI agent starts a session in your project, it typically has no memory of previous sessions and no built-in knowledge of your specific codebase. The usual workaround is to paste context into the chat manually, add instructions to a config file, or simply re-explain things as you go.
+
+The Agent Skills open standard is a specification for solving this at the file level. It defines a common markdown format — the `SKILL.md` file — that an AI agent can read to gain structured, technology-specific knowledge before it writes a single line of code. Rather than each tool inventing its own convention, the standard gives any compliant agent a predictable place to look and a consistent structure to parse.
+
+In practical terms, this means:
+
+- **You write (or generate) skill files once.** A `SKILL.md` for TypeScript describes how TypeScript is used in your project — compiler settings, patterns to follow, things to avoid. That file sits in `.claude/skills/typescript/` and any agent that supports the standard reads it automatically at the start of a session.
+- **You are not locked to one tool.** Because the format is open, a skill file written for Claude Code today can be read by any other agent that adopts the standard tomorrow — without reformatting or re-authoring.
+- **The knowledge travels with the repository.** Commit your skill files alongside your code and every contributor, every CI environment, and every new team member's AI assistant starts from the same shared understanding of the project.
+
+ContextEngine generates `SKILL.md` files that conform to this standard. For Claude Code and Codex CLI, those files are consumed natively. For tools that use a different format (Cursor, Copilot), ContextEngine converts the same underlying content into the format each tool expects — so you author once and the tool handles the translation.
+
+You do not need to understand the full specification to use ContextEngine. But if you want to read the standard directly or check whether another tool in your workflow supports it, the reference is at [platform.claude.com](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview).
+
+---
+
 ## Usage
 
 ```bash
