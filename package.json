@@ -1,0 +1,51 @@
+{
+  "name": "contextengine",
+  "version": "1.2.0",
+  "description": "One command gives any AI agent your entire codebase. Auto-detects your stack, generates context files for Claude Code, Cursor, Copilot, and Codex.",
+  "keywords": [
+    "claude",
+    "claude-code",
+    "cursor",
+    "copilot",
+    "codex",
+    "ai",
+    "developer-tools",
+    "context",
+    "scaffolding",
+    "stack-detection"
+  ],
+  "homepage": "https://github.com/strifero/ContextEngine",
+  "bugs": "https://github.com/strifero/ContextEngine/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strifero/ContextEngine.git"
+  },
+  "license": "MIT",
+  "author": "Strife Technologies <hello@strifetech.com> (https://strifetech.com)",
+  "type": "module",
+  "bin": {
+    "contextengine": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
