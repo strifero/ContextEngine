@@ -14,6 +14,12 @@ Free. Open source. Runs entirely on your machine. No account required.
 
 ---
 
+## See It In Action
+
+[![ContextEngine Demo](https://asciinema.org/a/SGP4Expm3PIsYHC9.svg)](https://asciinema.org/a/SGP4Expm3PIsYHC9)
+
+---
+
 ## The Problem
 
 Every AI coding session starts blank. You ask Claude Code to add an endpoint — it suggests `pages/api/` because it doesn't know you're on the App Router. You ask Cursor to write a query — it ignores your Prisma setup. You spend 10 minutes re-establishing context before doing any real work.
@@ -144,9 +150,9 @@ Don't see yours? [Open an issue](https://github.com/strifero/ContextEngine/issue
 
 ---
 
-## See It In Action
+## See Real Examples
 
-Real generated output files for common stacks:
+Generated output files for common stacks:
 👉 [contextengine-examples](https://github.com/strifero/contextengine-examples)
 
 ---
@@ -155,7 +161,7 @@ Real generated output files for common stacks:
 
 Skills are plain markdown files in `src/skills/`. To add a stack:
 
-1. Create `src/skills/<name>.ts`
+1. Create `src/skills/<n>.ts`
 2. Add detection to `src/detect.ts`
 3. Wire up in `src/registry.ts`
 4. Open a PR
