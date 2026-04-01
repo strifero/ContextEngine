@@ -1,54 +1,75 @@
 # ContextEngine
 
-**One command. Every AI agent understands your codebase.**
-
-Stop re-explaining your stack every session. ContextEngine scans your project, detects your frameworks, and generates everything Claude Code, Cursor, Copilot, and Codex need to understand your code from day one.
-
-Free. Open source. No account required.
+**Stop re-explaining your codebase to AI. Every. Single. Session.**
 
 ```bash
 npx @strifero/contextengine
 ```
 
+[![npm](https://img.shields.io/npm/v/@strifero/contextengine)](https://www.npmjs.com/package/@strifero/contextengine)
+[![npm downloads](https://img.shields.io/npm/dw/@strifero/contextengine)](https://www.npmjs.com/package/@strifero/contextengine)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+Free. Open source. Runs entirely on your machine. No account required.
+
 ---
 
-## What It Generates
+## The Problem
 
-**Claude Code** (default):
+Every AI coding session starts blank. You ask Claude Code to add an endpoint — it suggests `pages/api/` because it doesn't know you're on the App Router. You ask Cursor to write a query — it ignores your Prisma setup. You spend 10 minutes re-establishing context before doing any real work.
+
+`CLAUDE.md`, `.cursorrules`, and `copilot-instructions.md` fix this — your AI tool reads them automatically and starts with full context. But writing a good one is tedious.
+
+**ContextEngine generates them automatically from your actual codebase.**
+
+---
+
+## Before / After
+
+**Before** (Claude Code without a CLAUDE.md):
 ```
-.claude/
-├── CLAUDE.md           # Project overview, conventions, architecture
-├── skills/             # Tech-specific knowledge files
-│   ├── typescript/SKILL.md
-│   ├── react/SKILL.md
-│   └── ...
-└── agents/             # Specialized subagents
-    ├── backend-engineer.md
-    └── code-reviewer.md
+You: Where should I add a new API endpoint?
+Claude: Create a file in pages/api/users.ts and export a default handler...
+```
+Wrong. This is an App Router project.
+
+**After** (Claude Code with a generated CLAUDE.md):
+```
+You: Where should I add a new API endpoint?
+Claude: Create a Route Handler at app/api/users/route.ts. Export a named GET
+        function. Since this uses Prisma, import from lib/prisma.ts — I can see
+        the User model in your schema has...
+```
+Correct. Context-aware. No setup required from you.
+
+---
+
+## What It Does
+
+ContextEngine scans your project root, reads your actual config files and dependencies, and generates:
+
+| Tool | Output | Auto-loaded? |
+|------|--------|-------------|
+| **Claude Code** | `.claude/CLAUDE.md` + skill files | ✅ Yes |
+| **Cursor** | `.cursor/rules/*.mdc` | ✅ Yes |
+| **GitHub Copilot** | `.github/copilot-instructions.md` | ✅ Yes |
+| **Codex CLI** | `.claude/skills/` (Agent Skills standard) | ✅ Yes |
+
+One tool:
+```bash
+npx @strifero/contextengine
 ```
 
-**Cursor** (`--tool cursor`):
+All tools at once:
+```bash
+npx @strifero/contextengine --tool all
 ```
-.cursor/rules/
-├── typescript.mdc
-├── react.mdc
-└── ...
-```
-
-**GitHub Copilot** (`--tool copilot`):
-```
-.github/
-└── copilot-instructions.md
-```
-
-**All tools at once** (`--tool all`):
-Generates all of the above in a single run.
 
 ---
 
 ## Example Output
 
-Here's a representative excerpt from a generated `CLAUDE.md` for a Next.js + Prisma + TypeScript project:
+Running on a Next.js 14 + Prisma + TypeScript project generates a `CLAUDE.md` like:
 
 ```markdown
 # Project Context
@@ -60,191 +81,84 @@ Here's a representative excerpt from a generated `CLAUDE.md` for a Next.js + Pri
 - Tailwind CSS
 
 ## Conventions
-- All new routes go under `app/` using the App Router file convention
-- Server Components by default; add `"use client"` only when necessary
-- Database access only in Server Components or Route Handlers — never in Client Components
-- Prisma client is a singleton at `lib/prisma.ts`
-- Prefer `zod` for all runtime validation at API boundaries
-
-## Architecture Notes
-- `app/` — Next.js routes and layouts
-- `components/` — shared UI, always client-safe unless explicitly noted
-- `lib/` — server-side utilities and service clients
-- `prisma/` — schema and migrations
+- All routes go under app/ using the App Router file convention
+- Server Components by default; use "use client" only when necessary
+- Database access only in Server Components or Route Handlers
+- Prisma client singleton at lib/prisma.ts
+- Use zod for runtime validation at API boundaries
 
 ## What to avoid
-- Do not use `getServerSideProps` or `getStaticProps` — this project uses the App Router exclusively
-- Do not import server-only modules into `components/`
+- Do not use getServerSideProps or getStaticProps — App Router only
+- Do not import server-only modules into components/
 ```
 
-And here's a representative excerpt from a generated `CLAUDE.md` for a Python + Django project:
-
-```markdown
-# Project Context
-
-## Stack
-- Python
-- Django
-- PostgreSQL
-
-## Conventions
-- Follow Django's app-per-feature layout — each functional area is its own app under the project root
-- Business logic lives in `services.py` or model methods, not in views
-- Use Django ORM for all database access; raw SQL only when the ORM cannot express the query
-- Settings are split by environment — base settings in `settings/base.py`, overrides in `settings/local.py` and `settings/production.py`
-
-## Architecture Notes
-- `<project>/` — Django project package (settings, root URLconf, wsgi/asgi)
-- `apps/` — individual Django apps
-- `templates/` — project-wide templates; app-level templates live inside each app
-- `static/` — project-wide static assets
-
-## What to avoid
-- Do not put query logic directly in views — keep views thin
-- Do not use `python manage.py` commands in production without confirming migration state first
-```
-
-The actual output reflects the conventions and structure found in your specific project — file layout, detected dependencies, and config file patterns all shape what gets written.
-
----
-
-## Skill File Quality
-
-Skill files are not generic boilerplate. Each one is authored with opinionated, framework-specific guidance drawn from current best practices for that technology. For example:
-
-- The **React** skill covers component patterns, hook rules, and when to split client and server responsibilities
-- The **Prisma** skill covers query patterns, relation loading, and migration workflow
-- The **TypeScript** skill covers compiler options, type narrowing patterns, and what to avoid in strict mode
-- The **Django** skill covers app structure, ORM patterns, and view layer conventions
-- The **Go** skill covers module layout, error handling patterns, and idiomatic use of the standard library
-
-Skills are plain markdown, stored in `src/skills/` in the repository. You can read any of them before running the tool, and edit the generated output freely — `--update` will never overwrite your changes.
-
----
-
-## Keeping Skills Up to Date
-
-Best practices evolve. When the guidance in a bundled skill file changes — because a framework releases a major version, community conventions shift, or better patterns emerge — the skill is updated in the repository and that change ships as part of a normal package release.
-
-Because ContextEngine runs via `npx`, you always pull the latest published version by default. If you have a pinned version in a script or workflow, bump it periodically to get updated skill content.
-
-When a bundled skill is updated, running `--update` in your project will sync the new content for any skills you have not edited. Skills you have modified by hand are never overwritten — `--update` only touches files that match the original generated content. If you want to pull in upstream skill improvements while keeping your own additions, open the relevant skill file alongside the current version in `src/skills/` in the repository and merge the changes manually.
-
-If you believe a skill's guidance is outdated or incorrect, the skills are plain markdown and contributions are straightforward — see the Contributing section below.
-
----
-
-## Tool Compatibility
-
-ContextEngine generates different output formats depending on the target tool:
-
-| Tool | Format generated | Native consumption |
-|---|---|---|
-| Claude Code | `SKILL.md` per technology, `CLAUDE.md` project file | Yes — Claude Code reads both natively |
-| Cursor | `.mdc` rule files in `.cursor/rules/` | Yes — Cursor loads `.mdc` files natively |
-| GitHub Copilot | `copilot-instructions.md` in `.github/` | Yes — Copilot reads this file natively |
-| Codex CLI | `SKILL.md` files | Yes — follows the Agent Skills open standard |
-
-Cursor and Copilot do not read `SKILL.md` files directly. When you target those tools, ContextEngine converts the same underlying skill content into the format each tool expects — `.mdc` rule files for Cursor, a single consolidated markdown file for Copilot. The `--tool all` flag runs all conversions in one pass.
-
-Skill files in `.claude/skills/` follow the [Agent Skills open standard](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview), which defines a common markdown format for tool-consumable knowledge files. Any agent that adopts this standard can read them directly without adaptation.
-
----
-
-## Privacy
-
-ContextEngine runs entirely on your machine. Scanning your project, detecting your stack, and generating output files all happen locally — no code, file contents, or metadata are sent to any external server. The only network activity when you run `npx @strifero/contextengine` is npm fetching the package itself.
+This is generated from reading your actual `next.config.js`, `tsconfig.json`, `prisma/schema.prisma`, and `package.json` — not from templates.
 
 ---
 
 ## Usage
 
 ```bash
-# First run — detect stack and generate context files
+# Detect stack and generate context files
 npx @strifero/contextengine
 
-# Target a specific AI tool
+# Target a specific tool
 npx @strifero/contextengine --tool cursor
 npx @strifero/contextengine --tool copilot
 npx @strifero/contextengine --tool all
 
-# Stack changed? Re-sync without losing your edits
+# Re-sync after your stack changes (preserves your edits)
 npx @strifero/contextengine --update
 
-# Specify a directory
+# Specific directory
 npx @strifero/contextengine --dir /path/to/project
-
-# Overwrite existing context files
-npx @strifero/contextengine --force
-
-# Skip agent generation (Claude Code only)
-npx @strifero/contextengine --no-agents
 ```
+
+---
+
+## Commit It
+
+```bash
+git add .claude/ .cursor/ .github/copilot-instructions.md
+git commit -m "add AI context files via contextengine"
+```
+
+Every contributor who clones the repo gets full AI context from day one. When the stack changes, re-run with `--update`.
 
 ---
 
 ## Detected Stacks
 
-| Technology | Detected By |
-|---|---|
-| TypeScript | `tsconfig.json`, `.ts` files |
-| Node.js + Express | `package.json` dependencies |
-| Next.js | `next.config.*` |
-| React | `package.json` dependencies |
-| Vite | `vite.config.*` |
-| Vue | `package.json` dependencies |
-| Tailwind CSS | `tailwind.config.*` |
-| Swift / SwiftUI | `.xcodeproj`, `.swift` files |
-| Stripe | `package.json` dependencies |
-| Prisma | `prisma/schema.prisma` |
-| PostgreSQL | `package.json` dependencies |
-| MongoDB | `package.json` dependencies |
-| Azure | `azure.yaml`, `.bicep`, ARM files |
-| Docker | `Dockerfile`, `docker-compose.yml` |
-| Go | `go.mod` |
-| Python | `pyproject.toml`, `requirements.txt` |
-| Django | `manage.py` |
-| Rust | `Cargo.toml` |
-| PHP | `composer.json`, `.php` files |
-| C# | `.csproj`, `.sln`, `.cs` files |
-| Bun | `bun.lockb` |
+TypeScript · Node.js + Express · Next.js · React · Vite · Vue · Tailwind CSS ·
+Swift / SwiftUI · Stripe · Prisma · PostgreSQL · MongoDB · Azure · Docker ·
+Go · Python · Django · Rust · PHP · C# · Bun
 
-The table above reflects every technology that currently has a corresponding skill file in the library — one skill per detected technology. Don't see yours? [Open an issue](https://github.com/strifero/ContextEngine/issues) or submit a PR.
-
----
-
-## How It Works
-
-1. **Scans** your project root for config files, `package.json` deps, and file extensions
-2. **Detects** your tech stack automatically
-3. **Selects** the relevant skills from a curated library
-4. **Generates** context files for your chosen AI tool
-
-With `--update`, ContextEngine re-runs detection and syncs non-destructively — new skills are added, stale ones removed, and everything you've written by hand is preserved.
-
-Each skill file follows the [Agent Skills open standard](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) — compatible with Claude Code, Cursor, Codex CLI, and any other agent that supports `SKILL.md`.
+Don't see yours? [Open an issue](https://github.com/strifero/ContextEngine/issues) or submit a PR — skills are plain markdown.
 
 ---
 
 ## Requirements
 
 - Node.js 18+
-- A project directory (any language or framework)
+- Any project directory (any language or framework)
+
+---
+
+## See It In Action
+
+Real generated output files for common stacks:
+👉 [contextengine-examples](https://github.com/strifero/contextengine-examples)
 
 ---
 
 ## Contributing
 
-Skills are plain markdown files. To add a new stack:
+Skills are plain markdown files in `src/skills/`. To add a stack:
 
-1. Create `src/skills/<n>.ts` with the skill content
-2. Add detection logic to `src/detect.ts`
-3. Wire it up in `src/registry.ts`
+1. Create `src/skills/<name>.ts`
+2. Add detection to `src/detect.ts`
+3. Wire up in `src/registry.ts`
 4. Open a PR
-
-The full list of skills currently in the library matches the Detected Stacks table above — one skill file per row. Browsing `src/skills/` in the repository is the best way to check coverage for your stack before running the tool, or to read the guidance a skill will generate before committing it to your project.
-
-**Not a developer?** If you want a skill added for a technology you use but don't want to write code, [open an issue](https://github.com/strifero/ContextEngine/issues) and describe the stack. Include the technology name, how it's typically detected (config files, dependencies, file extensions), and any conventions or patterns that would be useful in a skill file. That gives contributors enough context to build it.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
