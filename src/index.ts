@@ -11,9 +11,15 @@ import { generateFiles } from './generate.js';
 import { updateProject } from './update.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const { version: VERSION } = JSON.parse(
-  readFileSync(resolve(__dirname, '../package.json'), 'utf-8')
-) as { version: string };
+
+// Fix #10: safe version read with fallback
+let VERSION = '0.0.0';
+try {
+  const pkg = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf-8')) as { version?: string };
+  VERSION = pkg.version ?? VERSION;
+} catch {
+  // package.json missing or malformed — continue with fallback
+}
 
 export type TargetTool = 'claude' | 'cursor' | 'copilot' | 'all';
 
@@ -127,49 +133,55 @@ if (tool !== 'claude') {
 
 // ── Execute ──────────────────────────────────────────────────────
 
-if (flags.update) {
-  const result = await updateProject({
-    projectDir,
-    detected,
-    includeAgents: !flags['no-agents'],
-  });
+// Fix #4: wrap execution in try/catch for clean error output
+try {
+  if (flags.update) {
+    const result = await updateProject({
+      projectDir,
+      detected,
+      includeAgents: !flags['no-agents'],
+    });
 
-  if (result.added.length > 0) {
-    console.log(`  ${pc.green('+')} Added:`);
-    for (const f of result.added) console.log(`    ${pc.green('+')} ${f}`);
-  }
-  if (result.removed.length > 0) {
-    console.log(`  ${pc.red('−')} Removed:`);
-    for (const f of result.removed) console.log(`    ${pc.red('−')} ${f}`);
-  }
-  if (result.kept.length > 0) {
-    console.log(`  ${pc.dim('=')} Unchanged: ${result.kept.length} files`);
-  }
-  if (result.claudeMdUpdated) {
-    console.log(`  ${pc.green('✓')} CLAUDE.md updated (your edits preserved)`);
-  }
+    if (result.added.length > 0) {
+      console.log(`  ${pc.green('+')} Added:`);
+      for (const f of result.added) console.log(`    ${pc.green('+')} ${f}`);
+    }
+    if (result.removed.length > 0) {
+      console.log(`  ${pc.red('−')} Removed:`);
+      for (const f of result.removed) console.log(`    ${pc.red('−')} ${f}`);
+    }
+    if (result.kept.length > 0) {
+      console.log(`  ${pc.dim('=')} Unchanged: ${result.kept.length} files`);
+    }
+    if (result.claudeMdUpdated) {
+      console.log(`  ${pc.green('✓')} CLAUDE.md updated (your edits preserved)`);
+    }
 
-  const total = result.added.length + result.removed.length;
-  if (total === 0 && result.claudeMdUpdated) {
-    console.log(`\n  ${pc.bold('Up to date.')} Stack line and skill lists refreshed.\n`);
-  } else if (total === 0) {
-    console.log(`\n  ${pc.bold('Already up to date.')} Nothing changed.\n`);
+    const total = result.added.length + result.removed.length;
+    if (total === 0 && result.claudeMdUpdated) {
+      console.log(`\n  ${pc.bold('Up to date.')} Stack line and skill lists refreshed.\n`);
+    } else if (total === 0) {
+      console.log(`\n  ${pc.bold('Already up to date.')} Nothing changed.\n`);
+    } else {
+      console.log(`\n  ${pc.bold('Done.')} ${result.added.length} added, ${result.removed.length} removed.\n`);
+    }
   } else {
-    console.log(`\n  ${pc.bold('Done.')} ${result.added.length} added, ${result.removed.length} removed.\n`);
-  }
-} else {
-  const result = await generateFiles({
-    projectDir,
-    detected,
-    tool,
-    includeAgents: !flags['no-agents'],
-  });
+    const result = await generateFiles({
+      projectDir,
+      detected,
+      tool,
+      includeAgents: !flags['no-agents'],
+    });
 
-  console.log(`\n  ${pc.green('✓')} Generated ${result.fileCount} files\n`);
-  for (const file of result.files) {
-    console.log(`    ${pc.dim('+')} ${file}`);
+    console.log(`\n  ${pc.green('✓')} Generated ${result.fileCount} files\n`);
+    for (const file of result.files) {
+      console.log(`    ${pc.dim('+')} ${file}`);
+    }
+    console.log(`\n  ${pc.bold('Done.')} Your AI agent is ready.\n`);
   }
-  console.log(`\n  ${pc.bold('Done.')} Your AI agent is ready.\n`);
+} catch (err) {
+  console.error(pc.red(`\n  Error: ${(err as Error).message}\n`));
+  process.exit(1);
 }
 
 console.log(`  ${pc.dim('by Strife Technologies — https://strifetech.com')}\n`);
