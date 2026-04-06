@@ -1,6 +1,6 @@
 {
   "name": "@strifero/contextengine",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Auto-generate CLAUDE.md, .cursorrules, and copilot-instructions from your actual codebase. One command gives Claude Code, Cursor, and Copilot full project context.",
   "keywords": [
     "claude-md",
