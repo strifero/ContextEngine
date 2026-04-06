@@ -25,6 +25,16 @@ export interface UpdateResult {
 
 const AUTO_SECTIONS = new Set(['Available Skills', 'Available Agents']);
 
+// Fix #8: only remove files that ContextEngine would have created.
+// User files in .claude/skills/ or .claude/agents/ are never touched.
+function isContextEngineFile(filePath: string): boolean {
+  // Skills are always SKILL.md
+  if (filePath.includes('skills/') && filePath.endsWith('/SKILL.md')) return true;
+  // Agents are <name>.md directly under agents/
+  if (filePath.match(/^agents\/[^/]+\.md$/)) return true;
+  return false;
+}
+
 function parseClaudeMd(raw: string): { preamble: string; sections: ParsedSection[] } {
   const lines = raw.split('\n');
   let preamble = '';
@@ -106,7 +116,11 @@ export async function updateProject(opts: UpdateOptions): Promise<UpdateResult> 
   }
 
   for (const path of existing) {
-    if (!desiredPaths.has(path)) { removeWithCleanup(claudeDir, path); result.removed.push(path); }
+    // Fix #8: only remove files ContextEngine owns — never user files
+    if (!desiredPaths.has(path) && isContextEngineFile(path)) {
+      removeWithCleanup(claudeDir, path);
+      result.removed.push(path);
+    }
   }
 
   const skillNames = desired.filter(f => f.path.includes('skills/')).map(f => f.path.split('skills/')[1].split('/')[0]);
