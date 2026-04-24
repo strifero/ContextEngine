@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// ContextEngine — CLI entry point
+// ContextEngine: CLI entry point
 
 import { parseArgs } from 'node:util';
 import { existsSync, readFileSync } from 'node:fs';
@@ -18,10 +18,13 @@ try {
   const pkg = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf-8')) as { version?: string };
   VERSION = pkg.version ?? VERSION;
 } catch {
-  // package.json missing or malformed — continue with fallback
+  // package.json missing or malformed: continue with fallback
 }
 
-export type TargetTool = 'claude' | 'cursor' | 'copilot' | 'all';
+export type TargetTool =
+  | 'claude' | 'cursor' | 'copilot' | 'agents'
+  | 'windsurf' | 'aider' | 'gemini' | 'cline' | 'roo' | 'junie' | 'amazon-q' | 'opencode' | 'zed'
+  | 'all';
 
 const { values: flags } = parseArgs({
   options: {
@@ -43,15 +46,23 @@ if (flags.version) {
 
 if (flags.help) {
   console.log(`
-${pc.bold('contextengine')} — Give any AI agent your entire codebase in one command.
+${pc.bold('contextengine')}: Give any AI agent your entire codebase in one command.
 
 ${pc.bold('Usage:')}
   npx contextengine [options]
 
 ${pc.bold('Options:')}
   -d, --dir <path>              Project directory to analyze (default: current directory)
-  -t, --tool <claude|cursor|copilot|all>
-                                AI tool to generate context for (default: claude)
+  -t, --tool <name>             AI tool to generate context for (default: claude)
+                                Named targets:
+                                  claude, cursor, copilot, agents,
+                                  windsurf, aider, gemini, cline, roo,
+                                  junie, amazon-q, opencode, zed, all
+                                'agents' writes AGENTS.md at the project root.
+                                Windsurf, Aider, Gemini, Cline, Roo, Junie,
+                                Amazon Q, OpenCode, and Zed write the same
+                                body at their tool-specific paths.
+                                'all' writes every target in one pass.
   -f, --force                   Overwrite existing context files
   -u, --update                  Re-sync skills and agents, preserving your edits
   --no-agents                   Skip agent generation (Claude Code only)
@@ -59,15 +70,16 @@ ${pc.bold('Options:')}
   -h, --help                    Show this help
 
 ${pc.bold('Examples:')}
-  npx contextengine                         # Claude Code — generate everything
+  npx contextengine                         # Claude Code: generate everything
   npx contextengine --tool cursor           # Cursor rules
   npx contextengine --tool copilot          # GitHub Copilot instructions
+  npx contextengine --tool agents           # AGENTS.md (Codex, OpenCode, etc.)
   npx contextengine --tool all              # All tools in one pass
-  npx contextengine --update                # Stack changed — sync without losing edits
+  npx contextengine --update                # Stack changed: sync without losing edits
   npx contextengine --force                 # Nuke and regenerate from scratch
   npx contextengine --dir ./app             # Target a specific directory
 
-${pc.dim('by Strife Technologies — https://strifetech.com')}
+${pc.dim('by Strife Technologies, https://strifetech.com')}
 `);
   process.exit(0);
 }
@@ -77,9 +89,13 @@ ${pc.dim('by Strife Technologies — https://strifetech.com')}
 const projectDir = resolve(flags.dir as string);
 const tool = (flags.tool ?? 'claude') as TargetTool;
 
-const validTools: TargetTool[] = ['claude', 'cursor', 'copilot', 'all'];
+const validTools: TargetTool[] = [
+  'claude', 'cursor', 'copilot', 'agents',
+  'windsurf', 'aider', 'gemini', 'cline', 'roo', 'junie', 'amazon-q', 'opencode', 'zed',
+  'all',
+];
 if (!validTools.includes(tool)) {
-  console.error(pc.red(`\n  Unknown tool: "${tool}". Valid options: claude, cursor, copilot, all\n`));
+  console.error(pc.red(`\n  Unknown tool: "${tool}". Valid options: ${validTools.join(', ')}\n`));
   process.exit(1);
 }
 
@@ -103,7 +119,7 @@ const claudeDir = resolve(projectDir, '.claude');
 const claudeExists = existsSync(claudeDir);
 
 if (flags.update && !claudeExists) {
-  console.error(pc.red('\n  Nothing to update — .claude/ does not exist. Run contextengine first.\n'));
+  console.error(pc.red('\n  Nothing to update: .claude/ does not exist. Run contextengine first.\n'));
   process.exit(1);
 }
 
@@ -119,12 +135,16 @@ if (tool === 'claude' && claudeExists && !flags.force && !flags.update) {
 console.log(`\n${pc.bold('ContextEngine')} ${pc.dim(`v${VERSION}`)}\n`);
 console.log(`  Analyzing ${pc.cyan(projectDir)}\n`);
 
-const detected = await detectStack(projectDir);
+const detection = await detectStack(projectDir);
+const detected = detection.techs;
 
 if (detected.length === 0) {
   console.log(pc.yellow('  No recognized tech stack detected.\n'));
 } else {
   console.log(`  ${pc.green('✓')} Detected: ${detected.map(d => pc.bold(d)).join(', ')}\n`);
+}
+if (detection.packageManager !== 'unknown') {
+  console.log(`  ${pc.dim(`Package manager: ${detection.packageManager}`)}\n`);
 }
 
 if (tool !== 'claude') {
@@ -138,7 +158,7 @@ try {
   if (flags.update) {
     const result = await updateProject({
       projectDir,
-      detected,
+      detection,
       includeAgents: !flags['no-agents'],
     });
 
@@ -168,7 +188,7 @@ try {
   } else {
     const result = await generateFiles({
       projectDir,
-      detected,
+      detection,
       tool,
       includeAgents: !flags['no-agents'],
     });
@@ -184,4 +204,4 @@ try {
   process.exit(1);
 }
 
-console.log(`  ${pc.dim('by Strife Technologies — https://strifetech.com')}\n`);
+console.log(`  ${pc.dim('by Strife Technologies, https://strifetech.com')}\n`);

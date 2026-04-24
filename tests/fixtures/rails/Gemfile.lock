@@ -1,0 +1,7 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    rails (7.2.0)
+
+BUNDLED WITH
+   2.5.0

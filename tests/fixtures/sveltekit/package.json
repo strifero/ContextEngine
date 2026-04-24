@@ -1,0 +1,17 @@
+{
+  "name": "my-sveltekit-app",
+  "private": true,
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@sveltejs/kit": "2.5.0",
+    "svelte": "4.2.0"
+  },
+  "devDependencies": {
+    "vite": "5.0.0",
+    "@sveltejs/adapter-auto": "3.0.0"
+  }
+}

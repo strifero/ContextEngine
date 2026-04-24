@@ -1,0 +1,109 @@
+# Snapshot
+
+## Detected
+nodejs, nestjs
+
+## Files (2)
+- .cursor/rules/nestjs.mdc
+- .cursor/rules/nodejs.mdc
+
+---
+FILE: .cursor/rules/nestjs.mdc
+---
+---
+description: nestjs best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: nestjs
+description: NestJS conventions: modules, controllers, providers, dependency injection, pipes, guards, and interceptors. Use when building or editing NestJS services, controllers, or feature modules.
+---
+
+<!-- review before release -->
+
+# NestJS Conventions
+
+## Structure
+```
+src/
+├── app.module.ts              (root module)
+├── main.ts                    (bootstrap)
+├── users/
+│   ├── users.module.ts
+│   ├── users.controller.ts
+│   ├── users.service.ts
+│   ├── dto/
+│   │   └── create-user.dto.ts
+│   └── entities/
+│       └── user.entity.ts
+└── common/                    (shared filters, guards, decorators)
+```
+
+## Modules
+- One feature per module. Import it from `AppModule`.
+- `imports` for other modules, `providers` for services, `controllers` for HTTP, `exports` for what the module publishes.
+
+## Controllers
+- Route decorators: `@Controller('users')`, `@Get()`, `@Post()`, etc.
+- Validate request bodies with `class-validator` DTOs and a global `ValidationPipe`.
+
+## Providers and DI
+- Register with `@Injectable()`. Inject via constructor.
+- Prefer interface tokens for swappable implementations.
+
+## Cross-cutting Concerns
+- `@UseGuards()` for auth, `@UseInterceptors()` for response shaping, `@UsePipes()` for transform/validation.
+- Global versions via `app.useGlobalPipes()`, `app.useGlobalGuards()` in `main.ts`.
+
+## Testing
+- `Test.createTestingModule({ ... })` gives a sandboxed DI container.
+- Mock providers with `{ provide: Foo, useValue: ... }` in `providers`.
+
+## Env and Config
+- `@nestjs/config` for typed config. Keep `.env` out of `src/`.
+
+---
+FILE: .cursor/rules/nodejs.mdc
+---
+---
+description: nodejs best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: nodejs
+description: Node.js runtime conventions, environment configuration, process management, and server bootstrap patterns. Use whenever writing server entry points, handling env vars, setting up process signals, or debugging Node.js runtime issues.
+---
+
+# Node.js Conventions
+
+## Runtime
+- Node.js 20+ LTS: use native `fetch`, `crypto`
+- Always specify `"engines": { "node": ">=20" }` in package.json
+
+## Environment Variables
+- Validate all required env vars at startup: fail fast
+```typescript
+const required = ['DATABASE_URL', 'API_KEY'];
+for (const key of required) {
+  if (!process.env[key]) throw new Error(`Missing env var: ${key}`);
+}
+```
+- Never read `process.env` deep in business logic: read at startup, pass down
+
+## Process Management
+- Handle `SIGTERM` and `SIGINT` for graceful shutdown
+- Register `process.on('unhandledRejection', ...)` at startup: log + exit(1)
+
+## Logging
+- Structured JSON logging (pino or similar) in production
+- Log level via `LOG_LEVEL` env var
+- Always include: timestamp, level, message, module
+
+## Package Conventions
+- Commit `package-lock.json`
+- Pin exact versions for infrastructure packages
+- Scripts: always define `start`, `build`, `dev`, `typecheck`, `lint`

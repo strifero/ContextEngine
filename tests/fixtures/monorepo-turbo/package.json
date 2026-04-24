@@ -1,0 +1,10 @@
+{
+  "name": "monorepo-turbo",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint"
+  }
+}

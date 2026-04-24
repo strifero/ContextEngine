@@ -1,0 +1,201 @@
+# Snapshot
+
+## Detected
+typescript, nextjs-pages, react, nodejs
+
+## Files (4)
+- .cursor/rules/nextjs-pages.mdc
+- .cursor/rules/nodejs.mdc
+- .cursor/rules/react.mdc
+- .cursor/rules/typescript.mdc
+
+---
+FILE: .cursor/rules/nextjs-pages.mdc
+---
+---
+description: nextjs-pages best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: nextjs-pages
+description: Next.js Pages Router conventions: file-based routing under pages/, getServerSideProps, getStaticProps, API routes at pages/api, and _app / _document customization. Use whenever building or editing a Pages Router project, or the Pages half of a mixed App plus Pages codebase.
+---
+
+# Next.js Pages Router Conventions
+
+## Structure
+```
+pages/
+├── _app.tsx
+├── _document.tsx
+├── index.tsx
+├── about.tsx
+├── dashboard/
+│   └── index.tsx
+└── api/
+    └── users.ts
+```
+
+## Data Fetching
+- `getServerSideProps` for per-request data
+- `getStaticProps` (with `getStaticPaths` for dynamic routes) for build-time data
+- Client-side fetching only for user-specific or highly interactive data
+
+```typescript
+export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+  const data = await fetchData(ctx.query.id as string);
+  return { props: { data } };
+}
+```
+
+## API Routes
+```typescript
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'GET') return res.status(405).end();
+  res.json({ ok: true });
+}
+```
+
+## Migration Notes
+- New Next.js features (Server Actions, streaming, new metadata API) land on App Router first.
+- Pages Router stays supported. Mixed projects are legal: Pages Router and App Router can coexist during migration.
+
+## Environment Variables
+- Server-only: `SOME_KEY`
+- Client-exposed: `NEXT_PUBLIC_SOME_KEY`
+
+---
+FILE: .cursor/rules/nodejs.mdc
+---
+---
+description: nodejs best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: nodejs
+description: Node.js runtime conventions, environment configuration, process management, and server bootstrap patterns. Use whenever writing server entry points, handling env vars, setting up process signals, or debugging Node.js runtime issues.
+---
+
+# Node.js Conventions
+
+## Runtime
+- Node.js 20+ LTS: use native `fetch`, `crypto`
+- Always specify `"engines": { "node": ">=20" }` in package.json
+
+## Environment Variables
+- Validate all required env vars at startup: fail fast
+```typescript
+const required = ['DATABASE_URL', 'API_KEY'];
+for (const key of required) {
+  if (!process.env[key]) throw new Error(`Missing env var: ${key}`);
+}
+```
+- Never read `process.env` deep in business logic: read at startup, pass down
+
+## Process Management
+- Handle `SIGTERM` and `SIGINT` for graceful shutdown
+- Register `process.on('unhandledRejection', ...)` at startup: log + exit(1)
+
+## Logging
+- Structured JSON logging (pino or similar) in production
+- Log level via `LOG_LEVEL` env var
+- Always include: timestamp, level, message, module
+
+## Package Conventions
+- Commit `package-lock.json`
+- Pin exact versions for infrastructure packages
+- Scripts: always define `start`, `build`, `dev`, `typecheck`, `lint`
+
+---
+FILE: .cursor/rules/react.mdc
+---
+---
+description: react best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: react
+description: React component patterns, hooks, state management, and accessibility conventions. Use whenever building React components, managing state, handling forms, writing custom hooks, or composing UI.
+---
+
+# React Conventions
+
+## Component Structure
+```typescript
+interface Props { id: string; onDone?: () => void; }
+
+export function MyComponent({ id, onDone }: Props) {
+  // 1. Hooks  2. Derived state  3. Handlers  4. Effects  5. Render
+}
+```
+- Named exports (except Next.js pages)
+
+## State Management
+- Local: `useState` / `useReducer`
+- Server state: React Query / SWR. Never `useEffect` + `fetch`.
+- Global: Zustand
+- URL state: `useSearchParams`
+
+## Performance
+- `memo()` only after measuring
+- Key prop: stable IDs, never array index
+
+## Accessibility
+- Keyboard navigable interactive elements
+- Descriptive `alt` on all images
+- `<label>` associated with every form field
+- Semantic HTML: `<button>`, `<nav>`, `<main>`
+
+---
+FILE: .cursor/rules/typescript.mdc
+---
+---
+description: typescript best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: typescript
+description: TypeScript patterns, type definitions, async conventions, and module structure. Use whenever writing, editing, or reviewing TypeScript code, defining types or interfaces, handling async logic, or structuring modules. Also trigger for strict mode errors, generics, or type inference questions.
+---
+
+# TypeScript Conventions
+
+## Compiler Settings
+- `"strict": true`. Non-negotiable.
+- `noUncheckedIndexedAccess: true`. Always guard array/object access.
+- `exactOptionalPropertyTypes: true`
+- Target `ES2022` or later
+
+## Type Definitions
+- Prefer `interface` for object shapes; `type` for unions, intersections, and primitives
+- Never use `any`: use `unknown` and narrow with type guards
+- Avoid type assertions (`as X`) unless you control both sides
+- Export types from a dedicated `types.ts` per module
+
+## Async Patterns
+- Always `async/await`: never raw `.then()` chains in application code
+- Wrap external calls in try/catch; rethrow with context
+- Use `Promise.all()` for independent parallel operations
+
+## Error Handling
+- API boundaries: return `{ error: string }` with the appropriate HTTP status
+- Never swallow errors silently: always log at minimum
+
+## Naming
+- Files: `kebab-case.ts`
+- Classes/Interfaces/Types: `PascalCase`
+- Functions/variables: `camelCase`
+- Constants: `SCREAMING_SNAKE_CASE`
+- Booleans: prefix with `is`, `has`, `can`, `should`
+
+## Imports
+- Use path aliases (`@/lib/...`): no deep relative paths
+- Group: external → internal → types → relative
