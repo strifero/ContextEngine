@@ -112,9 +112,9 @@ Today the README and implementation map Codex to `.claude/skills/`. Codex reads 
 - `generate.ts` Codex branch (if it has its own) or the `all` branch: emit AGENTS.md for Codex.
 - Remove the misleading `.claude/skills/` line for Codex.
 
-### Task 1.4: Default `--tool` behavior when no flag is passed
+### Task 1.4: DEFERRED (do not implement in this PR)
 
-Current default is `'claude'`. Change the default to emit **both** `AGENTS.md` **and** `.claude/CLAUDE.md` plus the existing `.claude/skills/` tree. Rationale: AGENTS.md is read by Claude Code too (as a secondary context file) and by every other agent; emitting it by default costs nothing and future-proofs the output. Keep `--tool claude` as an escape hatch that skips AGENTS.md for users who want the old behavior. Document this in the help text and the README.
+Changing the default `--tool` behavior to emit AGENTS.md alongside CLAUDE.md is deferred until after Phase 1 output has been reviewed. For this PR: `--tool agents` is opt-in, `--tool all` includes it, and the existing `--tool claude` default behavior is unchanged. Do not touch default behavior. Do not modify the README's default-behavior description.
 
 ### Task 1.5: Snapshot update
 
