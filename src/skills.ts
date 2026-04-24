@@ -828,6 +828,54 @@ public async Task<User?> GetUserAsync(string id, CancellationToken ct = default)
 // Frameworks added in phase 4 (review before release)
 // ---------------------------------------------------------------------------
 
+export const SKILL_NUXT: SkillFile = {
+  path: 'skills/nuxt/SKILL.md',
+  content: `---
+name: nuxt
+description: Nuxt conventions: pages, components auto-import, server routes, composables, and Nitro runtime. Use when building or editing a Nuxt 3+ app, pages, API routes, or composables.
+---
+
+<!-- review before release -->
+
+# Nuxt Conventions
+
+## Structure
+\`\`\`
+├── pages/                  (file-based routes)
+│   ├── index.vue
+│   └── users/[id].vue
+├── components/             (auto-imported)
+├── composables/            (auto-imported, prefixed use*)
+├── server/
+│   ├── api/                (HTTP endpoints)
+│   └── routes/             (non-API server routes)
+├── layouts/
+└── nuxt.config.ts
+\`\`\`
+
+## Data Fetching
+- \`useFetch('/api/users')\` in components: isomorphic, dedupes on SSR.
+- \`useAsyncData('key', () => $fetch(...))\` for custom data shapes.
+- Avoid calling APIs in mounted lifecycle hooks; compose data on the server.
+
+## Server Routes
+- \`server/api/hello.ts\` exports a default handler: \`export default defineEventHandler((event) => ...)\`.
+- Route params via \`getRouterParam(event, 'id')\`. Body via \`readBody(event)\`.
+
+## Auto-imports
+- Components from \`components/\` imported automatically.
+- Composables (\`useX\`) auto-imported from \`composables/\`.
+- Vue and Nuxt APIs are globally available; no explicit imports needed.
+
+## Runtime Config
+- Declare in \`nuxt.config.ts\` under \`runtimeConfig\`. Public keys under \`public\`.
+- Access via \`useRuntimeConfig()\` on server, \`useRuntimeConfig().public\` on client.
+
+## Modules
+- Extend Nuxt via modules (\`@nuxt/image\`, \`@nuxtjs/tailwindcss\`, etc.). Configure in \`nuxt.config.ts\`.
+`,
+};
+
 export const SKILL_REMIX: SkillFile = {
   path: 'skills/remix/SKILL.md',
   content: `---

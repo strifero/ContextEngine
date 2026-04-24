@@ -244,6 +244,7 @@ const DISPLAY_NAME: Record<DetectedTech, string> = {
   astro:          'Astro',
   sveltekit:      'SvelteKit',
   remix:          'Remix',
+  nuxt:           'Nuxt',
 };
 
 const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
@@ -264,6 +265,7 @@ const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
   astro:          'astro',
   sveltekit:      '@sveltejs/kit',
   remix:          '@remix-run/react',
+  nuxt:           'nuxt',
 };
 
 interface AgentsSummary { conventions: string[]; avoid: string[]; }
@@ -577,6 +579,16 @@ const AGENTS_SUMMARY: Record<DetectedTech, AgentsSummary> = {
     ],
     avoid: [
       'Fetching in components. Move to `loader`; return via `useLoaderData()`.',
+    ],
+  },
+  nuxt: {
+    conventions: [
+      'Pages under `pages/`, API under `server/api/`, composables under `composables/` (auto-imported).',
+      'Data fetching with `useFetch` or `useAsyncData` so SSR and client stay aligned.',
+      'Runtime config via `useRuntimeConfig()`. Keep secrets out of the `public` sub-object.',
+    ],
+    avoid: [
+      'Calling APIs in `onMounted`. Use `useFetch` and let Nuxt compose data on the server.',
     ],
   },
 };
