@@ -1,7 +1,7 @@
 # Snapshot
 
 ## Detected
-typescript, react, vite, nodejs, vitest
+typescript, react, vite, nodejs, eslint-flat, vitest
 
 ## Files (25)
 - .amazonq/rules/project.md
@@ -44,6 +44,7 @@ FILE: .amazonq/rules/project.md
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- ESLint (flat config)
 - Vitest
 
 ## Commands
@@ -63,6 +64,7 @@ FILE: .amazonq/rules/project.md
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Flat config (`eslint.config.*`). Run `eslint .` in CI; keep the lint output green.
 - Co-locate `<file>.test.ts` next to the module under test.
 - `vitest run` in CI, `vitest` for watch locally.
 
@@ -74,6 +76,7 @@ FILE: .amazonq/rules/project.md
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- Disabling rules inline except with a one-line reason comment.
 - `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
@@ -91,7 +94,7 @@ FILE: .claude/CLAUDE.md
 
 ## Project Overview
 
-**Detected stack:** typescript, react, vite, nodejs, vitest
+**Detected stack:** typescript, react, vite, nodejs, eslint-flat, vitest
 
 <!--
   Fill in the sections below to give Claude more context about your project.
@@ -393,6 +396,7 @@ FILE: .clinerules
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- ESLint (flat config)
 - Vitest
 
 ## Commands
@@ -412,6 +416,7 @@ FILE: .clinerules
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Flat config (`eslint.config.*`). Run `eslint .` in CI; keep the lint output green.
 - Co-locate `<file>.test.ts` next to the module under test.
 - `vitest run` in CI, `vitest` for watch locally.
 
@@ -423,6 +428,7 @@ FILE: .clinerules
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- Disabling rules inline except with a one-line reason comment.
 - `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
@@ -646,7 +652,7 @@ FILE: .github/copilot-instructions.md
 
 ## Project Stack
 
-**Detected:** typescript, react, vite, nodejs, vitest
+**Detected:** typescript, react, vite, nodejs, eslint-flat, vitest
 
 ## Conventions
 
@@ -849,6 +855,7 @@ FILE: .junie/guidelines.md
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- ESLint (flat config)
 - Vitest
 
 ## Commands
@@ -868,6 +875,7 @@ FILE: .junie/guidelines.md
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Flat config (`eslint.config.*`). Run `eslint .` in CI; keep the lint output green.
 - Co-locate `<file>.test.ts` next to the module under test.
 - `vitest run` in CI, `vitest` for watch locally.
 
@@ -879,6 +887,7 @@ FILE: .junie/guidelines.md
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- Disabling rules inline except with a one-line reason comment.
 - `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
@@ -899,6 +908,7 @@ FILE: .opencode/AGENTS.md
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- ESLint (flat config)
 - Vitest
 
 ## Commands
@@ -918,6 +928,7 @@ FILE: .opencode/AGENTS.md
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Flat config (`eslint.config.*`). Run `eslint .` in CI; keep the lint output green.
 - Co-locate `<file>.test.ts` next to the module under test.
 - `vitest run` in CI, `vitest` for watch locally.
 
@@ -929,6 +940,7 @@ FILE: .opencode/AGENTS.md
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- Disabling rules inline except with a one-line reason comment.
 - `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
@@ -949,6 +961,7 @@ FILE: .roo/rules.md
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- ESLint (flat config)
 - Vitest
 
 ## Commands
@@ -968,6 +981,7 @@ FILE: .roo/rules.md
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Flat config (`eslint.config.*`). Run `eslint .` in CI; keep the lint output green.
 - Co-locate `<file>.test.ts` next to the module under test.
 - `vitest run` in CI, `vitest` for watch locally.
 
@@ -979,6 +993,7 @@ FILE: .roo/rules.md
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- Disabling rules inline except with a one-line reason comment.
 - `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
@@ -999,6 +1014,7 @@ FILE: .rules
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- ESLint (flat config)
 - Vitest
 
 ## Commands
@@ -1018,6 +1034,7 @@ FILE: .rules
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Flat config (`eslint.config.*`). Run `eslint .` in CI; keep the lint output green.
 - Co-locate `<file>.test.ts` next to the module under test.
 - `vitest run` in CI, `vitest` for watch locally.
 
@@ -1029,6 +1046,7 @@ FILE: .rules
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- Disabling rules inline except with a one-line reason comment.
 - `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
@@ -1049,6 +1067,7 @@ FILE: .windsurfrules
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- ESLint (flat config)
 - Vitest
 
 ## Commands
@@ -1068,6 +1087,7 @@ FILE: .windsurfrules
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Flat config (`eslint.config.*`). Run `eslint .` in CI; keep the lint output green.
 - Co-locate `<file>.test.ts` next to the module under test.
 - `vitest run` in CI, `vitest` for watch locally.
 
@@ -1079,6 +1099,7 @@ FILE: .windsurfrules
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- Disabling rules inline except with a one-line reason comment.
 - `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
@@ -1099,6 +1120,7 @@ FILE: AGENTS.md
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- ESLint (flat config)
 - Vitest
 
 ## Commands
@@ -1118,6 +1140,7 @@ FILE: AGENTS.md
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Flat config (`eslint.config.*`). Run `eslint .` in CI; keep the lint output green.
 - Co-locate `<file>.test.ts` next to the module under test.
 - `vitest run` in CI, `vitest` for watch locally.
 
@@ -1129,6 +1152,7 @@ FILE: AGENTS.md
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- Disabling rules inline except with a one-line reason comment.
 - `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
@@ -1149,6 +1173,7 @@ FILE: CONVENTIONS.md
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- ESLint (flat config)
 - Vitest
 
 ## Commands
@@ -1168,6 +1193,7 @@ FILE: CONVENTIONS.md
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Flat config (`eslint.config.*`). Run `eslint .` in CI; keep the lint output green.
 - Co-locate `<file>.test.ts` next to the module under test.
 - `vitest run` in CI, `vitest` for watch locally.
 
@@ -1179,6 +1205,7 @@ FILE: CONVENTIONS.md
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- Disabling rules inline except with a one-line reason comment.
 - `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
@@ -1199,6 +1226,7 @@ FILE: GEMINI.md
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- ESLint (flat config)
 - Vitest
 
 ## Commands
@@ -1218,6 +1246,7 @@ FILE: GEMINI.md
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Flat config (`eslint.config.*`). Run `eslint .` in CI; keep the lint output green.
 - Co-locate `<file>.test.ts` next to the module under test.
 - `vitest run` in CI, `vitest` for watch locally.
 
@@ -1229,6 +1258,7 @@ FILE: GEMINI.md
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- Disabling rules inline except with a one-line reason comment.
 - `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---

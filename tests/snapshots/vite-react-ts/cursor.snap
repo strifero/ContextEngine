@@ -1,7 +1,7 @@
 # Snapshot
 
 ## Detected
-typescript, react, vite, nodejs, vitest
+typescript, react, vite, nodejs, eslint-flat, vitest
 
 ## Files (5)
 - .cursor/rules/nodejs.mdc

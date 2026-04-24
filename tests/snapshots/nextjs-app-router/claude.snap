@@ -1,7 +1,7 @@
 # Snapshot
 
 ## Detected
-typescript, nextjs-app, react, nodejs, tailwind, playwright
+typescript, nextjs-app, react, nodejs, tailwind, prettier, playwright
 
 ## Files (10)
 - .claude/CLAUDE.md
@@ -26,7 +26,7 @@ FILE: .claude/CLAUDE.md
 
 ## Project Overview
 
-**Detected stack:** typescript, nextjs-app, react, nodejs, tailwind, playwright
+**Detected stack:** typescript, nextjs-app, react, nodejs, tailwind, prettier, playwright
 
 <!--
   Fill in the sections below to give Claude more context about your project.

@@ -1,7 +1,7 @@
 # Snapshot
 
 ## Detected
-typescript, nextjs-app, react, nodejs, tailwind, playwright
+typescript, nextjs-app, react, nodejs, tailwind, prettier, playwright
 
 ## Files (1)
 - .rules
@@ -21,6 +21,7 @@ FILE: .rules
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Prettier
 - Playwright
 
 ## Commands
@@ -45,6 +46,7 @@ FILE: .rules
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Prettier is the source of truth for formatting. Run `prettier --write` or wire it into the editor.
 - Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
 - Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
 
@@ -58,6 +60,7 @@ FILE: .rules
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- Hand-formatting code that Prettier will rewrite. Configure Prettier instead.
 - `page.waitForTimeout`. Assert visibility or wait on a network response.
 
 ---

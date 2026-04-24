@@ -1,7 +1,7 @@
 # Snapshot
 
 ## Detected
-typescript, react, vite, nodejs, vitest
+typescript, react, vite, nodejs, eslint-flat, vitest
 
 ## Files (1)
 - .roo/rules.md
@@ -20,6 +20,7 @@ FILE: .roo/rules.md
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- ESLint (flat config)
 - Vitest
 
 ## Commands
@@ -39,6 +40,7 @@ FILE: .roo/rules.md
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Flat config (`eslint.config.*`). Run `eslint .` in CI; keep the lint output green.
 - Co-locate `<file>.test.ts` next to the module under test.
 - `vitest run` in CI, `vitest` for watch locally.
 
@@ -50,6 +52,7 @@ FILE: .roo/rules.md
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- Disabling rules inline except with a one-line reason comment.
 - `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---

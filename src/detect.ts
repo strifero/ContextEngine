@@ -10,7 +10,8 @@ export type DetectedTech =
   | 'vite' | 'vue' | 'tailwind' | 'swiftui' | 'stripe'
   | 'prisma' | 'postgresql' | 'mongodb' | 'azure' | 'docker'
   | 'go' | 'python' | 'django' | 'rust' | 'bun' | 'php' | 'csharp'
-  | 'vitest' | 'jest' | 'playwright' | 'cypress';
+  | 'vitest' | 'jest' | 'playwright' | 'cypress'
+  | 'eslint' | 'eslint-flat' | 'biome' | 'prettier';
 
 export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun' | 'unknown';
 
@@ -178,6 +179,20 @@ export async function detectStack(dir: string): Promise<DetectionResult> {
   if (hasFile(dir, 'global.json') || hasExtension(dir, '.csproj') ||
       hasExtension(dir, '.sln') || hasExtension(dir, '.cs'))
     detected.add('csharp');
+
+  // Linters and formatters. eslint-flat wins over eslint if both are present.
+  if (hasFile(dir, 'eslint.config.js', 'eslint.config.mjs', 'eslint.config.ts', 'eslint.config.cjs')) {
+    detected.add('eslint-flat');
+  } else if (hasFile(dir, '.eslintrc', '.eslintrc.js', '.eslintrc.cjs', '.eslintrc.json', '.eslintrc.yaml', '.eslintrc.yml')) {
+    detected.add('eslint');
+  }
+
+  if (hasFile(dir, 'biome.json', 'biome.jsonc') || hasDep(pkg, '@biomejs/biome'))
+    detected.add('biome');
+
+  if (hasFile(dir, '.prettierrc', '.prettierrc.json', '.prettierrc.js', '.prettierrc.cjs', '.prettierrc.yaml', '.prettierrc.yml', 'prettier.config.js', 'prettier.config.cjs') ||
+      hasDep(pkg, 'prettier'))
+    detected.add('prettier');
 
   if (hasFile(dir, 'vitest.config.ts', 'vitest.config.js', 'vitest.config.mjs') || hasDep(pkg, 'vitest'))
     detected.add('vitest');

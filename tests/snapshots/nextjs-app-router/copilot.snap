@@ -1,7 +1,7 @@
 # Snapshot
 
 ## Detected
-typescript, nextjs-app, react, nodejs, tailwind, playwright
+typescript, nextjs-app, react, nodejs, tailwind, prettier, playwright
 
 ## Files (1)
 - .github/copilot-instructions.md
@@ -15,7 +15,7 @@ FILE: .github/copilot-instructions.md
 
 ## Project Stack
 
-**Detected:** typescript, nextjs-app, react, nodejs, tailwind, playwright
+**Detected:** typescript, nextjs-app, react, nodejs, tailwind, prettier, playwright
 
 ## Conventions
 

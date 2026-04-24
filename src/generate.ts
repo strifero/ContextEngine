@@ -233,10 +233,14 @@ const DISPLAY_NAME: Record<DetectedTech, string> = {
   bun:        'Bun',
   php:        'PHP',
   csharp:     'C#',
-  vitest:     'Vitest',
-  jest:       'Jest',
-  playwright: 'Playwright',
-  cypress:    'Cypress',
+  vitest:         'Vitest',
+  jest:           'Jest',
+  playwright:     'Playwright',
+  cypress:        'Cypress',
+  eslint:         'ESLint (legacy config)',
+  'eslint-flat':  'ESLint (flat config)',
+  biome:          'Biome',
+  prettier:       'Prettier',
 };
 
 const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
@@ -505,6 +509,38 @@ const AGENTS_SUMMARY: Record<DetectedTech, AgentsSummary> = {
     ],
     avoid: [
       '`cy.wait(<ms>)`. Use command retry or intercept aliases.',
+    ],
+  },
+  eslint: {
+    conventions: [
+      'Legacy `.eslintrc` config. Run `eslint .` in CI; agents should not introduce new warnings.',
+    ],
+    avoid: [
+      'Disabling rules inline except with a one-line reason comment.',
+    ],
+  },
+  'eslint-flat': {
+    conventions: [
+      'Flat config (`eslint.config.*`). Run `eslint .` in CI; keep the lint output green.',
+    ],
+    avoid: [
+      'Disabling rules inline except with a one-line reason comment.',
+    ],
+  },
+  biome: {
+    conventions: [
+      'Biome handles lint and format together. Run `biome check --write` before committing.',
+    ],
+    avoid: [
+      'Mixing Biome with Prettier or ESLint for the same files. Pick one pipeline.',
+    ],
+  },
+  prettier: {
+    conventions: [
+      'Prettier is the source of truth for formatting. Run `prettier --write` or wire it into the editor.',
+    ],
+    avoid: [
+      'Hand-formatting code that Prettier will rewrite. Configure Prettier instead.',
     ],
   },
 };
