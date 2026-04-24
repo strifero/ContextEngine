@@ -59,7 +59,7 @@ ContextEngine scans your project root, reads your actual config files and depend
 | **Claude Code** | `.claude/CLAUDE.md` + skill files | ✅ Yes |
 | **Cursor** | `.cursor/rules/*.mdc` | ✅ Yes |
 | **GitHub Copilot** | `.github/copilot-instructions.md` | ✅ Yes |
-| **Codex CLI** | `.claude/skills/` (Agent Skills standard) | ✅ Yes |
+| **Codex CLI** | `AGENTS.md` (via `--tool agents`) | ✅ Yes |
 
 One tool:
 ```bash
