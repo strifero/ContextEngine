@@ -59,7 +59,18 @@ ContextEngine scans your project root, reads your actual config files and depend
 | **Claude Code** | `.claude/CLAUDE.md` + skill files | ✅ Yes |
 | **Cursor** | `.cursor/rules/*.mdc` | ✅ Yes |
 | **GitHub Copilot** | `.github/copilot-instructions.md` | ✅ Yes |
-| **Codex CLI** | `AGENTS.md` (via `--tool agents`) | ✅ Yes |
+| **Codex CLI** | `AGENTS.md` ¹ | ✅ Yes |
+| **OpenCode** | `.opencode/AGENTS.md` ¹ | ✅ Yes |
+| **Windsurf** | `.windsurfrules` | ✅ Yes |
+| **Aider** | `CONVENTIONS.md` | ✅ Yes |
+| **Gemini CLI** | `GEMINI.md` | ✅ Yes |
+| **Cline** | `.clinerules` | ✅ Yes |
+| **Roo Code** | `.roo/rules.md` | ✅ Yes |
+| **JetBrains (Junie)** | `.junie/guidelines.md` | ✅ Yes |
+| **Amazon Q** | `.amazonq/rules/project.md` | ✅ Yes |
+| **Zed** | `.rules` | ✅ Yes |
+
+¹ `AGENTS.md` at the repo root is the emerging cross-tool standard ([agents.md](https://agents.md)). Generate it with `--tool agents`. The other rows above are the tool-specific paths for agents that do not yet read `AGENTS.md` natively.
 
 One tool:
 ```bash
