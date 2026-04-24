@@ -33,6 +33,10 @@ FILE: .amazonq/rules/project.md
 
 - Node.js
 
+## Monorepo
+
+- Turbo workspace. Packages under `packages/` (or as declared in the workspace config).
+
 ## Commands
 
 - `npm run build`: `turbo run build`
@@ -200,6 +204,10 @@ FILE: .clinerules
 
 - Node.js
 
+## Monorepo
+
+- Turbo workspace. Packages under `packages/` (or as declared in the workspace config).
+
 ## Commands
 
 - `npm run build`: `turbo run build`
@@ -329,6 +337,10 @@ FILE: .junie/guidelines.md
 
 - Node.js
 
+## Monorepo
+
+- Turbo workspace. Packages under `packages/` (or as declared in the workspace config).
+
 ## Commands
 
 - `npm run build`: `turbo run build`
@@ -359,6 +371,10 @@ FILE: .opencode/AGENTS.md
 ## Stack
 
 - Node.js
+
+## Monorepo
+
+- Turbo workspace. Packages under `packages/` (or as declared in the workspace config).
 
 ## Commands
 
@@ -391,6 +407,10 @@ FILE: .roo/rules.md
 
 - Node.js
 
+## Monorepo
+
+- Turbo workspace. Packages under `packages/` (or as declared in the workspace config).
+
 ## Commands
 
 - `npm run build`: `turbo run build`
@@ -421,6 +441,10 @@ FILE: .rules
 ## Stack
 
 - Node.js
+
+## Monorepo
+
+- Turbo workspace. Packages under `packages/` (or as declared in the workspace config).
 
 ## Commands
 
@@ -453,6 +477,10 @@ FILE: .windsurfrules
 
 - Node.js
 
+## Monorepo
+
+- Turbo workspace. Packages under `packages/` (or as declared in the workspace config).
+
 ## Commands
 
 - `npm run build`: `turbo run build`
@@ -483,6 +511,10 @@ FILE: AGENTS.md
 ## Stack
 
 - Node.js
+
+## Monorepo
+
+- Turbo workspace. Packages under `packages/` (or as declared in the workspace config).
 
 ## Commands
 
@@ -515,6 +547,10 @@ FILE: CONVENTIONS.md
 
 - Node.js
 
+## Monorepo
+
+- Turbo workspace. Packages under `packages/` (or as declared in the workspace config).
+
 ## Commands
 
 - `npm run build`: `turbo run build`
@@ -545,6 +581,10 @@ FILE: GEMINI.md
 ## Stack
 
 - Node.js
+
+## Monorepo
+
+- Turbo workspace. Packages under `packages/` (or as declared in the workspace config).
 
 ## Commands
 

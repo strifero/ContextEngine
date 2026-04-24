@@ -2,7 +2,7 @@
 
 import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs';
 import { join, dirname, basename } from 'node:path';
-import type { DetectedTech, DetectionResult, PackageManager } from './detect.js';
+import type { DetectedTech, DetectionResult, Monorepo, PackageManager } from './detect.js';
 import type { TargetTool } from './index.js';
 import { selectFiles } from './registry.js';
 
@@ -518,6 +518,23 @@ function buildSummarySection(techs: DetectedTech[], key: 'conventions' | 'avoid'
   return bullets.length > 0 ? bullets.join('\n') : '(no stack-specific guidance)';
 }
 
+const MONOREPO_DISPLAY: Record<Exclude<Monorepo, null>, string> = {
+  'turbo':            'Turbo',
+  'nx':               'Nx',
+  'pnpm-workspaces':  'pnpm workspaces',
+  'lerna':            'Lerna',
+  'rush':             'Rush',
+};
+
+function buildMonorepoSection(monorepo: Monorepo): string {
+  if (!monorepo) return '';
+  return `## Monorepo
+
+- ${MONOREPO_DISPLAY[monorepo]} workspace. Packages under \`packages/\` (or as declared in the workspace config).
+
+`;
+}
+
 function renderAgentsMd(
   projectName: string,
   detected: DetectedTech[],
@@ -526,6 +543,7 @@ function renderAgentsMd(
   detection: DetectionResult,
 ): string {
   const stack       = buildStackSection(detected, pkg);
+  const monorepo    = buildMonorepoSection(detection.monorepo);
   const commands    = buildCommandsSection(detection.scripts, runPrefixFor(detection.packageManager));
   const conventions = buildSummarySection(summaryTechs, 'conventions');
   const avoid       = buildSummarySection(summaryTechs, 'avoid');
@@ -539,7 +557,7 @@ function renderAgentsMd(
 
 ${stack}
 
-## Commands
+${monorepo}## Commands
 
 ${commands}
 

@@ -18,6 +18,10 @@ FILE: .windsurfrules
 
 - Node.js
 
+## Monorepo
+
+- Turbo workspace. Packages under `packages/` (or as declared in the workspace config).
+
 ## Commands
 
 - `npm run build`: `turbo run build`

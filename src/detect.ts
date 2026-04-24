@@ -18,11 +18,14 @@ export interface TsconfigFlags {
   noUncheckedIndexedAccess: boolean;
 }
 
+export type Monorepo = 'turbo' | 'nx' | 'pnpm-workspaces' | 'lerna' | 'rush' | null;
+
 export interface DetectionResult {
   techs:          DetectedTech[];
   packageManager: PackageManager;
   scripts:        Record<string, string>;
   tsconfig:       TsconfigFlags | null;
+  monorepo:       Monorepo;
 }
 
 interface PackageJson {
@@ -76,6 +79,15 @@ function stripJsonComments(raw: string): string {
   return raw
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+}
+
+function detectMonorepo(dir: string): Monorepo {
+  if (hasFile(dir, 'turbo.json'))           return 'turbo';
+  if (hasFile(dir, 'nx.json'))              return 'nx';
+  if (hasFile(dir, 'pnpm-workspace.yaml'))  return 'pnpm-workspaces';
+  if (hasFile(dir, 'lerna.json'))           return 'lerna';
+  if (hasFile(dir, 'rush.json'))            return 'rush';
+  return null;
 }
 
 function readTsconfig(dir: string): TsconfigFlags | null {
@@ -171,5 +183,6 @@ export async function detectStack(dir: string): Promise<DetectionResult> {
     packageManager: detectPackageManager(dir),
     scripts:        pkg?.scripts ?? {},
     tsconfig:       readTsconfig(dir),
+    monorepo:       detectMonorepo(dir),
   };
 }
