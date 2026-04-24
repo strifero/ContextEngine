@@ -1,9 +1,9 @@
 # Snapshot
 
 ## Detected
-typescript, nextjs-app, react, nodejs, tailwind, prettier, playwright
+typescript, nextjs-app, react, nodejs, tailwind, prisma, prettier, playwright
 
-## Files (27)
+## Files (29)
 - .amazonq/rules/project.md
 - .claude/CLAUDE.md
 - .claude/agents/backend-engineer.md
@@ -12,6 +12,7 @@ typescript, nextjs-app, react, nodejs, tailwind, prettier, playwright
 - .claude/skills/nextjs-app/SKILL.md
 - .claude/skills/nodejs/SKILL.md
 - .claude/skills/playwright/SKILL.md
+- .claude/skills/prisma/SKILL.md
 - .claude/skills/react/SKILL.md
 - .claude/skills/tailwind/SKILL.md
 - .claude/skills/typescript/SKILL.md
@@ -19,6 +20,7 @@ typescript, nextjs-app, react, nodejs, tailwind, prettier, playwright
 - .cursor/rules/nextjs-app.mdc
 - .cursor/rules/nodejs.mdc
 - .cursor/rules/playwright.mdc
+- .cursor/rules/prisma.mdc
 - .cursor/rules/react.mdc
 - .cursor/rules/tailwind.mdc
 - .cursor/rules/typescript.mdc
@@ -47,6 +49,7 @@ FILE: .amazonq/rules/project.md
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Prisma 5.15.0
 - Prettier
 - Playwright
 
@@ -57,6 +60,7 @@ FILE: .amazonq/rules/project.md
 - `npm run start`: `next start`
 - `npm run lint`: `next lint`
 - `npm run test`: `vitest`
+- `npm run db:migrate`: `prisma migrate dev`
 
 ## Conventions
 
@@ -72,6 +76,8 @@ FILE: .amazonq/rules/project.md
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Single PrismaClient instance at `lib/prisma.ts`. Import that, never `new PrismaClient()` in request paths.
+- Schema changes go through `prisma migrate dev` locally and `prisma migrate deploy` in CI.
 - Prettier is the source of truth for formatting. Run `prettier --write` or wire it into the editor.
 - Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
 - Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
@@ -86,6 +92,7 @@ FILE: .amazonq/rules/project.md
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `$executeRawUnsafe` with user input. Use `$executeRaw` tagged templates.
 - Hand-formatting code that Prettier will rewrite. Configure Prettier instead.
 - `page.waitForTimeout`. Assert visibility or wait on a network response.
 
@@ -104,7 +111,7 @@ FILE: .claude/CLAUDE.md
 
 ## Project Overview
 
-**Detected stack:** typescript, nextjs-app, react, nodejs, tailwind, prettier, playwright
+**Detected stack:** typescript, nextjs-app, react, nodejs, tailwind, prisma, prettier, playwright
 
 <!--
   Fill in the sections below to give Claude more context about your project.
@@ -129,6 +136,7 @@ FILE: .claude/CLAUDE.md
 - `nextjs-app`
 - `react`
 - `tailwind`
+- `prisma`
 - `playwright`
 
 ## Available Agents
@@ -332,6 +340,40 @@ description: Playwright end-to-end test patterns, fixtures, selectors, and relia
 - `trace: 'retain-on-failure'` in `playwright.config` so failures are debuggable from CI artifacts.
 
 ---
+FILE: .claude/skills/prisma/SKILL.md
+---
+---
+name: prisma
+description: Prisma ORM patterns — schema design, migrations, typed queries, and connection pooling.
+---
+
+# Prisma Conventions
+
+## Client Singleton
+```typescript
+import { PrismaClient } from '@prisma/client';
+const g = globalThis as { prisma?: PrismaClient };
+export const prisma = g.prisma ?? new PrismaClient({ log: ['error'] });
+if (process.env.NODE_ENV !== 'production') g.prisma = prisma;
+```
+
+## Schema
+```prisma
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+## Migrations
+```bash
+npx prisma migrate dev --name describe_change
+npx prisma migrate deploy   # production
+```
+
+---
 FILE: .claude/skills/react/SKILL.md
 ---
 ---
@@ -458,6 +500,7 @@ FILE: .clinerules
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Prisma 5.15.0
 - Prettier
 - Playwright
 
@@ -468,6 +511,7 @@ FILE: .clinerules
 - `npm run start`: `next start`
 - `npm run lint`: `next lint`
 - `npm run test`: `vitest`
+- `npm run db:migrate`: `prisma migrate dev`
 
 ## Conventions
 
@@ -483,6 +527,8 @@ FILE: .clinerules
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Single PrismaClient instance at `lib/prisma.ts`. Import that, never `new PrismaClient()` in request paths.
+- Schema changes go through `prisma migrate dev` locally and `prisma migrate deploy` in CI.
 - Prettier is the source of truth for formatting. Run `prettier --write` or wire it into the editor.
 - Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
 - Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
@@ -497,6 +543,7 @@ FILE: .clinerules
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `$executeRawUnsafe` with user input. Use `$executeRaw` tagged templates.
 - Hand-formatting code that Prettier will rewrite. Configure Prettier instead.
 - `page.waitForTimeout`. Assert visibility or wait on a network response.
 
@@ -639,6 +686,46 @@ description: Playwright end-to-end test patterns, fixtures, selectors, and relia
 - `trace: 'retain-on-failure'` in `playwright.config` so failures are debuggable from CI artifacts.
 
 ---
+FILE: .cursor/rules/prisma.mdc
+---
+---
+description: prisma best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: prisma
+description: Prisma ORM patterns — schema design, migrations, typed queries, and connection pooling.
+---
+
+# Prisma Conventions
+
+## Client Singleton
+```typescript
+import { PrismaClient } from '@prisma/client';
+const g = globalThis as { prisma?: PrismaClient };
+export const prisma = g.prisma ?? new PrismaClient({ log: ['error'] });
+if (process.env.NODE_ENV !== 'production') g.prisma = prisma;
+```
+
+## Schema
+```prisma
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+## Migrations
+```bash
+npx prisma migrate dev --name describe_change
+npx prisma migrate deploy   # production
+```
+
+---
 FILE: .cursor/rules/react.mdc
 ---
 ---
@@ -777,7 +864,7 @@ FILE: .github/copilot-instructions.md
 
 ## Project Stack
 
-**Detected:** typescript, nextjs-app, react, nodejs, tailwind, prettier, playwright
+**Detected:** typescript, nextjs-app, react, nodejs, tailwind, prisma, prettier, playwright
 
 ## Conventions
 
@@ -989,6 +1076,41 @@ Input:  flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm
 
 ---
 
+## prisma
+
+---
+name: prisma
+description: Prisma ORM patterns — schema design, migrations, typed queries, and connection pooling.
+---
+
+# Prisma Conventions
+
+## Client Singleton
+```typescript
+import { PrismaClient } from '@prisma/client';
+const g = globalThis as { prisma?: PrismaClient };
+export const prisma = g.prisma ?? new PrismaClient({ log: ['error'] });
+if (process.env.NODE_ENV !== 'production') g.prisma = prisma;
+```
+
+## Schema
+```prisma
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+## Migrations
+```bash
+npx prisma migrate dev --name describe_change
+npx prisma migrate deploy   # production
+```
+
+---
+
 ## playwright
 
 ---
@@ -1032,6 +1154,7 @@ FILE: .junie/guidelines.md
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Prisma 5.15.0
 - Prettier
 - Playwright
 
@@ -1042,6 +1165,7 @@ FILE: .junie/guidelines.md
 - `npm run start`: `next start`
 - `npm run lint`: `next lint`
 - `npm run test`: `vitest`
+- `npm run db:migrate`: `prisma migrate dev`
 
 ## Conventions
 
@@ -1057,6 +1181,8 @@ FILE: .junie/guidelines.md
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Single PrismaClient instance at `lib/prisma.ts`. Import that, never `new PrismaClient()` in request paths.
+- Schema changes go through `prisma migrate dev` locally and `prisma migrate deploy` in CI.
 - Prettier is the source of truth for formatting. Run `prettier --write` or wire it into the editor.
 - Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
 - Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
@@ -1071,6 +1197,7 @@ FILE: .junie/guidelines.md
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `$executeRawUnsafe` with user input. Use `$executeRaw` tagged templates.
 - Hand-formatting code that Prettier will rewrite. Configure Prettier instead.
 - `page.waitForTimeout`. Assert visibility or wait on a network response.
 
@@ -1093,6 +1220,7 @@ FILE: .opencode/AGENTS.md
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Prisma 5.15.0
 - Prettier
 - Playwright
 
@@ -1103,6 +1231,7 @@ FILE: .opencode/AGENTS.md
 - `npm run start`: `next start`
 - `npm run lint`: `next lint`
 - `npm run test`: `vitest`
+- `npm run db:migrate`: `prisma migrate dev`
 
 ## Conventions
 
@@ -1118,6 +1247,8 @@ FILE: .opencode/AGENTS.md
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Single PrismaClient instance at `lib/prisma.ts`. Import that, never `new PrismaClient()` in request paths.
+- Schema changes go through `prisma migrate dev` locally and `prisma migrate deploy` in CI.
 - Prettier is the source of truth for formatting. Run `prettier --write` or wire it into the editor.
 - Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
 - Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
@@ -1132,6 +1263,7 @@ FILE: .opencode/AGENTS.md
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `$executeRawUnsafe` with user input. Use `$executeRaw` tagged templates.
 - Hand-formatting code that Prettier will rewrite. Configure Prettier instead.
 - `page.waitForTimeout`. Assert visibility or wait on a network response.
 
@@ -1154,6 +1286,7 @@ FILE: .roo/rules.md
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Prisma 5.15.0
 - Prettier
 - Playwright
 
@@ -1164,6 +1297,7 @@ FILE: .roo/rules.md
 - `npm run start`: `next start`
 - `npm run lint`: `next lint`
 - `npm run test`: `vitest`
+- `npm run db:migrate`: `prisma migrate dev`
 
 ## Conventions
 
@@ -1179,6 +1313,8 @@ FILE: .roo/rules.md
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Single PrismaClient instance at `lib/prisma.ts`. Import that, never `new PrismaClient()` in request paths.
+- Schema changes go through `prisma migrate dev` locally and `prisma migrate deploy` in CI.
 - Prettier is the source of truth for formatting. Run `prettier --write` or wire it into the editor.
 - Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
 - Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
@@ -1193,6 +1329,7 @@ FILE: .roo/rules.md
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `$executeRawUnsafe` with user input. Use `$executeRaw` tagged templates.
 - Hand-formatting code that Prettier will rewrite. Configure Prettier instead.
 - `page.waitForTimeout`. Assert visibility or wait on a network response.
 
@@ -1215,6 +1352,7 @@ FILE: .rules
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Prisma 5.15.0
 - Prettier
 - Playwright
 
@@ -1225,6 +1363,7 @@ FILE: .rules
 - `npm run start`: `next start`
 - `npm run lint`: `next lint`
 - `npm run test`: `vitest`
+- `npm run db:migrate`: `prisma migrate dev`
 
 ## Conventions
 
@@ -1240,6 +1379,8 @@ FILE: .rules
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Single PrismaClient instance at `lib/prisma.ts`. Import that, never `new PrismaClient()` in request paths.
+- Schema changes go through `prisma migrate dev` locally and `prisma migrate deploy` in CI.
 - Prettier is the source of truth for formatting. Run `prettier --write` or wire it into the editor.
 - Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
 - Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
@@ -1254,6 +1395,7 @@ FILE: .rules
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `$executeRawUnsafe` with user input. Use `$executeRaw` tagged templates.
 - Hand-formatting code that Prettier will rewrite. Configure Prettier instead.
 - `page.waitForTimeout`. Assert visibility or wait on a network response.
 
@@ -1276,6 +1418,7 @@ FILE: .windsurfrules
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Prisma 5.15.0
 - Prettier
 - Playwright
 
@@ -1286,6 +1429,7 @@ FILE: .windsurfrules
 - `npm run start`: `next start`
 - `npm run lint`: `next lint`
 - `npm run test`: `vitest`
+- `npm run db:migrate`: `prisma migrate dev`
 
 ## Conventions
 
@@ -1301,6 +1445,8 @@ FILE: .windsurfrules
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Single PrismaClient instance at `lib/prisma.ts`. Import that, never `new PrismaClient()` in request paths.
+- Schema changes go through `prisma migrate dev` locally and `prisma migrate deploy` in CI.
 - Prettier is the source of truth for formatting. Run `prettier --write` or wire it into the editor.
 - Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
 - Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
@@ -1315,6 +1461,7 @@ FILE: .windsurfrules
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `$executeRawUnsafe` with user input. Use `$executeRaw` tagged templates.
 - Hand-formatting code that Prettier will rewrite. Configure Prettier instead.
 - `page.waitForTimeout`. Assert visibility or wait on a network response.
 
@@ -1337,6 +1484,7 @@ FILE: AGENTS.md
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Prisma 5.15.0
 - Prettier
 - Playwright
 
@@ -1347,6 +1495,7 @@ FILE: AGENTS.md
 - `npm run start`: `next start`
 - `npm run lint`: `next lint`
 - `npm run test`: `vitest`
+- `npm run db:migrate`: `prisma migrate dev`
 
 ## Conventions
 
@@ -1362,6 +1511,8 @@ FILE: AGENTS.md
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Single PrismaClient instance at `lib/prisma.ts`. Import that, never `new PrismaClient()` in request paths.
+- Schema changes go through `prisma migrate dev` locally and `prisma migrate deploy` in CI.
 - Prettier is the source of truth for formatting. Run `prettier --write` or wire it into the editor.
 - Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
 - Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
@@ -1376,6 +1527,7 @@ FILE: AGENTS.md
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `$executeRawUnsafe` with user input. Use `$executeRaw` tagged templates.
 - Hand-formatting code that Prettier will rewrite. Configure Prettier instead.
 - `page.waitForTimeout`. Assert visibility or wait on a network response.
 
@@ -1398,6 +1550,7 @@ FILE: CONVENTIONS.md
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Prisma 5.15.0
 - Prettier
 - Playwright
 
@@ -1408,6 +1561,7 @@ FILE: CONVENTIONS.md
 - `npm run start`: `next start`
 - `npm run lint`: `next lint`
 - `npm run test`: `vitest`
+- `npm run db:migrate`: `prisma migrate dev`
 
 ## Conventions
 
@@ -1423,6 +1577,8 @@ FILE: CONVENTIONS.md
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Single PrismaClient instance at `lib/prisma.ts`. Import that, never `new PrismaClient()` in request paths.
+- Schema changes go through `prisma migrate dev` locally and `prisma migrate deploy` in CI.
 - Prettier is the source of truth for formatting. Run `prettier --write` or wire it into the editor.
 - Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
 - Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
@@ -1437,6 +1593,7 @@ FILE: CONVENTIONS.md
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `$executeRawUnsafe` with user input. Use `$executeRaw` tagged templates.
 - Hand-formatting code that Prettier will rewrite. Configure Prettier instead.
 - `page.waitForTimeout`. Assert visibility or wait on a network response.
 
@@ -1459,6 +1616,7 @@ FILE: GEMINI.md
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Prisma 5.15.0
 - Prettier
 - Playwright
 
@@ -1469,6 +1627,7 @@ FILE: GEMINI.md
 - `npm run start`: `next start`
 - `npm run lint`: `next lint`
 - `npm run test`: `vitest`
+- `npm run db:migrate`: `prisma migrate dev`
 
 ## Conventions
 
@@ -1484,6 +1643,8 @@ FILE: GEMINI.md
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Single PrismaClient instance at `lib/prisma.ts`. Import that, never `new PrismaClient()` in request paths.
+- Schema changes go through `prisma migrate dev` locally and `prisma migrate deploy` in CI.
 - Prettier is the source of truth for formatting. Run `prettier --write` or wire it into the editor.
 - Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
 - Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
@@ -1498,6 +1659,7 @@ FILE: GEMINI.md
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `$executeRawUnsafe` with user input. Use `$executeRaw` tagged templates.
 - Hand-formatting code that Prettier will rewrite. Configure Prettier instead.
 - `page.waitForTimeout`. Assert visibility or wait on a network response.
 

@@ -32,21 +32,70 @@ Every AI coding session starts blank. You ask Claude Code to add an endpoint —
 
 ## Before / After
 
-**Before** (Claude Code without a CLAUDE.md):
+**Before** (any agent, empty repo context):
 ```
 You: Where should I add a new API endpoint?
-Claude: Create a file in pages/api/users.ts and export a default handler...
+Agent: Create pages/api/users.ts and export a default handler...
 ```
 Wrong. This is an App Router project.
 
-**After** (Claude Code with a generated CLAUDE.md):
+**After.** Run ContextEngine once. It reads your `package.json`,
+`tsconfig.json`, `prisma/schema.prisma`, and friends, and writes a real
+`AGENTS.md` at the project root. On a minimal Next.js 14 (App Router) +
+Prisma + Tailwind repo, this is the actual file:
+
+```markdown
+# nextjs-app
+
+> AGENTS.md: instructions for AI coding agents working on this project.
+> Human contributors: see README.md.
+
+## Stack
+
+- TypeScript 5.5.0
+- Next.js (App Router) 14.2.0
+- React 18.3.0
+- Node.js
+- Tailwind CSS 3.4.0
+- Prisma 5.15.0
+- Prettier
+- Playwright
+
+## Commands
+
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
+- `npm run start`: `next start`
+- `npm run lint`: `next lint`
+- `npm run test`: `vitest`
+- `npm run db:migrate`: `prisma migrate dev`
+
+## Conventions
+
+- App Router by default. Server Components unless the file declares `"use client"`.
+- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
+- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- Single PrismaClient instance at `lib/prisma.ts`. Import that, never `new PrismaClient()` in request paths.
+- Schema changes go through `prisma migrate dev` locally and `prisma migrate deploy` in CI.
+- Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
+- Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
+- Prettier is the source of truth for formatting. Run `prettier --write` or wire it into the editor.
+
+## What to avoid
+
+- `getServerSideProps` and `getStaticProps`. The App Router replaced them.
+- Importing server-only modules from client components.
+- `$executeRawUnsafe` with user input. Use `$executeRaw` tagged templates.
+- `page.waitForTimeout`. Assert visibility or wait on a network response.
 ```
-You: Where should I add a new API endpoint?
-Claude: Create a Route Handler at app/api/users/route.ts. Export a named GET
-        function. Since this uses Prisma, import from lib/prisma.ts — I can see
-        the User model in your schema has...
-```
-Correct. Context-aware. No setup required from you.
+
+(Trimmed for brevity: the full file has a few more TypeScript and React
+bullets. Nothing is hand-written; every section above is derived from
+files in the repo.)
+
+For Claude Code, `--tool claude` also writes `.claude/CLAUDE.md` plus a
+skill library under `.claude/skills/` (e.g. `nextjs-app/SKILL.md`,
+`prisma/SKILL.md`) so Claude lazy-loads per-topic guidance on demand.
 
 ---
 
@@ -81,35 +130,6 @@ All tools at once:
 ```bash
 npx @strifero/contextengine --tool all
 ```
-
----
-
-## Example Output
-
-Running on a Next.js 14 + Prisma + TypeScript project generates a `CLAUDE.md` like:
-
-```markdown
-# Project Context
-
-## Stack
-- Next.js 14 (App Router)
-- TypeScript (strict mode)
-- Prisma ORM → PostgreSQL
-- Tailwind CSS
-
-## Conventions
-- All routes go under app/ using the App Router file convention
-- Server Components by default; use "use client" only when necessary
-- Database access only in Server Components or Route Handlers
-- Prisma client singleton at lib/prisma.ts
-- Use zod for runtime validation at API boundaries
-
-## What to avoid
-- Do not use getServerSideProps or getStaticProps — App Router only
-- Do not import server-only modules into components/
-```
-
-This is generated from reading your actual `next.config.js`, `tsconfig.json`, `prisma/schema.prisma`, and `package.json` — not from templates.
 
 ---
 

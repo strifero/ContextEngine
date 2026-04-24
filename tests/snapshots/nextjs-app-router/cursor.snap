@@ -1,12 +1,13 @@
 # Snapshot
 
 ## Detected
-typescript, nextjs-app, react, nodejs, tailwind, prettier, playwright
+typescript, nextjs-app, react, nodejs, tailwind, prisma, prettier, playwright
 
-## Files (6)
+## Files (7)
 - .cursor/rules/nextjs-app.mdc
 - .cursor/rules/nodejs.mdc
 - .cursor/rules/playwright.mdc
+- .cursor/rules/prisma.mdc
 - .cursor/rules/react.mdc
 - .cursor/rules/tailwind.mdc
 - .cursor/rules/typescript.mdc
@@ -144,6 +145,46 @@ description: Playwright end-to-end test patterns, fixtures, selectors, and relia
 ## Reliability
 - Reset state between tests: seed DB, mock API, or create a fresh user per test.
 - `trace: 'retain-on-failure'` in `playwright.config` so failures are debuggable from CI artifacts.
+
+---
+FILE: .cursor/rules/prisma.mdc
+---
+---
+description: prisma best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: prisma
+description: Prisma ORM patterns — schema design, migrations, typed queries, and connection pooling.
+---
+
+# Prisma Conventions
+
+## Client Singleton
+```typescript
+import { PrismaClient } from '@prisma/client';
+const g = globalThis as { prisma?: PrismaClient };
+export const prisma = g.prisma ?? new PrismaClient({ log: ['error'] });
+if (process.env.NODE_ENV !== 'production') g.prisma = prisma;
+```
+
+## Schema
+```prisma
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+## Migrations
+```bash
+npx prisma migrate dev --name describe_change
+npx prisma migrate deploy   # production
+```
 
 ---
 FILE: .cursor/rules/react.mdc

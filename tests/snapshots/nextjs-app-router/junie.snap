@@ -1,7 +1,7 @@
 # Snapshot
 
 ## Detected
-typescript, nextjs-app, react, nodejs, tailwind, prettier, playwright
+typescript, nextjs-app, react, nodejs, tailwind, prisma, prettier, playwright
 
 ## Files (1)
 - .junie/guidelines.md
@@ -21,6 +21,7 @@ FILE: .junie/guidelines.md
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Prisma 5.15.0
 - Prettier
 - Playwright
 
@@ -31,6 +32,7 @@ FILE: .junie/guidelines.md
 - `npm run start`: `next start`
 - `npm run lint`: `next lint`
 - `npm run test`: `vitest`
+- `npm run db:migrate`: `prisma migrate dev`
 
 ## Conventions
 
@@ -46,6 +48,8 @@ FILE: .junie/guidelines.md
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Single PrismaClient instance at `lib/prisma.ts`. Import that, never `new PrismaClient()` in request paths.
+- Schema changes go through `prisma migrate dev` locally and `prisma migrate deploy` in CI.
 - Prettier is the source of truth for formatting. Run `prettier --write` or wire it into the editor.
 - Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
 - Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
@@ -60,6 +64,7 @@ FILE: .junie/guidelines.md
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `$executeRawUnsafe` with user input. Use `$executeRaw` tagged templates.
 - Hand-formatting code that Prettier will rewrite. Configure Prettier instead.
 - `page.waitForTimeout`. Assert visibility or wait on a network response.
 

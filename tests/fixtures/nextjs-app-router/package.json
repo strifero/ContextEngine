@@ -7,16 +7,19 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest",
+    "db:migrate": "prisma migrate dev",
     "prepare": "husky install"
   },
   "dependencies": {
     "next": "14.2.0",
     "react": "18.3.0",
-    "react-dom": "18.3.0"
+    "react-dom": "18.3.0",
+    "@prisma/client": "5.15.0"
   },
   "devDependencies": {
     "typescript": "5.5.0",
     "@types/react": "18.3.0",
-    "tailwindcss": "3.4.0"
+    "tailwindcss": "3.4.0",
+    "prisma": "5.15.0"
   }
 }
