@@ -1,4 +1,4 @@
-// registry.ts — Maps detected technologies to skill and agent files
+// registry.ts: Maps detected technologies to skill and agent files
 
 import type { DetectedTech, DetectionResult, TsconfigFlags } from './detect.js';
 import type { SkillFile } from './skills.js';

@@ -27,7 +27,7 @@ FILE: .github/copilot-instructions.md
 
 ---
 name: php
-description: PHP conventions — modern PHP patterns, Composer, and WordPress plugin development.
+description: PHP conventions: modern PHP patterns, Composer, and WordPress plugin development.
 ---
 
 # PHP Conventions
@@ -43,7 +43,7 @@ public function __construct(
 
 ## WordPress Plugins
 - Prefix all functions, classes, hooks, option keys with plugin slug
-- Never access superglobals directly — use `sanitize_*()`, `esc_*()`, `wp_verify_nonce()`
+- Never access superglobals directly: use `sanitize_*()`, `esc_*()`, `wp_verify_nonce()`
 - Database writes via `$wpdb->prepare()`
 - Enqueue scripts via `wp_enqueue_scripts` hook
 

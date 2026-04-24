@@ -17,7 +17,7 @@ alwaysApply: false
 
 ---
 name: go
-description: Go conventions — project structure, error handling, HTTP handlers, and concurrency patterns.
+description: Go conventions: project structure, error handling, HTTP handlers, and concurrency patterns.
 ---
 
 # Go Conventions
@@ -43,5 +43,5 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 ```
 
 ## Concurrency
-- `context.Context` for cancellation — always first parameter
+- `context.Context` for cancellation: always first parameter
 - Channels for communication, mutexes for shared state

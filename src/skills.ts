@@ -1,4 +1,4 @@
-// skills.ts — Skill and agent file content library
+// skills.ts: Skill and agent file content library
 // Each entry is a self-contained SKILL.md following the Agent Skills open standard.
 // https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview
 
@@ -21,25 +21,25 @@ description: TypeScript patterns, type definitions, async conventions, and modul
 # TypeScript Conventions
 
 ## Compiler Settings
-- \`"strict": true\` — non-negotiable
-- \`noUncheckedIndexedAccess: true\` — always guard array/object access
+- \`"strict": true\`: non-negotiable
+- \`noUncheckedIndexedAccess: true\`: always guard array/object access
 - \`exactOptionalPropertyTypes: true\`
 - Target \`ES2022\` or later
 
 ## Type Definitions
 - Prefer \`interface\` for object shapes; \`type\` for unions, intersections, and primitives
-- Never use \`any\` — use \`unknown\` and narrow with type guards
+- Never use \`any\`: use \`unknown\` and narrow with type guards
 - Avoid type assertions (\`as X\`) unless you control both sides
 - Export types from a dedicated \`types.ts\` per module
 
 ## Async Patterns
-- Always \`async/await\` — never raw \`.then()\` chains in application code
+- Always \`async/await\`: never raw \`.then()\` chains in application code
 - Wrap external calls in try/catch; rethrow with context
 - Use \`Promise.all()\` for independent parallel operations
 
 ## Error Handling
 - API boundaries: return \`{ error: string }\` with the appropriate HTTP status
-- Never swallow errors silently — always log at minimum
+- Never swallow errors silently: always log at minimum
 
 ## Naming
 - Files: \`kebab-case.ts\`
@@ -49,7 +49,7 @@ description: TypeScript patterns, type definitions, async conventions, and modul
 - Booleans: prefix with \`is\`, \`has\`, \`can\`, \`should\`
 
 ## Imports
-- Use path aliases (\`@/lib/...\`) — no deep relative paths
+- Use path aliases (\`@/lib/...\`): no deep relative paths
 - Group: external → internal → types → relative
 `,
 };
@@ -64,22 +64,22 @@ description: Node.js runtime conventions, environment configuration, process man
 # Node.js Conventions
 
 ## Runtime
-- Node.js 20+ LTS — use native \`fetch\`, \`crypto\`
+- Node.js 20+ LTS: use native \`fetch\`, \`crypto\`
 - Always specify \`"engines": { "node": ">=20" }\` in package.json
 
 ## Environment Variables
-- Validate all required env vars at startup — fail fast
+- Validate all required env vars at startup: fail fast
 \`\`\`typescript
 const required = ['DATABASE_URL', 'API_KEY'];
 for (const key of required) {
   if (!process.env[key]) throw new Error(\`Missing env var: \${key}\`);
 }
 \`\`\`
-- Never read \`process.env\` deep in business logic — read at startup, pass down
+- Never read \`process.env\` deep in business logic: read at startup, pass down
 
 ## Process Management
 - Handle \`SIGTERM\` and \`SIGINT\` for graceful shutdown
-- Register \`process.on('unhandledRejection', ...)\` at startup — log + exit(1)
+- Register \`process.on('unhandledRejection', ...)\` at startup: log + exit(1)
 
 ## Logging
 - Structured JSON logging (pino or similar) in production
@@ -104,7 +104,7 @@ description: Express.js route structure, middleware patterns, error handling, an
 
 ## Router Structure
 - One router per domain (\`routes/users.ts\`, \`routes/orders.ts\`)
-- Routers are thin — all logic lives in \`lib/\`
+- Routers are thin: all logic lives in \`lib/\`
 - Mount routers in \`app.ts\`, not \`server.ts\`
 
 \`\`\`typescript
@@ -121,9 +121,9 @@ router.get('/:id', async (req: Request, res: Response) => {
 \`\`\`
 
 ## Response Conventions
-- Error: \`{ error: string }\` — always the \`error\` key
-- 400 — validation failure | 401 — no auth | 403 — forbidden
-- 404 — not found | 409 — conflict | 500 — server error
+- Error: \`{ error: string }\`: always the \`error\` key
+- 400: validation failure | 401: no auth | 403: forbidden
+- 404: not found | 409: conflict | 500: server error
 
 ## Middleware Order
 1. \`express.json()\`  2. CORS  3. Logging  4. Routes  5. 404 handler  6. Error handler
@@ -134,7 +134,7 @@ export const SKILL_NEXTJS_APP: SkillFile = {
   path: 'skills/nextjs-app/SKILL.md',
   content: `---
 name: nextjs-app
-description: Next.js App Router conventions — Server Components, Client Components, API routes, data fetching, and project structure. Use whenever building or editing Next.js pages, layouts, API routes, or server actions. Also trigger for routing, metadata, or image optimization questions.
+description: Next.js App Router conventions: Server Components, Client Components, API routes, data fetching, and project structure. Use whenever building or editing Next.js pages, layouts, API routes, or server actions. Also trigger for routing, metadata, or image optimization questions.
 ---
 
 # Next.js App Router Conventions
@@ -253,7 +253,7 @@ export function MyComponent({ id, onDone }: Props) {
 
 ## State Management
 - Local: \`useState\` / \`useReducer\`
-- Server state: React Query / SWR — never \`useEffect\` + \`fetch\`
+- Server state: React Query / SWR: never \`useEffect\` + \`fetch\`
 - Global: Zustand
 - URL state: \`useSearchParams\`
 
@@ -273,7 +273,7 @@ export const SKILL_VITE: SkillFile = {
   path: 'skills/vite/SKILL.md',
   content: `---
 name: vite
-description: Vite project conventions — config structure, environment variables, build optimization, and plugin setup.
+description: Vite project conventions: config structure, environment variables, build optimization, and plugin setup.
 ---
 
 # Vite Conventions
@@ -290,7 +290,7 @@ export default defineConfig({
 ## Environment Variables
 - Prefix with \`VITE_\` to expose to client
 - Access via \`import.meta.env.VITE_API_URL\`
-- \`.env.local\` for local overrides — never commit
+- \`.env.local\` for local overrides: never commit
 
 ## Build
 - Dynamic \`import()\` for route-level code splitting
@@ -326,7 +326,7 @@ export function useUser(id: string) {
 }
 \`\`\`
 
-## State — Pinia (Composition API style only)
+## State: Pinia (Composition API style only)
 \`\`\`typescript
 export const useCartStore = defineStore('cart', () => {
   const items = ref<Item[]>([]);
@@ -373,12 +373,12 @@ export const SKILL_SWIFTUI: SkillFile = {
   path: 'skills/swiftui/SKILL.md',
   content: `---
 name: swiftui
-description: Swift and SwiftUI patterns — view composition, @Observable state, async/await, navigation, and iOS architecture.
+description: Swift and SwiftUI patterns: view composition, @Observable state, async/await, navigation, and iOS architecture.
 ---
 
 # SwiftUI / Swift Conventions
 
-## State — @Observable
+## State: @Observable
 \`\`\`swift
 @Observable
 final class ViewModel {
@@ -409,12 +409,12 @@ export const SKILL_STRIPE: SkillFile = {
   path: 'skills/stripe/SKILL.md',
   content: `---
 name: stripe
-description: Stripe integration — payments, subscriptions, webhooks, and the customer portal.
+description: Stripe integration: payments, subscriptions, webhooks, and the customer portal.
 ---
 
 # Stripe Conventions
 
-## Webhook — Verify Signature Every Time
+## Webhook: Verify Signature Every Time
 \`\`\`typescript
 router.post('/webhooks/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'] as string;
@@ -447,7 +447,7 @@ export const SKILL_PRISMA: SkillFile = {
   path: 'skills/prisma/SKILL.md',
   content: `---
 name: prisma
-description: Prisma ORM patterns — schema design, migrations, typed queries, and connection pooling.
+description: Prisma ORM patterns: schema design, migrations, typed queries, and connection pooling.
 ---
 
 # Prisma Conventions
@@ -482,7 +482,7 @@ export const SKILL_POSTGRESQL: SkillFile = {
   path: 'skills/postgresql/SKILL.md',
   content: `---
 name: postgresql
-description: PostgreSQL patterns — schema design, indexes, parameterized queries, and connection pooling.
+description: PostgreSQL patterns: schema design, indexes, parameterized queries, and connection pooling.
 ---
 
 # PostgreSQL Conventions
@@ -512,7 +512,7 @@ export const SKILL_MONGODB: SkillFile = {
   path: 'skills/mongodb/SKILL.md',
   content: `---
 name: mongodb
-description: MongoDB and Mongoose conventions — schema design, queries, indexes, and connection management.
+description: MongoDB and Mongoose conventions: schema design, queries, indexes, and connection management.
 ---
 
 # MongoDB / Mongoose Conventions
@@ -542,7 +542,7 @@ export const SKILL_AZURE: SkillFile = {
   path: 'skills/azure/SKILL.md',
   content: `---
 name: azure
-description: Azure infrastructure conventions — Container Apps, Key Vault, Azure CLI, and deployment patterns.
+description: Azure infrastructure conventions: Container Apps, Key Vault, Azure CLI, and deployment patterns.
 ---
 
 # Azure Conventions
@@ -558,7 +558,7 @@ Container Reg:  cr<appname><env>
 ## Container Apps
 - Scale to zero (min 0) for cost efficiency
 - Liveness probe on \`/health\`
-- Secrets from Key Vault — never hardcode
+- Secrets from Key Vault: never hardcode
 - Start: \`0.5 vCPU / 1Gi\`
 
 ## Deploy
@@ -572,7 +572,7 @@ export const SKILL_DOCKER: SkillFile = {
   path: 'skills/docker/SKILL.md',
   content: `---
 name: docker
-description: Docker and container conventions — multi-stage builds, health checks, and docker-compose patterns.
+description: Docker and container conventions: multi-stage builds, health checks, and docker-compose patterns.
 ---
 
 # Docker Conventions
@@ -598,7 +598,7 @@ CMD ["node", "dist/index.js"]
 \`\`\`
 
 ## Best Practices
-- Pin base image tags — never \`latest\`
+- Pin base image tags: never \`latest\`
 - Non-root user in production
 - \`.dockerignore\` excludes \`node_modules\`, \`.env\`, \`.git\`
 `,
@@ -608,7 +608,7 @@ export const SKILL_GO: SkillFile = {
   path: 'skills/go/SKILL.md',
   content: `---
 name: go
-description: Go conventions — project structure, error handling, HTTP handlers, and concurrency patterns.
+description: Go conventions: project structure, error handling, HTTP handlers, and concurrency patterns.
 ---
 
 # Go Conventions
@@ -634,7 +634,7 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 \`\`\`
 
 ## Concurrency
-- \`context.Context\` for cancellation — always first parameter
+- \`context.Context\` for cancellation: always first parameter
 - Channels for communication, mutexes for shared state
 `,
 };
@@ -643,12 +643,12 @@ export const SKILL_PYTHON: SkillFile = {
   path: 'skills/python/SKILL.md',
   content: `---
 name: python
-description: Python conventions — project structure, type hints, async patterns, and error handling.
+description: Python conventions: project structure, type hints, async patterns, and error handling.
 ---
 
 # Python Conventions
 
-## Type Hints — Always
+## Type Hints: Always
 \`\`\`python
 def get_user(user_id: str) -> Optional[User]:
     ...
@@ -675,14 +675,14 @@ export const SKILL_DJANGO: SkillFile = {
   path: 'skills/django/SKILL.md',
   content: `---
 name: django
-description: Django conventions — settings, models, migrations, and REST Framework patterns.
+description: Django conventions: settings, models, migrations, and REST Framework patterns.
 ---
 
 # Django Conventions
 
 ## Settings
 - Split: \`settings/base.py\`, \`settings/dev.py\`, \`settings/prod.py\`
-- Secrets via \`django-environ\` — never committed
+- Secrets via \`django-environ\`: never committed
 
 ## Models
 \`\`\`python
@@ -705,7 +705,7 @@ export const SKILL_RUST: SkillFile = {
   path: 'skills/rust/SKILL.md',
   content: `---
 name: rust
-description: Rust conventions — error handling with Result/Option, async with Tokio, and project structure.
+description: Rust conventions: error handling with Result/Option, async with Tokio, and project structure.
 ---
 
 # Rust Conventions
@@ -720,9 +720,9 @@ pub enum AppError {
     Database(#[from] sqlx::Error),
 }
 \`\`\`
-- Never \`unwrap()\` in production — use \`?\`
+- Never \`unwrap()\` in production: use \`?\`
 
-## Async — Tokio
+## Async: Tokio
 \`\`\`rust
 #[tokio::main]
 async fn main() -> anyhow::Result<()> { ... }
@@ -738,7 +738,7 @@ export const SKILL_BUN: SkillFile = {
   path: 'skills/bun/SKILL.md',
   content: `---
 name: bun
-description: Bun runtime conventions — server, file I/O, built-in test runner, and package management.
+description: Bun runtime conventions: server, file I/O, built-in test runner, and package management.
 ---
 
 # Bun Conventions
@@ -768,7 +768,7 @@ describe('math', () => {
   it('adds', () => expect(1 + 1).toBe(2));
 });
 \`\`\`
-- Auto-loads \`.env\` — no dotenv needed
+- Auto-loads \`.env\`: no dotenv needed
 `,
 };
 
@@ -776,7 +776,7 @@ export const SKILL_PHP: SkillFile = {
   path: 'skills/php/SKILL.md',
   content: `---
 name: php
-description: PHP conventions — modern PHP patterns, Composer, and WordPress plugin development.
+description: PHP conventions: modern PHP patterns, Composer, and WordPress plugin development.
 ---
 
 # PHP Conventions
@@ -792,7 +792,7 @@ public function __construct(
 
 ## WordPress Plugins
 - Prefix all functions, classes, hooks, option keys with plugin slug
-- Never access superglobals directly — use \`sanitize_*()\`, \`esc_*()\`, \`wp_verify_nonce()\`
+- Never access superglobals directly: use \`sanitize_*()\`, \`esc_*()\`, \`wp_verify_nonce()\`
 - Database writes via \`$wpdb->prepare()\`
 - Enqueue scripts via \`wp_enqueue_scripts\` hook
 `,
@@ -802,13 +802,13 @@ export const SKILL_CSHARP: SkillFile = {
   path: 'skills/csharp/SKILL.md',
   content: `---
 name: csharp
-description: C# and .NET conventions — async/await, LINQ, and .NET MAUI cross-platform development.
+description: C# and .NET conventions: async/await, LINQ, and .NET MAUI cross-platform development.
 ---
 
 # C# / .NET Conventions
 
 ## Async/Await
-- All I/O is async — never \`.Result\` or \`.Wait()\`
+- All I/O is async: never \`.Result\` or \`.Wait()\`
 - \`CancellationToken\` as last parameter on every async method
 \`\`\`csharp
 public async Task<User?> GetUserAsync(string id, CancellationToken ct = default)
@@ -820,7 +820,7 @@ public async Task<User?> GetUserAsync(string id, CancellationToken ct = default)
 ## .NET MAUI
 - MVVM: \`[ObservableProperty]\` and \`[RelayCommand]\` source generators
 - \`Shell\` for navigation
-- DI in \`MauiProgram.cs\` — no static service locators
+- DI in \`MauiProgram.cs\`: no static service locators
 `,
 };
 
@@ -1510,7 +1510,7 @@ export const AGENT_FRONTEND: SkillFile = {
   path: 'agents/frontend-engineer.md',
   content: `---
 name: frontend-engineer
-description: Specialized agent for UI development — React components, styling, and client-side state. Invoke for building screens, fixing UI bugs, implementing responsive layouts, or improving UX.
+description: Specialized agent for UI development: React components, styling, and client-side state. Invoke for building screens, fixing UI bugs, implementing responsive layouts, or improving UX.
 ---
 
 # Frontend Engineer Agent
@@ -1537,7 +1537,7 @@ description: Specialized agent for SwiftUI and iOS development. Invoke for build
 You are a senior iOS engineer specializing in Swift and SwiftUI.
 
 ## Quality Bar
-- Use @Observable — not ObservableObject/Combine
+- Use @Observable: not ObservableObject/Combine
 - Every async operation has loading and error state
 - No force unwraps (\`!\`) in production code
 `,
@@ -1547,7 +1547,7 @@ export const AGENT_REVIEWER: SkillFile = {
   path: 'agents/code-reviewer.md',
   content: `---
 name: code-reviewer
-description: Specialized agent for code review — correctness, security, performance, and maintainability. Invoke when reviewing a PR, auditing a module, or checking code before shipping.
+description: Specialized agent for code review: correctness, security, performance, and maintainability. Invoke when reviewing a PR, auditing a module, or checking code before shipping.
 ---
 
 # Code Reviewer Agent
@@ -1587,7 +1587,7 @@ description: Specialized agent for infrastructure, deployment, CI/CD, and monito
 You are a senior DevOps engineer.
 
 ## Quality Bar
-- Infrastructure as code — no click-ops in production
+- Infrastructure as code: no click-ops in production
 - Every service has \`/health\`
 - Secrets in vault, not plain env vars
 - CI: lint → test → build → deploy → health check

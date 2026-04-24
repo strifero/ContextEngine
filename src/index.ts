@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// ContextEngine — CLI entry point
+// ContextEngine: CLI entry point
 
 import { parseArgs } from 'node:util';
 import { existsSync, readFileSync } from 'node:fs';
@@ -18,7 +18,7 @@ try {
   const pkg = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf-8')) as { version?: string };
   VERSION = pkg.version ?? VERSION;
 } catch {
-  // package.json missing or malformed — continue with fallback
+  // package.json missing or malformed: continue with fallback
 }
 
 export type TargetTool =
@@ -46,7 +46,7 @@ if (flags.version) {
 
 if (flags.help) {
   console.log(`
-${pc.bold('contextengine')} — Give any AI agent your entire codebase in one command.
+${pc.bold('contextengine')}: Give any AI agent your entire codebase in one command.
 
 ${pc.bold('Usage:')}
   npx contextengine [options]
@@ -70,16 +70,16 @@ ${pc.bold('Options:')}
   -h, --help                    Show this help
 
 ${pc.bold('Examples:')}
-  npx contextengine                         # Claude Code — generate everything
+  npx contextengine                         # Claude Code: generate everything
   npx contextengine --tool cursor           # Cursor rules
   npx contextengine --tool copilot          # GitHub Copilot instructions
   npx contextengine --tool agents           # AGENTS.md (Codex, OpenCode, etc.)
   npx contextengine --tool all              # All tools in one pass
-  npx contextengine --update                # Stack changed — sync without losing edits
+  npx contextengine --update                # Stack changed: sync without losing edits
   npx contextengine --force                 # Nuke and regenerate from scratch
   npx contextengine --dir ./app             # Target a specific directory
 
-${pc.dim('by Strife Technologies — https://strifetech.com')}
+${pc.dim('by Strife Technologies, https://strifetech.com')}
 `);
   process.exit(0);
 }
@@ -119,7 +119,7 @@ const claudeDir = resolve(projectDir, '.claude');
 const claudeExists = existsSync(claudeDir);
 
 if (flags.update && !claudeExists) {
-  console.error(pc.red('\n  Nothing to update — .claude/ does not exist. Run contextengine first.\n'));
+  console.error(pc.red('\n  Nothing to update: .claude/ does not exist. Run contextengine first.\n'));
   process.exit(1);
 }
 
@@ -204,4 +204,4 @@ try {
   process.exit(1);
 }
 
-console.log(`  ${pc.dim('by Strife Technologies — https://strifetech.com')}\n`);
+console.log(`  ${pc.dim('by Strife Technologies, https://strifetech.com')}\n`);

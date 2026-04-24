@@ -17,7 +17,7 @@ alwaysApply: false
 
 ---
 name: rust
-description: Rust conventions — error handling with Result/Option, async with Tokio, and project structure.
+description: Rust conventions: error handling with Result/Option, async with Tokio, and project structure.
 ---
 
 # Rust Conventions
@@ -32,9 +32,9 @@ pub enum AppError {
     Database(#[from] sqlx::Error),
 }
 ```
-- Never `unwrap()` in production — use `?`
+- Never `unwrap()` in production: use `?`
 
-## Async — Tokio
+## Async: Tokio
 ```rust
 #[tokio::main]
 async fn main() -> anyhow::Result<()> { ... }

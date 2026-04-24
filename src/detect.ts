@@ -1,4 +1,4 @@
-// detect.ts — Scan a project directory and identify its tech stack
+// detect.ts: Scan a project directory and identify its tech stack
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';

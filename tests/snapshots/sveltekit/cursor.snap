@@ -25,22 +25,22 @@ description: Node.js runtime conventions, environment configuration, process man
 # Node.js Conventions
 
 ## Runtime
-- Node.js 20+ LTS — use native `fetch`, `crypto`
+- Node.js 20+ LTS: use native `fetch`, `crypto`
 - Always specify `"engines": { "node": ">=20" }` in package.json
 
 ## Environment Variables
-- Validate all required env vars at startup — fail fast
+- Validate all required env vars at startup: fail fast
 ```typescript
 const required = ['DATABASE_URL', 'API_KEY'];
 for (const key of required) {
   if (!process.env[key]) throw new Error(`Missing env var: ${key}`);
 }
 ```
-- Never read `process.env` deep in business logic — read at startup, pass down
+- Never read `process.env` deep in business logic: read at startup, pass down
 
 ## Process Management
 - Handle `SIGTERM` and `SIGINT` for graceful shutdown
-- Register `process.on('unhandledRejection', ...)` at startup — log + exit(1)
+- Register `process.on('unhandledRejection', ...)` at startup: log + exit(1)
 
 ## Logging
 - Structured JSON logging (pino or similar) in production
@@ -119,7 +119,7 @@ alwaysApply: false
 
 ---
 name: vite
-description: Vite project conventions — config structure, environment variables, build optimization, and plugin setup.
+description: Vite project conventions: config structure, environment variables, build optimization, and plugin setup.
 ---
 
 # Vite Conventions
@@ -136,7 +136,7 @@ export default defineConfig({
 ## Environment Variables
 - Prefix with `VITE_` to expose to client
 - Access via `import.meta.env.VITE_API_URL`
-- `.env.local` for local overrides — never commit
+- `.env.local` for local overrides: never commit
 
 ## Build
 - Dynamic `import()` for route-level code splitting

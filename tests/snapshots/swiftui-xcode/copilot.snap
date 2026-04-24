@@ -27,12 +27,12 @@ FILE: .github/copilot-instructions.md
 
 ---
 name: swiftui
-description: Swift and SwiftUI patterns — view composition, @Observable state, async/await, navigation, and iOS architecture.
+description: Swift and SwiftUI patterns: view composition, @Observable state, async/await, navigation, and iOS architecture.
 ---
 
 # SwiftUI / Swift Conventions
 
-## State — @Observable
+## State: @Observable
 ```swift
 @Observable
 final class ViewModel {

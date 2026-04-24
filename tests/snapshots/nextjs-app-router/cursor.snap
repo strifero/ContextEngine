@@ -23,7 +23,7 @@ alwaysApply: false
 
 ---
 name: nextjs-app
-description: Next.js App Router conventions — Server Components, Client Components, API routes, data fetching, and project structure. Use whenever building or editing Next.js pages, layouts, API routes, or server actions. Also trigger for routing, metadata, or image optimization questions.
+description: Next.js App Router conventions: Server Components, Client Components, API routes, data fetching, and project structure. Use whenever building or editing Next.js pages, layouts, API routes, or server actions. Also trigger for routing, metadata, or image optimization questions.
 ---
 
 # Next.js App Router Conventions
@@ -84,22 +84,22 @@ description: Node.js runtime conventions, environment configuration, process man
 # Node.js Conventions
 
 ## Runtime
-- Node.js 20+ LTS — use native `fetch`, `crypto`
+- Node.js 20+ LTS: use native `fetch`, `crypto`
 - Always specify `"engines": { "node": ">=20" }` in package.json
 
 ## Environment Variables
-- Validate all required env vars at startup — fail fast
+- Validate all required env vars at startup: fail fast
 ```typescript
 const required = ['DATABASE_URL', 'API_KEY'];
 for (const key of required) {
   if (!process.env[key]) throw new Error(`Missing env var: ${key}`);
 }
 ```
-- Never read `process.env` deep in business logic — read at startup, pass down
+- Never read `process.env` deep in business logic: read at startup, pass down
 
 ## Process Management
 - Handle `SIGTERM` and `SIGINT` for graceful shutdown
-- Register `process.on('unhandledRejection', ...)` at startup — log + exit(1)
+- Register `process.on('unhandledRejection', ...)` at startup: log + exit(1)
 
 ## Logging
 - Structured JSON logging (pino or similar) in production
@@ -157,7 +157,7 @@ alwaysApply: false
 
 ---
 name: prisma
-description: Prisma ORM patterns — schema design, migrations, typed queries, and connection pooling.
+description: Prisma ORM patterns: schema design, migrations, typed queries, and connection pooling.
 ---
 
 # Prisma Conventions
@@ -214,7 +214,7 @@ export function MyComponent({ id, onDone }: Props) {
 
 ## State Management
 - Local: `useState` / `useReducer`
-- Server state: React Query / SWR — never `useEffect` + `fetch`
+- Server state: React Query / SWR: never `useEffect` + `fetch`
 - Global: Zustand
 - URL state: `useSearchParams`
 
@@ -285,25 +285,25 @@ description: TypeScript patterns, type definitions, async conventions, and modul
 # TypeScript Conventions
 
 ## Compiler Settings
-- `"strict": true` — non-negotiable
-- `noUncheckedIndexedAccess: true` — always guard array/object access
+- `"strict": true`: non-negotiable
+- `noUncheckedIndexedAccess: true`: always guard array/object access
 - `exactOptionalPropertyTypes: true`
 - Target `ES2022` or later
 
 ## Type Definitions
 - Prefer `interface` for object shapes; `type` for unions, intersections, and primitives
-- Never use `any` — use `unknown` and narrow with type guards
+- Never use `any`: use `unknown` and narrow with type guards
 - Avoid type assertions (`as X`) unless you control both sides
 - Export types from a dedicated `types.ts` per module
 
 ## Async Patterns
-- Always `async/await` — never raw `.then()` chains in application code
+- Always `async/await`: never raw `.then()` chains in application code
 - Wrap external calls in try/catch; rethrow with context
 - Use `Promise.all()` for independent parallel operations
 
 ## Error Handling
 - API boundaries: return `{ error: string }` with the appropriate HTTP status
-- Never swallow errors silently — always log at minimum
+- Never swallow errors silently: always log at minimum
 
 ## Naming
 - Files: `kebab-case.ts`
@@ -313,5 +313,5 @@ description: TypeScript patterns, type definitions, async conventions, and modul
 - Booleans: prefix with `is`, `has`, `can`, `should`
 
 ## Imports
-- Use path aliases (`@/lib/...`) — no deep relative paths
+- Use path aliases (`@/lib/...`): no deep relative paths
 - Group: external → internal → types → relative
