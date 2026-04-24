@@ -825,6 +825,61 @@ public async Task<User?> GetUserAsync(string id, CancellationToken ct = default)
 };
 
 // ---------------------------------------------------------------------------
+// Frameworks added in phase 4 (review before release)
+// ---------------------------------------------------------------------------
+
+export const SKILL_ASTRO: SkillFile = {
+  path: 'skills/astro/SKILL.md',
+  content: `---
+name: astro
+description: Astro conventions: component structure, islands architecture, content collections, and server-first rendering. Use when building or editing Astro sites, pages, layouts, or content collections.
+---
+
+<!-- review before release -->
+
+# Astro Conventions
+
+## Structure
+\`\`\`
+src/
+├── pages/
+│   ├── index.astro
+│   └── blog/[slug].astro
+├── layouts/
+│   └── BaseLayout.astro
+├── components/
+└── content/
+    └── blog/
+\`\`\`
+
+## Components
+- \`.astro\` files: frontmatter (\`---\`) at top for data, markup below.
+- Framework components (React, Vue, Svelte) are islands: \`<Counter client:load />\`.
+- Default rendering is server-side. Add \`client:*\` only to components that need hydration.
+
+## Client Directives
+- \`client:load\`: hydrate immediately
+- \`client:idle\`: hydrate when the browser is idle
+- \`client:visible\`: hydrate when scrolled into view
+- \`client:media="(min-width: 768px)"\`: media-query gated
+- \`client:only="react"\`: skip SSR entirely for that island
+
+## Data
+- \`Astro.props\` for component props.
+- Content collections: define schemas in \`src/content/config.ts\`, load with \`getCollection()\`.
+- \`fetch()\` and \`Astro.glob()\` in frontmatter run at build time by default.
+
+## Routing
+- File-based under \`src/pages/\`. \`[slug].astro\` for dynamic segments.
+- API endpoints: \`src/pages/api/<name>.ts\` exporting HTTP method functions.
+
+## Environment
+- Public vars prefixed \`PUBLIC_\`: \`import.meta.env.PUBLIC_FOO\` in components.
+- Private vars only available in server context (frontmatter, endpoints).
+`,
+};
+
+// ---------------------------------------------------------------------------
 // Testing frameworks (added phase 3.6, review before release)
 // ---------------------------------------------------------------------------
 

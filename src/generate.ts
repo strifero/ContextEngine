@@ -241,6 +241,7 @@ const DISPLAY_NAME: Record<DetectedTech, string> = {
   'eslint-flat':  'ESLint (flat config)',
   biome:          'Biome',
   prettier:       'Prettier',
+  astro:          'Astro',
 };
 
 const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
@@ -258,6 +259,7 @@ const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
   jest:           'jest',
   playwright:     '@playwright/test',
   cypress:        'cypress',
+  astro:          'astro',
 };
 
 interface AgentsSummary { conventions: string[]; avoid: string[]; }
@@ -541,6 +543,16 @@ const AGENTS_SUMMARY: Record<DetectedTech, AgentsSummary> = {
     ],
     avoid: [
       'Hand-formatting code that Prettier will rewrite. Configure Prettier instead.',
+    ],
+  },
+  astro: {
+    conventions: [
+      'Pages under `src/pages/`, layouts under `src/layouts/`, components under `src/components/`.',
+      'Server-rendered by default. Add `client:load`, `client:idle`, or `client:visible` only where hydration is needed.',
+      'Public env vars prefixed `PUBLIC_` and read via `import.meta.env`.',
+    ],
+    avoid: [
+      'Hydrating whole pages. Push `client:*` directives down to the smallest island.',
     ],
   },
 };

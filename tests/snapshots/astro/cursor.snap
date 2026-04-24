@@ -1,0 +1,108 @@
+# Snapshot
+
+## Detected
+nodejs, astro
+
+## Files (2)
+- .cursor/rules/astro.mdc
+- .cursor/rules/nodejs.mdc
+
+---
+FILE: .cursor/rules/astro.mdc
+---
+---
+description: astro best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: astro
+description: Astro conventions: component structure, islands architecture, content collections, and server-first rendering. Use when building or editing Astro sites, pages, layouts, or content collections.
+---
+
+<!-- review before release -->
+
+# Astro Conventions
+
+## Structure
+```
+src/
+├── pages/
+│   ├── index.astro
+│   └── blog/[slug].astro
+├── layouts/
+│   └── BaseLayout.astro
+├── components/
+└── content/
+    └── blog/
+```
+
+## Components
+- `.astro` files: frontmatter (`---`) at top for data, markup below.
+- Framework components (React, Vue, Svelte) are islands: `<Counter client:load />`.
+- Default rendering is server-side. Add `client:*` only to components that need hydration.
+
+## Client Directives
+- `client:load`: hydrate immediately
+- `client:idle`: hydrate when the browser is idle
+- `client:visible`: hydrate when scrolled into view
+- `client:media="(min-width: 768px)"`: media-query gated
+- `client:only="react"`: skip SSR entirely for that island
+
+## Data
+- `Astro.props` for component props.
+- Content collections: define schemas in `src/content/config.ts`, load with `getCollection()`.
+- `fetch()` and `Astro.glob()` in frontmatter run at build time by default.
+
+## Routing
+- File-based under `src/pages/`. `[slug].astro` for dynamic segments.
+- API endpoints: `src/pages/api/<name>.ts` exporting HTTP method functions.
+
+## Environment
+- Public vars prefixed `PUBLIC_`: `import.meta.env.PUBLIC_FOO` in components.
+- Private vars only available in server context (frontmatter, endpoints).
+
+---
+FILE: .cursor/rules/nodejs.mdc
+---
+---
+description: nodejs best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: nodejs
+description: Node.js runtime conventions, environment configuration, process management, and server bootstrap patterns. Use whenever writing server entry points, handling env vars, setting up process signals, or debugging Node.js runtime issues.
+---
+
+# Node.js Conventions
+
+## Runtime
+- Node.js 20+ LTS — use native `fetch`, `crypto`
+- Always specify `"engines": { "node": ">=20" }` in package.json
+
+## Environment Variables
+- Validate all required env vars at startup — fail fast
+```typescript
+const required = ['DATABASE_URL', 'API_KEY'];
+for (const key of required) {
+  if (!process.env[key]) throw new Error(`Missing env var: ${key}`);
+}
+```
+- Never read `process.env` deep in business logic — read at startup, pass down
+
+## Process Management
+- Handle `SIGTERM` and `SIGINT` for graceful shutdown
+- Register `process.on('unhandledRejection', ...)` at startup — log + exit(1)
+
+## Logging
+- Structured JSON logging (pino or similar) in production
+- Log level via `LOG_LEVEL` env var
+- Always include: timestamp, level, message, module
+
+## Package Conventions
+- Commit `package-lock.json`
+- Pin exact versions for infrastructure packages
+- Scripts: always define `start`, `build`, `dev`, `typecheck`, `lint`

@@ -11,6 +11,7 @@ import {
   SKILL_GO, SKILL_PYTHON, SKILL_DJANGO, SKILL_RUST, SKILL_BUN,
   SKILL_PHP, SKILL_CSHARP,
   SKILL_VITEST, SKILL_JEST, SKILL_PLAYWRIGHT, SKILL_CYPRESS,
+  SKILL_ASTRO,
   AGENT_BACKEND, AGENT_FRONTEND, AGENT_IOS, AGENT_REVIEWER, AGENT_DEVOPS,
 } from './skills.js';
 
@@ -43,6 +44,7 @@ const SKILL_REGISTRY: SkillEntry[] = [
   { triggers: ['bun'],                      files: [SKILL_BUN] },
   { triggers: ['php'],                      files: [SKILL_PHP] },
   { triggers: ['csharp'],                   files: [SKILL_CSHARP] },
+  { triggers: ['astro'],                    files: [SKILL_ASTRO] },
   { triggers: ['vitest'],                   files: [SKILL_VITEST] },
   { triggers: ['jest'],                     files: [SKILL_JEST] },
   { triggers: ['playwright'],               files: [SKILL_PLAYWRIGHT] },
@@ -55,7 +57,7 @@ const AGENT_REGISTRY: SkillEntry[] = [
     files: [AGENT_BACKEND],
   },
   {
-    triggers: ['nextjs-app', 'nextjs-pages', 'react', 'vue', 'vite', 'tailwind'],
+    triggers: ['nextjs-app', 'nextjs-pages', 'react', 'vue', 'vite', 'tailwind', 'astro'],
     files: [AGENT_FRONTEND],
   },
   {

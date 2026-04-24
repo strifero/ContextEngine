@@ -11,7 +11,8 @@ export type DetectedTech =
   | 'prisma' | 'postgresql' | 'mongodb' | 'azure' | 'docker'
   | 'go' | 'python' | 'django' | 'rust' | 'bun' | 'php' | 'csharp'
   | 'vitest' | 'jest' | 'playwright' | 'cypress'
-  | 'eslint' | 'eslint-flat' | 'biome' | 'prettier';
+  | 'eslint' | 'eslint-flat' | 'biome' | 'prettier'
+  | 'astro';
 
 export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun' | 'unknown';
 
@@ -179,6 +180,9 @@ export async function detectStack(dir: string): Promise<DetectionResult> {
   if (hasFile(dir, 'global.json') || hasExtension(dir, '.csproj') ||
       hasExtension(dir, '.sln') || hasExtension(dir, '.cs'))
     detected.add('csharp');
+
+  if (hasFile(dir, 'astro.config.js', 'astro.config.mjs', 'astro.config.ts') || hasDep(pkg, 'astro'))
+    detected.add('astro');
 
   // Linters and formatters. eslint-flat wins over eslint if both are present.
   if (hasFile(dir, 'eslint.config.js', 'eslint.config.mjs', 'eslint.config.ts', 'eslint.config.cjs')) {
