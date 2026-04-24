@@ -12,7 +12,7 @@ export type DetectedTech =
   | 'go' | 'python' | 'django' | 'rust' | 'bun' | 'php' | 'csharp'
   | 'vitest' | 'jest' | 'playwright' | 'cypress'
   | 'eslint' | 'eslint-flat' | 'biome' | 'prettier'
-  | 'astro' | 'sveltekit' | 'remix' | 'nuxt';
+  | 'astro' | 'sveltekit' | 'remix' | 'nuxt' | 'nestjs';
 
 export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun' | 'unknown';
 
@@ -198,6 +198,9 @@ export async function detectStack(dir: string): Promise<DetectionResult> {
 
   if (hasFile(dir, 'nuxt.config.ts', 'nuxt.config.js', 'nuxt.config.mjs') || hasDep(pkg, 'nuxt'))
     detected.add('nuxt');
+
+  if (hasFile(dir, 'nest-cli.json') || hasDep(pkg, '@nestjs/core'))
+    detected.add('nestjs');
 
   // Linters and formatters. eslint-flat wins over eslint if both are present.
   if (hasFile(dir, 'eslint.config.js', 'eslint.config.mjs', 'eslint.config.ts', 'eslint.config.cjs')) {

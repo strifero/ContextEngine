@@ -245,6 +245,7 @@ const DISPLAY_NAME: Record<DetectedTech, string> = {
   sveltekit:      'SvelteKit',
   remix:          'Remix',
   nuxt:           'Nuxt',
+  nestjs:         'NestJS',
 };
 
 const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
@@ -266,6 +267,7 @@ const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
   sveltekit:      '@sveltejs/kit',
   remix:          '@remix-run/react',
   nuxt:           'nuxt',
+  nestjs:         '@nestjs/core',
 };
 
 interface AgentsSummary { conventions: string[]; avoid: string[]; }
@@ -589,6 +591,16 @@ const AGENTS_SUMMARY: Record<DetectedTech, AgentsSummary> = {
     ],
     avoid: [
       'Calling APIs in `onMounted`. Use `useFetch` and let Nuxt compose data on the server.',
+    ],
+  },
+  nestjs: {
+    conventions: [
+      'One feature per module: controller + service + DTOs colocated under the same directory.',
+      'Validate bodies with `class-validator` DTOs and a global `ValidationPipe`.',
+      'Inject dependencies through the constructor. Prefer interface tokens for swappable implementations.',
+    ],
+    avoid: [
+      'Business logic in controllers. Delegate to services; controllers only wire HTTP to service calls.',
     ],
   },
 };

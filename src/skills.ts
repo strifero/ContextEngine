@@ -828,6 +828,58 @@ public async Task<User?> GetUserAsync(string id, CancellationToken ct = default)
 // Frameworks added in phase 4 (review before release)
 // ---------------------------------------------------------------------------
 
+export const SKILL_NESTJS: SkillFile = {
+  path: 'skills/nestjs/SKILL.md',
+  content: `---
+name: nestjs
+description: NestJS conventions: modules, controllers, providers, dependency injection, pipes, guards, and interceptors. Use when building or editing NestJS services, controllers, or feature modules.
+---
+
+<!-- review before release -->
+
+# NestJS Conventions
+
+## Structure
+\`\`\`
+src/
+├── app.module.ts              (root module)
+├── main.ts                    (bootstrap)
+├── users/
+│   ├── users.module.ts
+│   ├── users.controller.ts
+│   ├── users.service.ts
+│   ├── dto/
+│   │   └── create-user.dto.ts
+│   └── entities/
+│       └── user.entity.ts
+└── common/                    (shared filters, guards, decorators)
+\`\`\`
+
+## Modules
+- One feature per module. Import it from \`AppModule\`.
+- \`imports\` for other modules, \`providers\` for services, \`controllers\` for HTTP, \`exports\` for what the module publishes.
+
+## Controllers
+- Route decorators: \`@Controller('users')\`, \`@Get()\`, \`@Post()\`, etc.
+- Validate request bodies with \`class-validator\` DTOs and a global \`ValidationPipe\`.
+
+## Providers and DI
+- Register with \`@Injectable()\`. Inject via constructor.
+- Prefer interface tokens for swappable implementations.
+
+## Cross-cutting Concerns
+- \`@UseGuards()\` for auth, \`@UseInterceptors()\` for response shaping, \`@UsePipes()\` for transform/validation.
+- Global versions via \`app.useGlobalPipes()\`, \`app.useGlobalGuards()\` in \`main.ts\`.
+
+## Testing
+- \`Test.createTestingModule({ ... })\` gives a sandboxed DI container.
+- Mock providers with \`{ provide: Foo, useValue: ... }\` in \`providers\`.
+
+## Env and Config
+- \`@nestjs/config\` for typed config. Keep \`.env\` out of \`src/\`.
+`,
+};
+
 export const SKILL_NUXT: SkillFile = {
   path: 'skills/nuxt/SKILL.md',
   content: `---
