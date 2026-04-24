@@ -828,6 +828,58 @@ public async Task<User?> GetUserAsync(string id, CancellationToken ct = default)
 // Frameworks added in phase 4 (review before release)
 // ---------------------------------------------------------------------------
 
+export const SKILL_FLUTTER: SkillFile = {
+  path: 'skills/flutter/SKILL.md',
+  content: `---
+name: flutter
+description: Flutter conventions: widget structure, state management, routing, async patterns, and pub dependencies. Use when building or editing a Flutter app, widgets, or Dart packages.
+---
+
+<!-- review before release -->
+
+# Flutter Conventions
+
+## Structure
+\`\`\`
+lib/
+├── main.dart               (runApp entry)
+├── src/
+│   ├── app.dart            (MaterialApp / Router)
+│   ├── features/
+│   │   └── <feature>/
+│   │       ├── view.dart
+│   │       ├── controller.dart
+│   │       └── model.dart
+│   └── common/             (shared widgets, theme, util)
+test/
+\`\`\`
+
+## Widgets
+- Split long \`build\` methods into smaller widgets rather than helper methods.
+- Stateless where possible. Reach for StatefulWidget only when local state is genuinely needed.
+- const constructors and const instances whenever inputs are compile-time constant.
+
+## State Management
+- Pick one approach per app (Provider, Riverpod, Bloc, signals) and stay consistent.
+- Keep view code pure: side effects live in controllers, repositories, or services.
+
+## Async and I/O
+- \`Future\` + async/await for one-shot work; \`Stream\` for sequences.
+- Use \`FutureBuilder\` / \`StreamBuilder\` sparingly; prefer explicit state management.
+
+## Routing
+- \`go_router\` or \`Navigator 2.0\` declarative routing for anything beyond trivial apps.
+- Deep links and platform back-button handling come with declarative routers.
+
+## Packages
+- \`flutter pub get\` / \`flutter pub upgrade\` to manage dependencies.
+- Use \`flutter pub outdated\` before major version bumps.
+
+## Testing
+- \`flutter test\` for unit and widget tests. \`flutter test integration_test/\` for full-app integration runs.
+`,
+};
+
 export const SKILL_LARAVEL: SkillFile = {
   path: 'skills/laravel/SKILL.md',
   content: `---

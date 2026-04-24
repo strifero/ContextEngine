@@ -12,7 +12,7 @@ import {
   SKILL_PHP, SKILL_CSHARP,
   SKILL_VITEST, SKILL_JEST, SKILL_PLAYWRIGHT, SKILL_CYPRESS,
   SKILL_ASTRO, SKILL_SVELTEKIT, SKILL_REMIX, SKILL_NUXT, SKILL_NESTJS,
-  SKILL_FASTAPI, SKILL_RAILS, SKILL_LARAVEL,
+  SKILL_FASTAPI, SKILL_RAILS, SKILL_LARAVEL, SKILL_FLUTTER,
   AGENT_BACKEND, AGENT_FRONTEND, AGENT_IOS, AGENT_REVIEWER, AGENT_DEVOPS,
 } from './skills.js';
 
@@ -53,6 +53,7 @@ const SKILL_REGISTRY: SkillEntry[] = [
   { triggers: ['fastapi'],                  files: [SKILL_FASTAPI] },
   { triggers: ['rails'],                    files: [SKILL_RAILS] },
   { triggers: ['laravel'],                  files: [SKILL_LARAVEL] },
+  { triggers: ['flutter'],                  files: [SKILL_FLUTTER] },
   { triggers: ['vitest'],                   files: [SKILL_VITEST] },
   { triggers: ['jest'],                     files: [SKILL_JEST] },
   { triggers: ['playwright'],               files: [SKILL_PLAYWRIGHT] },
@@ -69,7 +70,7 @@ const AGENT_REGISTRY: SkillEntry[] = [
     files: [AGENT_FRONTEND],
   },
   {
-    triggers: ['swiftui'],
+    triggers: ['swiftui', 'flutter'],
     files: [AGENT_IOS],
   },
   {

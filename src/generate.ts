@@ -249,6 +249,7 @@ const DISPLAY_NAME: Record<DetectedTech, string> = {
   fastapi:        'FastAPI',
   rails:          'Ruby on Rails',
   laravel:        'Laravel',
+  flutter:        'Flutter',
 };
 
 const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
@@ -634,6 +635,16 @@ const AGENTS_SUMMARY: Record<DetectedTech, AgentsSummary> = {
     ],
     avoid: [
       'Inline validation inside controllers when a Form Request fits.',
+    ],
+  },
+  flutter: {
+    conventions: [
+      'Split long `build` methods into smaller widgets; avoid helper methods that return Widgets.',
+      'Pick one state-management approach per app (Riverpod, Bloc, Provider) and stay consistent.',
+      '`flutter pub get` / `flutter pub upgrade` for deps; `flutter test` for the test suite.',
+    ],
+    avoid: [
+      'Stateful widgets when the component does not actually hold state.',
     ],
   },
 };
