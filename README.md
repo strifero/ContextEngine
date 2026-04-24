@@ -99,6 +99,19 @@ skill library under `.claude/skills/` (e.g. `nextjs-app/SKILL.md`,
 
 ---
 
+## What's new in 1.3.0
+
+- **AGENTS.md** is a first-class target. `--tool agents` emits the cross-tool standard; `--tool all` bundles it.
+- **Nine new agent targets**: Windsurf, Aider, Gemini CLI, Cline, Roo Code, JetBrains Junie, Amazon Q, OpenCode, Zed.
+- **Deeper detection**: `package.json` scripts land in `## Commands` with the right package-manager prefix. Next.js App Router and Pages Router are distinguished. TypeScript `strict` is surfaced correctly, including through `extends` chains. Monorepos (Turbo, Nx, pnpm-workspaces, Lerna, Rush) get their own section.
+- **Ten new stack detectors**: Astro, SvelteKit, Remix, Nuxt, NestJS, FastAPI, Rails, Laravel, Flutter, Angular.
+- **Test frameworks and linters**: Vitest, Jest, Playwright, Cypress ship as skills; ESLint flat + legacy, Biome, Prettier surface as conventions bullets.
+- **Windows fix**: `--update` no longer overwrites your edits on Windows. CI now covers Ubuntu + Windows across Node 18 and 20.
+
+Full release notes: [v1.3.0](https://github.com/strifero/ContextEngine/releases/tag/v1.3.0).
+
+---
+
 ## What It Does
 
 ContextEngine scans your project root, reads your actual config files and dependencies, and generates:
@@ -136,12 +149,19 @@ npx @strifero/contextengine --tool all
 ## Usage
 
 ```bash
-# Detect stack and generate context files
+# Detect stack and generate context files for Claude Code (default)
 npx @strifero/contextengine
 
-# Target a specific tool
+# Emit the cross-tool AGENTS.md standard at the project root
+npx @strifero/contextengine --tool agents
+
+# Target any supported agent individually
 npx @strifero/contextengine --tool cursor
-npx @strifero/contextengine --tool copilot
+npx @strifero/contextengine --tool windsurf
+npx @strifero/contextengine --tool gemini
+# Also supported: copilot, aider, cline, roo, junie, amazon-q, opencode, zed
+
+# Write files for every supported agent at once
 npx @strifero/contextengine --tool all
 
 # Re-sync after your stack changes (preserves your edits)
@@ -156,7 +176,7 @@ npx @strifero/contextengine --dir /path/to/project
 ## Commit It
 
 ```bash
-git add .claude/ .cursor/ .github/copilot-instructions.md
+git add AGENTS.md .claude/ .cursor/ .github/copilot-instructions.md
 git commit -m "add AI context files via contextengine"
 ```
 
