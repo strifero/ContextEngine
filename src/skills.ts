@@ -828,6 +828,57 @@ public async Task<User?> GetUserAsync(string id, CancellationToken ct = default)
 // Frameworks added in phase 4 (review before release)
 // ---------------------------------------------------------------------------
 
+export const SKILL_ANGULAR: SkillFile = {
+  path: 'skills/angular/SKILL.md',
+  content: `---
+name: angular
+description: Angular conventions: standalone components, signals, dependency injection, RxJS patterns, routing, and the Angular CLI. Use when building or editing an Angular app, components, services, or route configs.
+---
+
+<!-- review before release -->
+
+# Angular Conventions
+
+## Structure
+\`\`\`
+src/
+├── app/
+│   ├── app.config.ts          (bootstrap config, providers, router)
+│   ├── app.routes.ts
+│   ├── app.component.ts
+│   └── features/
+│       └── <feature>/
+│           ├── <feature>.component.ts
+│           ├── <feature>.service.ts
+│           └── <feature>.routes.ts
+└── main.ts
+\`\`\`
+
+## Components
+- Standalone components (\`standalone: true\` or the new default in 17+). Avoid NgModules in new code.
+- Use OnPush change detection where data flow allows.
+- Template files (\`*.component.html\`) for non-trivial markup; inline templates for small components.
+
+## Signals and State
+- Angular signals for reactive state: \`signal(...)\`, \`computed(...)\`, \`effect(...)\`.
+- RxJS for streams and cross-cutting async (HTTP, forms). Don't mix signals and observables carelessly in one component.
+
+## Services and DI
+- \`@Injectable({ providedIn: 'root' })\` for singletons.
+- Prefer constructor injection. Use \`inject()\` in functional contexts (guards, interceptors).
+
+## Routing
+- Lazy-load feature routes: \`loadComponent: () => import(...)\`.
+- Functional guards and resolvers in v17+.
+
+## Forms
+- Reactive forms for anything non-trivial. Typed FormGroups via \`new FormGroup<...>({...})\`.
+
+## Angular CLI
+- \`ng serve\`, \`ng build\`, \`ng test\`, \`ng lint\`. Use \`ng generate\` for scaffolded artifacts so project structure stays conventional.
+`,
+};
+
 export const SKILL_FLUTTER: SkillFile = {
   path: 'skills/flutter/SKILL.md',
   content: `---

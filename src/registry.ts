@@ -13,6 +13,7 @@ import {
   SKILL_VITEST, SKILL_JEST, SKILL_PLAYWRIGHT, SKILL_CYPRESS,
   SKILL_ASTRO, SKILL_SVELTEKIT, SKILL_REMIX, SKILL_NUXT, SKILL_NESTJS,
   SKILL_FASTAPI, SKILL_RAILS, SKILL_LARAVEL, SKILL_FLUTTER,
+  SKILL_ANGULAR,
   AGENT_BACKEND, AGENT_FRONTEND, AGENT_IOS, AGENT_REVIEWER, AGENT_DEVOPS,
 } from './skills.js';
 
@@ -54,6 +55,7 @@ const SKILL_REGISTRY: SkillEntry[] = [
   { triggers: ['rails'],                    files: [SKILL_RAILS] },
   { triggers: ['laravel'],                  files: [SKILL_LARAVEL] },
   { triggers: ['flutter'],                  files: [SKILL_FLUTTER] },
+  { triggers: ['angular'],                  files: [SKILL_ANGULAR] },
   { triggers: ['vitest'],                   files: [SKILL_VITEST] },
   { triggers: ['jest'],                     files: [SKILL_JEST] },
   { triggers: ['playwright'],               files: [SKILL_PLAYWRIGHT] },
@@ -66,7 +68,7 @@ const AGENT_REGISTRY: SkillEntry[] = [
     files: [AGENT_BACKEND],
   },
   {
-    triggers: ['nextjs-app', 'nextjs-pages', 'react', 'vue', 'vite', 'tailwind', 'astro', 'sveltekit', 'remix', 'nuxt'],
+    triggers: ['nextjs-app', 'nextjs-pages', 'react', 'vue', 'vite', 'tailwind', 'astro', 'sveltekit', 'remix', 'nuxt', 'angular'],
     files: [AGENT_FRONTEND],
   },
   {

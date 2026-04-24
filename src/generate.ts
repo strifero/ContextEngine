@@ -250,6 +250,7 @@ const DISPLAY_NAME: Record<DetectedTech, string> = {
   rails:          'Ruby on Rails',
   laravel:        'Laravel',
   flutter:        'Flutter',
+  angular:        'Angular',
 };
 
 const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
@@ -272,6 +273,7 @@ const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
   remix:          '@remix-run/react',
   nuxt:           'nuxt',
   nestjs:         '@nestjs/core',
+  angular:        '@angular/core',
 };
 
 interface AgentsSummary { conventions: string[]; avoid: string[]; }
@@ -645,6 +647,17 @@ const AGENTS_SUMMARY: Record<DetectedTech, AgentsSummary> = {
     ],
     avoid: [
       'Stateful widgets when the component does not actually hold state.',
+    ],
+  },
+  angular: {
+    conventions: [
+      'Standalone components (`standalone: true`) for new code. Avoid NgModules.',
+      'Signals for reactive state; RxJS for streams and HTTP. Do not mix them inside one component path without a reason.',
+      'Lazy-load feature routes via `loadComponent`; use functional guards and resolvers.',
+      '`@Injectable({ providedIn: "root" })` for singletons. Prefer `inject()` in functional contexts.',
+    ],
+    avoid: [
+      'Hand-scaffolded components when `ng generate component <name>` produces the conventional layout.',
     ],
   },
 };

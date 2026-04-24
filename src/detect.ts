@@ -13,7 +13,7 @@ export type DetectedTech =
   | 'vitest' | 'jest' | 'playwright' | 'cypress'
   | 'eslint' | 'eslint-flat' | 'biome' | 'prettier'
   | 'astro' | 'sveltekit' | 'remix' | 'nuxt' | 'nestjs' | 'fastapi'
-  | 'rails' | 'laravel' | 'flutter';
+  | 'rails' | 'laravel' | 'flutter' | 'angular';
 
 // Widened in phase 4 to cover non-Node ecosystems. The prefix logic in
 // generate.ts only produces script prefixes for the Node-family tools
@@ -241,6 +241,9 @@ export async function detectStack(dir: string): Promise<DetectionResult> {
 
   if (fileContainsCI(join(dir, 'pubspec.yaml'), 'flutter'))
     detected.add('flutter');
+
+  if (hasFile(dir, 'angular.json') || hasDep(pkg, '@angular/core'))
+    detected.add('angular');
 
   // Linters and formatters. eslint-flat wins over eslint if both are present.
   if (hasFile(dir, 'eslint.config.js', 'eslint.config.mjs', 'eslint.config.ts', 'eslint.config.cjs')) {
