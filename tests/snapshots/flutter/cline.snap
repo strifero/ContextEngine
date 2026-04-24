@@ -20,7 +20,7 @@ FILE: .clinerules
 
 ## Commands
 
-(no recognized package.json scripts. Fill in the commands agents should run for build, test, lint, etc.)
+(no commands detected. Fill in the commands agents should run for build, test, lint, etc.)
 
 ## Conventions
 

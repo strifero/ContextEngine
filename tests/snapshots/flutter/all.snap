@@ -35,7 +35,7 @@ FILE: .amazonq/rules/project.md
 
 ## Commands
 
-(no recognized package.json scripts. Fill in the commands agents should run for build, test, lint, etc.)
+(no commands detected. Fill in the commands agents should run for build, test, lint, etc.)
 
 ## Conventions
 
@@ -205,7 +205,7 @@ FILE: .clinerules
 
 ## Commands
 
-(no recognized package.json scripts. Fill in the commands agents should run for build, test, lint, etc.)
+(no commands detected. Fill in the commands agents should run for build, test, lint, etc.)
 
 ## Conventions
 
@@ -359,7 +359,7 @@ FILE: .junie/guidelines.md
 
 ## Commands
 
-(no recognized package.json scripts. Fill in the commands agents should run for build, test, lint, etc.)
+(no commands detected. Fill in the commands agents should run for build, test, lint, etc.)
 
 ## Conventions
 
@@ -389,7 +389,7 @@ FILE: .opencode/AGENTS.md
 
 ## Commands
 
-(no recognized package.json scripts. Fill in the commands agents should run for build, test, lint, etc.)
+(no commands detected. Fill in the commands agents should run for build, test, lint, etc.)
 
 ## Conventions
 
@@ -419,7 +419,7 @@ FILE: .roo/rules.md
 
 ## Commands
 
-(no recognized package.json scripts. Fill in the commands agents should run for build, test, lint, etc.)
+(no commands detected. Fill in the commands agents should run for build, test, lint, etc.)
 
 ## Conventions
 
@@ -449,7 +449,7 @@ FILE: .rules
 
 ## Commands
 
-(no recognized package.json scripts. Fill in the commands agents should run for build, test, lint, etc.)
+(no commands detected. Fill in the commands agents should run for build, test, lint, etc.)
 
 ## Conventions
 
@@ -479,7 +479,7 @@ FILE: .windsurfrules
 
 ## Commands
 
-(no recognized package.json scripts. Fill in the commands agents should run for build, test, lint, etc.)
+(no commands detected. Fill in the commands agents should run for build, test, lint, etc.)
 
 ## Conventions
 
@@ -509,7 +509,7 @@ FILE: AGENTS.md
 
 ## Commands
 
-(no recognized package.json scripts. Fill in the commands agents should run for build, test, lint, etc.)
+(no commands detected. Fill in the commands agents should run for build, test, lint, etc.)
 
 ## Conventions
 
@@ -539,7 +539,7 @@ FILE: CONVENTIONS.md
 
 ## Commands
 
-(no recognized package.json scripts. Fill in the commands agents should run for build, test, lint, etc.)
+(no commands detected. Fill in the commands agents should run for build, test, lint, etc.)
 
 ## Conventions
 
@@ -569,7 +569,7 @@ FILE: GEMINI.md
 
 ## Commands
 
-(no recognized package.json scripts. Fill in the commands agents should run for build, test, lint, etc.)
+(no commands detected. Fill in the commands agents should run for build, test, lint, etc.)
 
 ## Conventions
 

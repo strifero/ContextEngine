@@ -709,7 +709,7 @@ function isKnownScript(name: string): boolean {
 
 function buildCommandsSection(scripts: Record<string, string>, runPrefix: string): string {
   const entries = Object.entries(scripts).filter(([k]) => isKnownScript(k));
-  if (entries.length === 0) return '(no recognized package.json scripts. Fill in the commands agents should run for build, test, lint, etc.)';
+  if (entries.length === 0) return '(no commands detected. Fill in the commands agents should run for build, test, lint, etc.)';
   return entries.map(([k, v]) => `- \`${runPrefix} ${k}\`: \`${v}\``).join('\n');
 }
 
