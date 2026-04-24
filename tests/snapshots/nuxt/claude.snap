@@ -229,8 +229,8 @@ description: TypeScript patterns, type definitions, async conventions, and modul
 # TypeScript Conventions
 
 ## Compiler Settings
-- `"strict": true`: non-negotiable
-- `noUncheckedIndexedAccess: true`: always guard array/object access
+- `"strict": true`. Non-negotiable.
+- `noUncheckedIndexedAccess: true`. Always guard array/object access.
 - `exactOptionalPropertyTypes: true`
 - Target `ES2022` or later
 

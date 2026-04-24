@@ -142,7 +142,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 ```
 
 ## Response Conventions
-- Error: `{ error: string }`: always the `error` key
+- Error: `{ error: string }`. Always the `error` key.
 - 400: validation failure | 401: no auth | 403: forbidden
 - 404: not found | 409: conflict | 500: server error
 

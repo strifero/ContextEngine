@@ -33,8 +33,8 @@ description: TypeScript patterns, type definitions, async conventions, and modul
 # TypeScript Conventions
 
 ## Compiler Settings
-- `"strict": true`: non-negotiable
-- `noUncheckedIndexedAccess: true`: always guard array/object access
+- `"strict": true`. Non-negotiable.
+- `noUncheckedIndexedAccess: true`. Always guard array/object access.
 - `exactOptionalPropertyTypes: true`
 - Target `ES2022` or later
 
@@ -178,7 +178,7 @@ export function MyComponent({ id, onDone }: Props) {
 
 ## State Management
 - Local: `useState` / `useReducer`
-- Server state: React Query / SWR: never `useEffect` + `fetch`
+- Server state: React Query / SWR. Never `useEffect` + `fetch`.
 - Global: Zustand
 - URL state: `useSearchParams`
 
