@@ -2,15 +2,24 @@
 
 import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs';
 import { join, dirname, basename } from 'node:path';
-import type { DetectedTech } from './detect.js';
+import type { DetectedTech, DetectionResult, PackageManager } from './detect.js';
 import type { TargetTool } from './index.js';
 import { selectFiles } from './registry.js';
 
 interface GenerateOptions {
   projectDir:    string;
-  detected:      DetectedTech[];
+  detection:     DetectionResult;
   tool:          TargetTool;
   includeAgents: boolean;
+}
+
+function runPrefixFor(pm: PackageManager): string {
+  switch (pm) {
+    case 'pnpm': return 'pnpm';
+    case 'yarn': return 'yarn';
+    case 'bun':  return 'bun run';
+    default:     return 'npm run';   // npm, unknown
+  }
 }
 
 interface GenerateResult {
@@ -94,7 +103,8 @@ ${agentNames.length > 0
 }
 
 async function generateClaude(opts: GenerateOptions): Promise<GenerateResult> {
-  const { projectDir, detected, includeAgents } = opts;
+  const { projectDir, detection, includeAgents } = opts;
+  const detected = detection.techs;
   const claudeDir = join(projectDir, '.claude');
   const writtenFiles: string[] = [];
 
@@ -130,11 +140,11 @@ ${content}
 }
 
 async function generateCursor(opts: GenerateOptions): Promise<GenerateResult> {
-  const { projectDir, detected } = opts;
+  const { projectDir, detection } = opts;
   const rulesDir = join(projectDir, '.cursor', 'rules');
   const writtenFiles: string[] = [];
 
-  const skillFiles = selectFiles(detected, false);
+  const skillFiles = selectFiles(detection.techs, false);
   for (const file of skillFiles) {
     if (!file.path.includes('skills/')) continue;
     const tech = file.path.split('skills/')[1].split('/')[0];
@@ -150,7 +160,8 @@ async function generateCursor(opts: GenerateOptions): Promise<GenerateResult> {
 // ── GitHub Copilot ─────────────────────────────────────────────────
 
 async function generateCopilot(opts: GenerateOptions): Promise<GenerateResult> {
-  const { projectDir, detected } = opts;
+  const { projectDir, detection } = opts;
+  const detected = detection.techs;
   const githubDir = join(projectDir, '.github');
   const outPath = join(githubDir, 'copilot-instructions.md');
   const writtenFiles: string[] = [];
@@ -478,8 +489,7 @@ function isKnownScript(name: string): boolean {
   return false;
 }
 
-function buildCommandsSection(pkg: PkgJson | null, runPrefix: string = 'npm run'): string {
-  const scripts = pkg?.scripts ?? {};
+function buildCommandsSection(scripts: Record<string, string>, runPrefix: string): string {
   const entries = Object.entries(scripts).filter(([k]) => isKnownScript(k));
   if (entries.length === 0) return '(no recognized package.json scripts. Fill in the commands agents should run for build, test, lint, etc.)';
   return entries.map(([k, v]) => `- \`${runPrefix} ${k}\`: \`${v}\``).join('\n');
@@ -500,9 +510,10 @@ function renderAgentsMd(
   detected: DetectedTech[],
   pkg: PkgJson | null,
   summaryTechs: DetectedTech[],
+  detection: DetectionResult,
 ): string {
   const stack       = buildStackSection(detected, pkg);
-  const commands    = buildCommandsSection(pkg);
+  const commands    = buildCommandsSection(detection.scripts, runPrefixFor(detection.packageManager));
   const conventions = buildSummarySection(summaryTechs, 'conventions');
   const avoid       = buildSummarySection(summaryTechs, 'avoid');
 
@@ -533,17 +544,18 @@ ${avoid}
 `;
 }
 
-function generateAgentsMd(projectDir: string, detected: DetectedTech[]): string {
+function generateAgentsMd(projectDir: string, detection: DetectionResult): string {
   const pkg = readPkg(projectDir);
   const projectName = pkg?.name || basename(projectDir) || 'project';
+  const detected = detection.techs;
 
   let summaryTechs = [...detected];
-  let output = renderAgentsMd(projectName, detected, pkg, summaryTechs);
+  let output = renderAgentsMd(projectName, detected, pkg, summaryTechs, detection);
 
   for (const drop of TRUNCATION_ORDER) {
     if (output.length <= 8192) break;
     summaryTechs = summaryTechs.filter(t => t !== drop);
-    output = renderAgentsMd(projectName, detected, pkg, summaryTechs);
+    output = renderAgentsMd(projectName, detected, pkg, summaryTechs, detection);
   }
   return output;
 }
@@ -565,8 +577,8 @@ const AGENTS_BODY_TARGETS: ReadonlyArray<{ tool: TargetTool; path: string }> = [
 ];
 
 async function writeAgentsTarget(opts: GenerateOptions, outputPath: string): Promise<GenerateResult> {
-  const { projectDir, detected } = opts;
-  const body = generateAgentsMd(projectDir, detected);
+  const { projectDir, detection } = opts;
+  const body = generateAgentsMd(projectDir, detection);
   const full = join(projectDir, outputPath);
   mkdirSync(dirname(full), { recursive: true });
   writeFileSync(full, body, 'utf-8');

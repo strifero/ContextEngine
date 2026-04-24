@@ -135,12 +135,16 @@ if (tool === 'claude' && claudeExists && !flags.force && !flags.update) {
 console.log(`\n${pc.bold('ContextEngine')} ${pc.dim(`v${VERSION}`)}\n`);
 console.log(`  Analyzing ${pc.cyan(projectDir)}\n`);
 
-const detected = await detectStack(projectDir);
+const detection = await detectStack(projectDir);
+const detected = detection.techs;
 
 if (detected.length === 0) {
   console.log(pc.yellow('  No recognized tech stack detected.\n'));
 } else {
   console.log(`  ${pc.green('✓')} Detected: ${detected.map(d => pc.bold(d)).join(', ')}\n`);
+}
+if (detection.packageManager !== 'unknown') {
+  console.log(`  ${pc.dim(`Package manager: ${detection.packageManager}`)}\n`);
 }
 
 if (tool !== 'claude') {
@@ -154,7 +158,7 @@ try {
   if (flags.update) {
     const result = await updateProject({
       projectDir,
-      detected,
+      detection,
       includeAgents: !flags['no-agents'],
     });
 
@@ -184,7 +188,7 @@ try {
   } else {
     const result = await generateFiles({
       projectDir,
-      detected,
+      detection,
       tool,
       includeAgents: !flags['no-agents'],
     });

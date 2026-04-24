@@ -45,9 +45,9 @@ FILE: .amazonq/rules/project.md
 
 ## Commands
 
-- `npm run dev`: `vite`
-- `npm run build`: `tsc && vite build`
-- `npm run typecheck`: `tsc --noEmit`
+- `pnpm dev`: `vite`
+- `pnpm build`: `tsc && vite build`
+- `pnpm typecheck`: `tsc --noEmit`
 
 ## Conventions
 
@@ -355,9 +355,9 @@ FILE: .clinerules
 
 ## Commands
 
-- `npm run dev`: `vite`
-- `npm run build`: `tsc && vite build`
-- `npm run typecheck`: `tsc --noEmit`
+- `pnpm dev`: `vite`
+- `pnpm build`: `tsc && vite build`
+- `pnpm typecheck`: `tsc --noEmit`
 
 ## Conventions
 
@@ -732,9 +732,9 @@ FILE: .junie/guidelines.md
 
 ## Commands
 
-- `npm run dev`: `vite`
-- `npm run build`: `tsc && vite build`
-- `npm run typecheck`: `tsc --noEmit`
+- `pnpm dev`: `vite`
+- `pnpm build`: `tsc && vite build`
+- `pnpm typecheck`: `tsc --noEmit`
 
 ## Conventions
 
@@ -778,9 +778,9 @@ FILE: .opencode/AGENTS.md
 
 ## Commands
 
-- `npm run dev`: `vite`
-- `npm run build`: `tsc && vite build`
-- `npm run typecheck`: `tsc --noEmit`
+- `pnpm dev`: `vite`
+- `pnpm build`: `tsc && vite build`
+- `pnpm typecheck`: `tsc --noEmit`
 
 ## Conventions
 
@@ -824,9 +824,9 @@ FILE: .roo/rules.md
 
 ## Commands
 
-- `npm run dev`: `vite`
-- `npm run build`: `tsc && vite build`
-- `npm run typecheck`: `tsc --noEmit`
+- `pnpm dev`: `vite`
+- `pnpm build`: `tsc && vite build`
+- `pnpm typecheck`: `tsc --noEmit`
 
 ## Conventions
 
@@ -870,9 +870,9 @@ FILE: .rules
 
 ## Commands
 
-- `npm run dev`: `vite`
-- `npm run build`: `tsc && vite build`
-- `npm run typecheck`: `tsc --noEmit`
+- `pnpm dev`: `vite`
+- `pnpm build`: `tsc && vite build`
+- `pnpm typecheck`: `tsc --noEmit`
 
 ## Conventions
 
@@ -916,9 +916,9 @@ FILE: .windsurfrules
 
 ## Commands
 
-- `npm run dev`: `vite`
-- `npm run build`: `tsc && vite build`
-- `npm run typecheck`: `tsc --noEmit`
+- `pnpm dev`: `vite`
+- `pnpm build`: `tsc && vite build`
+- `pnpm typecheck`: `tsc --noEmit`
 
 ## Conventions
 
@@ -962,9 +962,9 @@ FILE: AGENTS.md
 
 ## Commands
 
-- `npm run dev`: `vite`
-- `npm run build`: `tsc && vite build`
-- `npm run typecheck`: `tsc --noEmit`
+- `pnpm dev`: `vite`
+- `pnpm build`: `tsc && vite build`
+- `pnpm typecheck`: `tsc --noEmit`
 
 ## Conventions
 
@@ -1008,9 +1008,9 @@ FILE: CONVENTIONS.md
 
 ## Commands
 
-- `npm run dev`: `vite`
-- `npm run build`: `tsc && vite build`
-- `npm run typecheck`: `tsc --noEmit`
+- `pnpm dev`: `vite`
+- `pnpm build`: `tsc && vite build`
+- `pnpm typecheck`: `tsc --noEmit`
 
 ## Conventions
 
@@ -1054,9 +1054,9 @@ FILE: GEMINI.md
 
 ## Commands
 
-- `npm run dev`: `vite`
-- `npm run build`: `tsc && vite build`
-- `npm run typecheck`: `tsc --noEmit`
+- `pnpm dev`: `vite`
+- `pnpm build`: `tsc && vite build`
+- `pnpm typecheck`: `tsc --noEmit`
 
 ## Conventions
 

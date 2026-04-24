@@ -9,8 +9,17 @@ export type DetectedTech =
   | 'prisma' | 'postgresql' | 'mongodb' | 'azure' | 'docker'
   | 'go' | 'python' | 'django' | 'rust' | 'bun' | 'php' | 'csharp';
 
+export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun' | 'unknown';
+
+export interface DetectionResult {
+  techs:          DetectedTech[];
+  packageManager: PackageManager;
+  scripts:        Record<string, string>;
+}
+
 interface PackageJson {
-  dependencies?: Record<string, string>;
+  scripts?:         Record<string, string>;
+  dependencies?:    Record<string, string>;
   devDependencies?: Record<string, string>;
 }
 
@@ -45,7 +54,15 @@ function scanExtension(dir: string, ext: string, depth: number): boolean {
   return false;
 }
 
-export async function detectStack(dir: string): Promise<DetectedTech[]> {
+function detectPackageManager(dir: string): PackageManager {
+  if (hasFile(dir, 'bun.lockb', 'bun.lock')) return 'bun';
+  if (hasFile(dir, 'pnpm-lock.yaml'))        return 'pnpm';
+  if (hasFile(dir, 'yarn.lock'))             return 'yarn';
+  if (hasFile(dir, 'package-lock.json'))     return 'npm';
+  return 'unknown';
+}
+
+export async function detectStack(dir: string): Promise<DetectionResult> {
   const detected = new Set<DetectedTech>();
   const pkg = readJson<PackageJson>(join(dir, 'package.json'));
 
@@ -107,5 +124,9 @@ export async function detectStack(dir: string): Promise<DetectedTech[]> {
       hasExtension(dir, '.sln') || hasExtension(dir, '.cs'))
     detected.add('csharp');
 
-  return Array.from(detected);
+  return {
+    techs:          Array.from(detected),
+    packageManager: detectPackageManager(dir),
+    scripts:        pkg?.scripts ?? {},
+  };
 }

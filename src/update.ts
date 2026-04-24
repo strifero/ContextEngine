@@ -5,14 +5,14 @@ import {
   mkdirSync, unlinkSync, rmdirSync,
 } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
-import type { DetectedTech } from './detect.js';
+import type { DetectionResult } from './detect.js';
 import { selectFiles } from './registry.js';
 
 interface ParsedSection { name: string; content: string; }
 
 export interface UpdateOptions {
   projectDir:    string;
-  detected:      DetectedTech[];
+  detection:     DetectionResult;
   includeAgents: boolean;
 }
 
@@ -91,7 +91,8 @@ function removeWithCleanup(claudeDir: string, filePath: string) {
 }
 
 export async function updateProject(opts: UpdateOptions): Promise<UpdateResult> {
-  const { projectDir, detected, includeAgents } = opts;
+  const { projectDir, detection, includeAgents } = opts;
+  const detected = detection.techs;
   const claudeDir = join(projectDir, '.claude');
   const claudeMdPath = join(claudeDir, 'CLAUDE.md');
 

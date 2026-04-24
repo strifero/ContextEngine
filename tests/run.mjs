@@ -98,7 +98,6 @@ const runId = `${process.pid}-${Date.now()}`;
 
 for (const fixture of fixtures) {
   const fixtureDir = join(FIXTURES_DIR, fixture);
-  const detected = await detectStack(fixtureDir);
 
   for (const tool of TOOLS) {
     total++;
@@ -109,15 +108,20 @@ for (const fixture of fixtures) {
     cpSync(fixtureDir, projectDir, { recursive: true });
     const preExisting = new Set(walk(projectDir));
 
+    // Detect against the copied project dir, not the source fixture, so
+    // anything that depends on disk state (lockfiles, config files) sees
+    // the same directory the generator writes into.
+    const detection = await detectStack(projectDir);
+
     try {
       await generateFiles({
         projectDir,
-        detected,
+        detection,
         tool,
         includeAgents: true,
       });
 
-      const actual = serialize(projectDir, detected, preExisting);
+      const actual = serialize(projectDir, detection.techs, preExisting);
       const snapFile = join(SNAPSHOTS_DIR, fixture, `${tool}.snap`);
 
       if (!existsSync(snapFile) || UPDATE) {
