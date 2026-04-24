@@ -4,7 +4,7 @@ import {
   existsSync, readFileSync, writeFileSync, readdirSync,
   mkdirSync, unlinkSync, rmdirSync,
 } from 'node:fs';
-import { join, dirname, relative } from 'node:path';
+import { join, dirname, relative, sep } from 'node:path';
 import type { DetectionResult } from './detect.js';
 import { selectFiles } from './registry.js';
 
@@ -73,7 +73,7 @@ function collectFiles(claudeDir: string, subdir: string): string[] {
     for (const e of readdirSync(dir, { withFileTypes: true })) {
       const full = join(dir, e.name);
       if (e.isDirectory()) walk(full);
-      else out.push(relative(claudeDir, full));
+      else out.push(relative(claudeDir, full).split(sep).join('/'));
     }
   }
   walk(root);
