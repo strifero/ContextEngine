@@ -1,7 +1,7 @@
 // generate.ts — Write context files into a project for the selected AI tool
 
-import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs';
+import { join, dirname, basename } from 'node:path';
 import type { DetectedTech } from './detect.js';
 import type { TargetTool } from './index.js';
 import { selectFiles } from './registry.js';
@@ -18,6 +18,26 @@ interface GenerateResult {
   files:     string[];
 }
 
+// ── package.json helpers (used by AGENTS.md) ───────────────────────
+
+interface PkgJson {
+  name?:            string;
+  version?:         string;
+  scripts?:         Record<string, string>;
+  dependencies?:    Record<string, string>;
+  devDependencies?: Record<string, string>;
+}
+
+function readPkg(projectDir: string): PkgJson | null {
+  try {
+    return JSON.parse(readFileSync(join(projectDir, 'package.json'), 'utf-8')) as PkgJson;
+  } catch { return null; }
+}
+
+function stripSemver(v: string): string {
+  return v.replace(/^[\^~><=\s]+/, '').trim();
+}
+
 // ── Claude Code ────────────────────────────────────────────────────
 
 function generateClaudeMd(detected: DetectedTech[], skillPaths: string[]): string {
@@ -30,7 +50,7 @@ function generateClaudeMd(detected: DetectedTech[], skillPaths: string[]): strin
 
   const stackLine = detected.length > 0 ? detected.join(', ') : 'generic project';
 
-  return `# Project — Claude Code Context
+  return `# Project: Claude Code Context
 
 > Read this file fully before writing any code.
 > Skills in \`.claude/skills/\` load automatically when relevant.
@@ -40,7 +60,7 @@ function generateClaudeMd(detected: DetectedTech[], skillPaths: string[]): strin
 
 **Detected stack:** ${stackLine}
 
-<!-- 
+<!--
   Fill in the sections below to give Claude more context about your project.
   The more detail you add, the better Claude Code performs.
 -->
@@ -170,21 +190,370 @@ ${sections}
   return { fileCount: writtenFiles.length, files: writtenFiles };
 }
 
+// ── AGENTS.md ──────────────────────────────────────────────────────
+// Spec: https://agents.md
+// One file at the project root, read by Codex, OpenCode, and a growing
+// list of agents. We keep Conventions and What-to-avoid summaries
+// hardcoded here (not pulled from skills.ts) so the skill prose stays
+// the single source of Claude Code's skill library and this file stays
+// the single source of AGENTS.md's condensed guidance.
+
+const DISPLAY_NAME: Record<DetectedTech, string> = {
+  typescript: 'TypeScript',
+  nodejs:     'Node.js',
+  express:    'Express',
+  nextjs:     'Next.js',
+  react:      'React',
+  vite:       'Vite',
+  vue:        'Vue',
+  tailwind:   'Tailwind CSS',
+  swiftui:    'SwiftUI',
+  stripe:     'Stripe',
+  prisma:     'Prisma',
+  postgresql: 'PostgreSQL',
+  mongodb:    'MongoDB',
+  azure:      'Azure',
+  docker:     'Docker',
+  go:         'Go',
+  python:     'Python',
+  django:     'Django',
+  rust:       'Rust',
+  bun:        'Bun',
+  php:        'PHP',
+  csharp:     'C#',
+};
+
+const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
+  nextjs:     'next',
+  react:      'react',
+  typescript: 'typescript',
+  vite:       'vite',
+  vue:        'vue',
+  tailwind:   'tailwindcss',
+  express:    'express',
+  stripe:     'stripe',
+  prisma:     '@prisma/client',
+};
+
+interface AgentsSummary { conventions: string[]; avoid: string[]; }
+
+const AGENTS_SUMMARY: Record<DetectedTech, AgentsSummary> = {
+  typescript: {
+    conventions: [
+      'Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.',
+      'All async code uses async/await. No raw `.then()` chains in application code.',
+      'Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.',
+    ],
+    avoid: [
+      'Using `any`. Reach for `unknown` and narrow with type guards.',
+      'Type assertions (`as X`) except at boundaries you control.',
+    ],
+  },
+  nodejs: {
+    conventions: [
+      'ES modules (`"type": "module"`) with explicit `.js` extensions on imports.',
+      'Use native fetch where available. Reserve axios for interceptor-heavy flows.',
+    ],
+    avoid: [
+      'Mixing CommonJS and ESM in the same package.',
+    ],
+  },
+  express: {
+    conventions: [
+      'Validate request bodies with zod before touching business logic.',
+      'Centralize error handling in one middleware. API errors return `{ error: string }` with the right HTTP status.',
+    ],
+    avoid: [
+      'Throwing inside route handlers without a surrounding try/catch.',
+    ],
+  },
+  nextjs: {
+    conventions: [
+      'App Router by default. Server Components unless the file declares `"use client"`.',
+      'Database access lives in Server Components, Route Handlers, or Server Actions, never client code.',
+      'Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).',
+    ],
+    avoid: [
+      '`getServerSideProps` and `getStaticProps` in App Router projects.',
+      'Importing server-only modules from client components.',
+    ],
+  },
+  react: {
+    conventions: [
+      'Function components and hooks only.',
+      'Lift state to the lowest common ancestor. Co-locate state with the component that owns it.',
+    ],
+    avoid: [
+      'Class components in new code.',
+      'Derived state in `useState` when it can be computed during render.',
+    ],
+  },
+  vite: {
+    conventions: [
+      'Environment variables prefixed with `VITE_` to expose to client code.',
+      'Reference static assets via `new URL(path, import.meta.url)`.',
+    ],
+    avoid: [
+      'Reading `process.env` directly in client code. Use `import.meta.env`.',
+    ],
+  },
+  vue: {
+    conventions: [
+      'Composition API with `<script setup>` for new components.',
+      'Props typed via `defineProps<...>()`, emits via `defineEmits<...>()`.',
+    ],
+    avoid: [
+      'Options API in new components, unless matching existing files.',
+    ],
+  },
+  tailwind: {
+    conventions: [
+      'Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.',
+      'Design tokens live in `tailwind.config.*` under `theme.extend`.',
+    ],
+    avoid: [
+      'Inline `style={{ ... }}` for anything Tailwind already covers.',
+    ],
+  },
+  swiftui: {
+    conventions: [
+      'One View per file, named after the struct.',
+      'State flows down via `@Binding`, up via closures or `@ObservableObject`.',
+    ],
+    avoid: [
+      'UIKit types inside SwiftUI views unless wrapping via `UIViewRepresentable`.',
+    ],
+  },
+  stripe: {
+    conventions: [
+      'Amounts stored and passed in the smallest currency unit (cents).',
+      'Verify webhook signatures with the Stripe SDK before trusting the payload.',
+    ],
+    avoid: [
+      'Calling the Stripe API from client code with a secret key.',
+    ],
+  },
+  prisma: {
+    conventions: [
+      'Single PrismaClient instance at `lib/prisma.ts`. Import that, never `new PrismaClient()` in request paths.',
+      'Schema changes go through `prisma migrate dev` locally and `prisma migrate deploy` in CI.',
+    ],
+    avoid: [
+      '`$executeRawUnsafe` with user input. Use `$executeRaw` tagged templates.',
+    ],
+  },
+  postgresql: {
+    conventions: [
+      'Parameterize every query. Never string-concatenate user input into SQL.',
+      'Index the columns you filter and join on. Run `EXPLAIN ANALYZE` on perf-critical paths.',
+    ],
+    avoid: [
+      '`SELECT *` in application code. List the columns you need.',
+    ],
+  },
+  mongodb: {
+    conventions: [
+      'Create indexes for every `find` filter your app runs in a hot path.',
+      'Validate documents at the application layer or with JSON Schema validators.',
+    ],
+    avoid: [
+      'Unbounded `find()` calls. Always `.limit(...)` or paginate.',
+    ],
+  },
+  azure: {
+    conventions: [
+      'Managed Identity for service-to-service auth. No connection strings in code.',
+      'Resource definitions live in Bicep or Terraform, not the portal.',
+    ],
+    avoid: [
+      'Secrets stored in app settings. Use Key Vault references.',
+    ],
+  },
+  docker: {
+    conventions: [
+      'Multi-stage builds: compile in a builder image, copy artifacts into a minimal runtime.',
+      'Pin base image tags by digest or version. No `latest` in production Dockerfiles.',
+    ],
+    avoid: [
+      'Running containers as root. Add a non-root user in the final stage.',
+    ],
+  },
+  go: {
+    conventions: [
+      'Return errors as the last value. Wrap with `fmt.Errorf("context: %w", err)` when bubbling up.',
+      'Interfaces defined where they are consumed, not where they are implemented.',
+    ],
+    avoid: [
+      'Using `panic` for expected error conditions.',
+    ],
+  },
+  python: {
+    conventions: [
+      'Type hints on every public function. Run mypy or pyright in CI.',
+      'Format with black or ruff-format. Lint with ruff.',
+    ],
+    avoid: [
+      'Bare `except:` clauses. Catch the specific exception.',
+    ],
+  },
+  django: {
+    conventions: [
+      'Business logic in services, not views or models.',
+      '`select_related` for forward FKs, `prefetch_related` for reverse and M2M.',
+    ],
+    avoid: [
+      'N+1 queries. Check with `django-debug-toolbar` or `CaptureQueriesContext`.',
+    ],
+  },
+  rust: {
+    conventions: [
+      'Return `Result<T, E>` from fallible functions. Reserve panics for invariants that cannot fail.',
+      'Use `thiserror` for library error types, `anyhow` at application boundaries.',
+    ],
+    avoid: [
+      'Unnecessary `.clone()` and `.unwrap()` in library code.',
+    ],
+  },
+  bun: {
+    conventions: [
+      '`bun` as package manager and test runner. `bunx` replaces `npx`.',
+      'Bun native APIs (`Bun.file`, `Bun.serve`) where they fit. Fall back to Node APIs for ecosystem compat.',
+    ],
+    avoid: [
+      'Mixing `npm install` and `bun install` in the same repo.',
+    ],
+  },
+  php: {
+    conventions: [
+      'PSR-12 coding style. Composer for dependencies. PHP 8+ typed properties.',
+    ],
+    avoid: [
+      '`include`/`require` scatter. Use Composer autoloading.',
+    ],
+  },
+  csharp: {
+    conventions: [
+      'Nullable reference types enabled. `record` for DTOs, `class` for entities with identity.',
+    ],
+    avoid: [
+      'Catching `Exception` broadly. Catch the specific type or rethrow.',
+    ],
+  },
+};
+
+// Techs dropped first when AGENTS.md exceeds the 8 KB cap. Order:
+// least-specific first, so specific guidance survives truncation.
+const TRUNCATION_ORDER: DetectedTech[] = ['typescript', 'nodejs'];
+
+function techWithVersion(tech: DetectedTech, pkg: PkgJson | null): string {
+  const name = DISPLAY_NAME[tech];
+  const packageName = TECH_TO_PACKAGE[tech];
+  if (!packageName || !pkg) return name;
+  const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+  const raw = deps[packageName];
+  if (!raw) return name;
+  return `${name} ${stripSemver(raw)}`;
+}
+
+function buildStackSection(detected: DetectedTech[], pkg: PkgJson | null): string {
+  if (detected.length === 0) return '(no stack detected)';
+  return detected.map(t => `- ${techWithVersion(t, pkg)}`).join('\n');
+}
+
+function buildCommandsSection(pkg: PkgJson | null): string {
+  const scripts = pkg?.scripts ?? {};
+  const entries = Object.entries(scripts);
+  if (entries.length === 0) return '(no package.json scripts detected. Fill in the commands agents should run for build, test, lint, etc.)';
+  return entries.map(([k, v]) => `- \`npm run ${k}\`: \`${v}\``).join('\n');
+}
+
+function buildSummarySection(techs: DetectedTech[], key: 'conventions' | 'avoid'): string {
+  const bullets: string[] = [];
+  for (const t of techs) {
+    const entry = AGENTS_SUMMARY[t];
+    if (!entry) continue;
+    for (const line of entry[key]) bullets.push(`- ${line}`);
+  }
+  return bullets.length > 0 ? bullets.join('\n') : '(no stack-specific guidance)';
+}
+
+function renderAgentsMd(
+  projectName: string,
+  detected: DetectedTech[],
+  pkg: PkgJson | null,
+  summaryTechs: DetectedTech[],
+): string {
+  const stack       = buildStackSection(detected, pkg);
+  const commands    = buildCommandsSection(pkg);
+  const conventions = buildSummarySection(summaryTechs, 'conventions');
+  const avoid       = buildSummarySection(summaryTechs, 'avoid');
+
+  return `# ${projectName}
+
+> AGENTS.md: instructions for AI coding agents working on this project.
+> Human contributors: see README.md.
+
+## Stack
+
+${stack}
+
+## Commands
+
+${commands}
+
+## Conventions
+
+${conventions}
+
+## What to avoid
+
+${avoid}
+
+---
+
+*Generated by [ContextEngine](https://github.com/strifero/ContextEngine). Re-run to refresh.*
+`;
+}
+
+function generateAgentsMd(projectDir: string, detected: DetectedTech[]): string {
+  const pkg = readPkg(projectDir);
+  const projectName = pkg?.name || basename(projectDir) || 'project';
+
+  let summaryTechs = [...detected];
+  let output = renderAgentsMd(projectName, detected, pkg, summaryTechs);
+
+  for (const drop of TRUNCATION_ORDER) {
+    if (output.length <= 8192) break;
+    summaryTechs = summaryTechs.filter(t => t !== drop);
+    output = renderAgentsMd(projectName, detected, pkg, summaryTechs);
+  }
+  return output;
+}
+
+async function generateAgents(opts: GenerateOptions): Promise<GenerateResult> {
+  const { projectDir, detected } = opts;
+  const agentsPath = join(projectDir, 'AGENTS.md');
+  writeFileSync(agentsPath, generateAgentsMd(projectDir, detected), 'utf-8');
+  return { fileCount: 1, files: ['AGENTS.md'] };
+}
+
 // ── Main export ────────────────────────────────────────────────────
 
 export async function generateFiles(opts: GenerateOptions): Promise<GenerateResult> {
   if (opts.tool === 'all') {
-    const [claude, cursor, copilot] = await Promise.all([
-      generateClaude({ ...opts, tool: 'claude' }),
-      generateCursor({ ...opts, tool: 'cursor' }),
+    const [claude, cursor, copilot, agents] = await Promise.all([
+      generateClaude({  ...opts, tool: 'claude' }),
+      generateCursor({  ...opts, tool: 'cursor' }),
       generateCopilot({ ...opts, tool: 'copilot' }),
+      generateAgents({  ...opts, tool: 'agents' }),
     ]);
     return {
-      fileCount: claude.fileCount + cursor.fileCount + copilot.fileCount,
-      files: [...claude.files, ...cursor.files, ...copilot.files],
+      fileCount: claude.fileCount + cursor.fileCount + copilot.fileCount + agents.fileCount,
+      files:     [...claude.files, ...cursor.files, ...copilot.files, ...agents.files],
     };
   }
   if (opts.tool === 'cursor')  return generateCursor(opts);
   if (opts.tool === 'copilot') return generateCopilot(opts);
+  if (opts.tool === 'agents')  return generateAgents(opts);
   return generateClaude(opts);
 }

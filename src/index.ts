@@ -21,7 +21,7 @@ try {
   // package.json missing or malformed — continue with fallback
 }
 
-export type TargetTool = 'claude' | 'cursor' | 'copilot' | 'all';
+export type TargetTool = 'claude' | 'cursor' | 'copilot' | 'agents' | 'all';
 
 const { values: flags } = parseArgs({
   options: {
@@ -50,8 +50,10 @@ ${pc.bold('Usage:')}
 
 ${pc.bold('Options:')}
   -d, --dir <path>              Project directory to analyze (default: current directory)
-  -t, --tool <claude|cursor|copilot|all>
+  -t, --tool <claude|cursor|copilot|agents|all>
                                 AI tool to generate context for (default: claude)
+                                'agents' writes AGENTS.md at the project root
+                                (read by Codex, OpenCode, Cursor, and others)
   -f, --force                   Overwrite existing context files
   -u, --update                  Re-sync skills and agents, preserving your edits
   --no-agents                   Skip agent generation (Claude Code only)
@@ -62,6 +64,7 @@ ${pc.bold('Examples:')}
   npx contextengine                         # Claude Code — generate everything
   npx contextengine --tool cursor           # Cursor rules
   npx contextengine --tool copilot          # GitHub Copilot instructions
+  npx contextengine --tool agents           # AGENTS.md (Codex, OpenCode, etc.)
   npx contextengine --tool all              # All tools in one pass
   npx contextengine --update                # Stack changed — sync without losing edits
   npx contextengine --force                 # Nuke and regenerate from scratch
@@ -77,9 +80,9 @@ ${pc.dim('by Strife Technologies — https://strifetech.com')}
 const projectDir = resolve(flags.dir as string);
 const tool = (flags.tool ?? 'claude') as TargetTool;
 
-const validTools: TargetTool[] = ['claude', 'cursor', 'copilot', 'all'];
+const validTools: TargetTool[] = ['claude', 'cursor', 'copilot', 'agents', 'all'];
 if (!validTools.includes(tool)) {
-  console.error(pc.red(`\n  Unknown tool: "${tool}". Valid options: claude, cursor, copilot, all\n`));
+  console.error(pc.red(`\n  Unknown tool: "${tool}". Valid options: claude, cursor, copilot, agents, all\n`));
   process.exit(1);
 }
 

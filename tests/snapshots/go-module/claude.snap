@@ -12,7 +12,7 @@ go
 ---
 FILE: .claude/CLAUDE.md
 ---
-# Project — Claude Code Context
+# Project: Claude Code Context
 
 > Read this file fully before writing any code.
 > Skills in `.claude/skills/` load automatically when relevant.
@@ -22,7 +22,7 @@ FILE: .claude/CLAUDE.md
 
 **Detected stack:** go
 
-<!-- 
+<!--
   Fill in the sections below to give Claude more context about your project.
   The more detail you add, the better Claude Code performs.
 -->

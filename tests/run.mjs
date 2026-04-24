@@ -1,15 +1,16 @@
 #!/usr/bin/env node
 // Snapshot runner for ContextEngine.
-// Iterates tests/fixtures/*, runs detectStack + generateFiles for each tool
-// into a temp dir, then serializes the output and diffs it against
-// tests/snapshots/<fixture>/<tool>.snap.
+// For each fixture and each --tool, copies the fixture into a temp dir
+// named after the fixture, runs detectStack + generateFiles against that
+// dir, then serializes only files generateFiles created. That serialized
+// output is diffed against (or written to) tests/snapshots/<fixture>/<tool>.snap.
 //
-// Run: `npm test`         — diff mode (fails on mismatch)
-//      `npm run test:update` — write new snapshots
+// Run: `npm test`             — diff mode (fails on mismatch)
+//      `npm run test:update`  — write new snapshots
 
 import {
   readdirSync, readFileSync, writeFileSync,
-  mkdirSync, existsSync, rmSync,
+  mkdirSync, existsSync, rmSync, cpSync,
 } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -23,9 +24,10 @@ const FIXTURES_DIR  = join(__dirname, 'fixtures');
 const SNAPSHOTS_DIR = join(__dirname, 'snapshots');
 
 const UPDATE = process.argv.includes('--update');
-const TOOLS  = ['claude', 'cursor', 'copilot', 'all'];
+const TOOLS  = ['claude', 'cursor', 'copilot', 'agents', 'all'];
 
 function walk(dir, base = dir) {
+  if (!existsSync(dir)) return [];
   const out = [];
   for (const e of readdirSync(dir, { withFileTypes: true })) {
     const full = join(dir, e.name);
@@ -39,8 +41,9 @@ function normalize(text) {
   return text.replace(/\r\n/g, '\n');
 }
 
-function serialize(outputDir, detected) {
-  const files = existsSync(outputDir) ? walk(outputDir) : [];
+function serialize(outputDir, detected, preExisting) {
+  const all = walk(outputDir);
+  const files = all.filter(f => !preExisting.has(f));
   const parts = [
     '# Snapshot',
     '',
@@ -87,25 +90,30 @@ let written = 0;
 let failed  = 0;
 const failures = [];
 
+const runId = `${process.pid}-${Date.now()}`;
+
 for (const fixture of fixtures) {
   const fixtureDir = join(FIXTURES_DIR, fixture);
   const detected = await detectStack(fixtureDir);
 
   for (const tool of TOOLS) {
     total++;
-    const tempDir = join(tmpdir(), `ctxeng-${fixture}-${tool}-${process.pid}-${Date.now()}`);
-    if (existsSync(tempDir)) rmSync(tempDir, { recursive: true, force: true });
-    mkdirSync(tempDir, { recursive: true });
+    const runRoot = join(tmpdir(), `ctxeng-${runId}-${fixture}-${tool}`);
+    const projectDir = join(runRoot, fixture);
+    if (existsSync(runRoot)) rmSync(runRoot, { recursive: true, force: true });
+    mkdirSync(runRoot, { recursive: true });
+    cpSync(fixtureDir, projectDir, { recursive: true });
+    const preExisting = new Set(walk(projectDir));
 
     try {
       await generateFiles({
-        projectDir: tempDir,
+        projectDir,
         detected,
         tool,
         includeAgents: true,
       });
 
-      const actual = serialize(tempDir, detected);
+      const actual = serialize(projectDir, detected, preExisting);
       const snapFile = join(SNAPSHOTS_DIR, fixture, `${tool}.snap`);
 
       if (!existsSync(snapFile) || UPDATE) {
@@ -125,7 +133,7 @@ for (const fixture of fixtures) {
         }
       }
     } finally {
-      rmSync(tempDir, { recursive: true, force: true });
+      rmSync(runRoot, { recursive: true, force: true });
     }
   }
 }
