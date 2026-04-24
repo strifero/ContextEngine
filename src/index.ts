@@ -21,7 +21,10 @@ try {
   // package.json missing or malformed — continue with fallback
 }
 
-export type TargetTool = 'claude' | 'cursor' | 'copilot' | 'agents' | 'all';
+export type TargetTool =
+  | 'claude' | 'cursor' | 'copilot' | 'agents'
+  | 'windsurf' | 'aider' | 'gemini' | 'cline' | 'roo' | 'junie' | 'amazon-q' | 'opencode' | 'zed'
+  | 'all';
 
 const { values: flags } = parseArgs({
   options: {
@@ -50,10 +53,16 @@ ${pc.bold('Usage:')}
 
 ${pc.bold('Options:')}
   -d, --dir <path>              Project directory to analyze (default: current directory)
-  -t, --tool <claude|cursor|copilot|agents|all>
-                                AI tool to generate context for (default: claude)
-                                'agents' writes AGENTS.md at the project root
-                                (read by Codex, OpenCode, Cursor, and others)
+  -t, --tool <name>             AI tool to generate context for (default: claude)
+                                Named targets:
+                                  claude, cursor, copilot, agents,
+                                  windsurf, aider, gemini, cline, roo,
+                                  junie, amazon-q, opencode, zed, all
+                                'agents' writes AGENTS.md at the project root.
+                                Windsurf, Aider, Gemini, Cline, Roo, Junie,
+                                Amazon Q, OpenCode, and Zed write the same
+                                body at their tool-specific paths.
+                                'all' writes every target in one pass.
   -f, --force                   Overwrite existing context files
   -u, --update                  Re-sync skills and agents, preserving your edits
   --no-agents                   Skip agent generation (Claude Code only)
@@ -80,9 +89,13 @@ ${pc.dim('by Strife Technologies — https://strifetech.com')}
 const projectDir = resolve(flags.dir as string);
 const tool = (flags.tool ?? 'claude') as TargetTool;
 
-const validTools: TargetTool[] = ['claude', 'cursor', 'copilot', 'agents', 'all'];
+const validTools: TargetTool[] = [
+  'claude', 'cursor', 'copilot', 'agents',
+  'windsurf', 'aider', 'gemini', 'cline', 'roo', 'junie', 'amazon-q', 'opencode', 'zed',
+  'all',
+];
 if (!validTools.includes(tool)) {
-  console.error(pc.red(`\n  Unknown tool: "${tool}". Valid options: claude, cursor, copilot, agents, all\n`));
+  console.error(pc.red(`\n  Unknown tool: "${tool}". Valid options: ${validTools.join(', ')}\n`));
   process.exit(1);
 }
 

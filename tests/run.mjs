@@ -24,7 +24,11 @@ const FIXTURES_DIR  = join(__dirname, 'fixtures');
 const SNAPSHOTS_DIR = join(__dirname, 'snapshots');
 
 const UPDATE = process.argv.includes('--update');
-const TOOLS  = ['claude', 'cursor', 'copilot', 'agents', 'all'];
+const TOOLS  = [
+  'claude', 'cursor', 'copilot', 'agents',
+  'windsurf', 'aider', 'gemini', 'cline', 'roo', 'junie', 'amazon-q', 'opencode', 'zed',
+  'all',
+];
 
 function walk(dir, base = dir) {
   if (!existsSync(dir)) return [];

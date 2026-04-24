@@ -530,30 +530,55 @@ function generateAgentsMd(projectDir: string, detected: DetectedTech[]): string 
   return output;
 }
 
-async function generateAgents(opts: GenerateOptions): Promise<GenerateResult> {
+// All targets whose output is the AGENTS.md body at a different path.
+// The body is identical across targets: only the file location varies.
+// Order here controls the order files are listed in `--tool all` output.
+const AGENTS_BODY_TARGETS: ReadonlyArray<{ tool: TargetTool; path: string }> = [
+  { tool: 'agents',   path: 'AGENTS.md' },
+  { tool: 'windsurf', path: '.windsurfrules' },
+  { tool: 'aider',    path: 'CONVENTIONS.md' },
+  { tool: 'gemini',   path: 'GEMINI.md' },
+  { tool: 'cline',    path: '.clinerules' },
+  { tool: 'roo',      path: '.roo/rules.md' },
+  { tool: 'junie',    path: '.junie/guidelines.md' },
+  { tool: 'amazon-q', path: '.amazonq/rules/project.md' },
+  { tool: 'opencode', path: '.opencode/AGENTS.md' },
+  { tool: 'zed',      path: '.rules' },
+];
+
+async function writeAgentsTarget(opts: GenerateOptions, outputPath: string): Promise<GenerateResult> {
   const { projectDir, detected } = opts;
-  const agentsPath = join(projectDir, 'AGENTS.md');
-  writeFileSync(agentsPath, generateAgentsMd(projectDir, detected), 'utf-8');
-  return { fileCount: 1, files: ['AGENTS.md'] };
+  const body = generateAgentsMd(projectDir, detected);
+  const full = join(projectDir, outputPath);
+  mkdirSync(dirname(full), { recursive: true });
+  writeFileSync(full, body, 'utf-8');
+  return { fileCount: 1, files: [outputPath] };
 }
 
 // ── Main export ────────────────────────────────────────────────────
 
 export async function generateFiles(opts: GenerateOptions): Promise<GenerateResult> {
   if (opts.tool === 'all') {
-    const [claude, cursor, copilot, agents] = await Promise.all([
+    const [claude, cursor, copilot] = await Promise.all([
       generateClaude({  ...opts, tool: 'claude' }),
       generateCursor({  ...opts, tool: 'cursor' }),
       generateCopilot({ ...opts, tool: 'copilot' }),
-      generateAgents({  ...opts, tool: 'agents' }),
     ]);
+    const bodyResults = await Promise.all(
+      AGENTS_BODY_TARGETS.map(t => writeAgentsTarget({ ...opts, tool: t.tool }, t.path)),
+    );
+    const everything = [claude, cursor, copilot, ...bodyResults];
     return {
-      fileCount: claude.fileCount + cursor.fileCount + copilot.fileCount + agents.fileCount,
-      files:     [...claude.files, ...cursor.files, ...copilot.files, ...agents.files],
+      fileCount: everything.reduce((n, r) => n + r.fileCount, 0),
+      files:     everything.flatMap(r => r.files),
     };
   }
+
   if (opts.tool === 'cursor')  return generateCursor(opts);
   if (opts.tool === 'copilot') return generateCopilot(opts);
-  if (opts.tool === 'agents')  return generateAgents(opts);
+
+  const bodyTarget = AGENTS_BODY_TARGETS.find(t => t.tool === opts.tool);
+  if (bodyTarget) return writeAgentsTarget(opts, bodyTarget.path);
+
   return generateClaude(opts);
 }
