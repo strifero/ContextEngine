@@ -12,9 +12,16 @@ export type DetectedTech =
   | 'go' | 'python' | 'django' | 'rust' | 'bun' | 'php' | 'csharp'
   | 'vitest' | 'jest' | 'playwright' | 'cypress'
   | 'eslint' | 'eslint-flat' | 'biome' | 'prettier'
-  | 'astro' | 'sveltekit' | 'remix' | 'nuxt' | 'nestjs' | 'fastapi';
+  | 'astro' | 'sveltekit' | 'remix' | 'nuxt' | 'nestjs' | 'fastapi'
+  | 'rails';
 
-export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun' | 'unknown';
+// Widened in phase 4 to cover non-Node ecosystems. The prefix logic in
+// generate.ts only produces script prefixes for the Node-family tools
+// (npm/pnpm/yarn/bun); non-Node values are informational.
+export type PackageManager =
+  | 'npm' | 'pnpm' | 'yarn' | 'bun'
+  | 'bundler'
+  | 'unknown';
 
 export type PythonTool = 'poetry' | 'uv' | 'pip' | null;
 
@@ -82,6 +89,7 @@ function detectPackageManager(dir: string): PackageManager {
   if (hasFile(dir, 'pnpm-lock.yaml'))        return 'pnpm';
   if (hasFile(dir, 'yarn.lock'))             return 'yarn';
   if (hasFile(dir, 'package-lock.json'))     return 'npm';
+  if (hasFile(dir, 'Gemfile.lock', 'Gemfile')) return 'bundler';
   return 'unknown';
 }
 
@@ -222,6 +230,9 @@ export async function detectStack(dir: string): Promise<DetectionResult> {
   if (fileContainsCI(join(dir, 'requirements.txt'), 'fastapi') ||
       fileContainsCI(join(dir, 'pyproject.toml'),    'fastapi'))
     detected.add('fastapi');
+
+  if (fileContainsCI(join(dir, 'Gemfile'), 'rails') || existsSync(join(dir, 'config', 'application.rb')))
+    detected.add('rails');
 
   // Linters and formatters. eslint-flat wins over eslint if both are present.
   if (hasFile(dir, 'eslint.config.js', 'eslint.config.mjs', 'eslint.config.ts', 'eslint.config.cjs')) {

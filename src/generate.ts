@@ -247,6 +247,7 @@ const DISPLAY_NAME: Record<DetectedTech, string> = {
   nuxt:           'Nuxt',
   nestjs:         'NestJS',
   fastapi:        'FastAPI',
+  rails:          'Ruby on Rails',
 };
 
 const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
@@ -612,6 +613,16 @@ const AGENTS_SUMMARY: Record<DetectedTech, AgentsSummary> = {
     ],
     avoid: [
       'Blocking calls (sync DB drivers, `time.sleep`) in `async` endpoints.',
+    ],
+  },
+  rails: {
+    conventions: [
+      'Skinny controllers, fat models (or services). Strong params declared at the top of the controller.',
+      'Manage schema with `bin/rails db:migrate`; one change per migration, reversible where possible.',
+      'Use `bundle exec` to run rake / rails tasks inside the project gemset.',
+    ],
+    avoid: [
+      'Business logic in views. Push it to helpers, services, or model methods.',
     ],
   },
 };

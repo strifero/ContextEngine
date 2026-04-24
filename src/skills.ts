@@ -828,6 +828,58 @@ public async Task<User?> GetUserAsync(string id, CancellationToken ct = default)
 // Frameworks added in phase 4 (review before release)
 // ---------------------------------------------------------------------------
 
+export const SKILL_RAILS: SkillFile = {
+  path: 'skills/rails/SKILL.md',
+  content: `---
+name: rails
+description: Ruby on Rails conventions: MVC, ActiveRecord, strong params, background jobs via ActiveJob, and rake / rails CLI tasks. Use when building or editing a Rails app, controllers, models, or migrations.
+---
+
+<!-- review before release -->
+
+# Rails Conventions
+
+## Structure
+\`\`\`
+app/
+├── controllers/            (one per resource)
+├── models/                 (ActiveRecord)
+├── views/                  (ERB / view templates)
+├── helpers/
+├── jobs/                   (ActiveJob)
+├── mailers/                (ActionMailer)
+└── services/               (POROs for business logic, if used)
+config/
+db/
+  └── migrate/              (timestamped migrations)
+lib/
+spec/ or test/              (RSpec or Minitest)
+\`\`\`
+
+## Controllers
+- Skinny controllers: delegate to models or services. Strong params at the top.
+- RESTful actions (index, show, new, create, edit, update, destroy).
+- Return appropriate status codes. Validate before side effects.
+
+## Models
+- ActiveRecord validations and associations at the top, scopes next, methods last.
+- Callbacks sparingly; prefer explicit service calls for side effects.
+- Use \`has_many :through\` for many-to-many relationships, not \`has_and_belongs_to_many\`.
+
+## Migrations
+- One change per migration. Run with \`bin/rails db:migrate\`.
+- Reversible when possible; write \`up\` / \`down\` when not.
+
+## Tasks and Console
+- \`bin/rails <task>\` for rake tasks (\`db:migrate\`, \`assets:precompile\`, custom).
+- \`bin/rails console\` for a REPL against the app's environment.
+
+## Testing
+- RSpec or Minitest. Keep fast unit tests for models and services; use system/request tests for end-to-end flows.
+- Fixtures via factories (FactoryBot) rather than YAML for non-trivial setups.
+`,
+};
+
 export const SKILL_FASTAPI: SkillFile = {
   path: 'skills/fastapi/SKILL.md',
   content: `---
