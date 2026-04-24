@@ -2,7 +2,7 @@ name: test
 
 on:
   push:
-    branches: [main]
+    branches: [main, feat/agents-md-and-depth]
   pull_request:
 
 jobs:
