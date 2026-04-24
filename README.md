@@ -103,23 +103,23 @@ skill library under `.claude/skills/` (e.g. `nextjs-app/SKILL.md`,
 
 ContextEngine scans your project root, reads your actual config files and dependencies, and generates:
 
-| Tool | Output | Auto-loaded? |
-|------|--------|-------------|
-| **Claude Code** | `.claude/CLAUDE.md` + skill files | ✅ Yes |
-| **Cursor** | `.cursor/rules/*.mdc` | ✅ Yes |
-| **GitHub Copilot** | `.github/copilot-instructions.md` | ✅ Yes |
-| **Codex CLI** | `AGENTS.md` ¹ | ✅ Yes |
-| **OpenCode** | `.opencode/AGENTS.md` ¹ | ✅ Yes |
-| **Windsurf** | `.windsurfrules` | ✅ Yes |
-| **Aider** | `CONVENTIONS.md` | ✅ Yes |
-| **Gemini CLI** | `GEMINI.md` | ✅ Yes |
-| **Cline** | `.clinerules` | ✅ Yes |
-| **Roo Code** | `.roo/rules.md` | ✅ Yes |
-| **JetBrains (Junie)** | `.junie/guidelines.md` | ✅ Yes |
-| **Amazon Q** | `.amazonq/rules/project.md` | ✅ Yes |
-| **Zed** | `.rules` | ✅ Yes |
+| Tool | Output | Reads AGENTS.md? | Auto-loaded? |
+|------|--------|------------------|-------------|
+| **Claude Code** | `.claude/CLAUDE.md` + skill files | no (uses CLAUDE.md) | ✅ Yes |
+| **Cursor** | `.cursor/rules/*.mdc` | no | ✅ Yes |
+| **GitHub Copilot** | `.github/copilot-instructions.md` | no | ✅ Yes |
+| **Codex CLI** | `AGENTS.md` | yes | ✅ Yes |
+| **OpenCode** | `.opencode/AGENTS.md` | yes | ✅ Yes |
+| **Aider** | `CONVENTIONS.md` | yes (recent versions) | ✅ Yes |
+| **Windsurf** | `.windsurfrules` | no | ✅ Yes |
+| **Gemini CLI** | `GEMINI.md` | no (uses GEMINI.md) | ✅ Yes |
+| **Cline** | `.clinerules` | no | ✅ Yes |
+| **Roo Code** | `.roo/rules.md` | no | ✅ Yes |
+| **JetBrains (Junie)** | `.junie/guidelines.md` | no | ✅ Yes |
+| **Amazon Q** | `.amazonq/rules/project.md` | no | ✅ Yes |
+| **Zed** | `.rules` | no | ✅ Yes |
 
-¹ `AGENTS.md` at the repo root is the emerging cross-tool standard ([agents.md](https://agents.md)). Generate it with `--tool agents`. The other rows above are the tool-specific paths for agents that do not yet read `AGENTS.md` natively.
+`AGENTS.md` at the repo root is the cross-tool standard ([agents.md](https://agents.md)). The column above reflects native support at the time of this release; the list is growing as more agents adopt the spec. For tools without native support, ContextEngine writes the body at the tool-specific path the agent expects.
 
 One tool:
 ```bash
