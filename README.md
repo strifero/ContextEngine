@@ -174,11 +174,25 @@ The baseline context cost stays small. Skill files in `.claude/skills/` are lazy
 
 ## Detected Stacks
 
-TypeScript · Node.js + Express · Next.js · React · Vite · Vue · Tailwind CSS ·
-Swift / SwiftUI · Stripe · Prisma · PostgreSQL · MongoDB · Azure · Docker ·
-Go · Python · Django · Rust · PHP · C# · Bun
+**Languages and runtimes.** TypeScript · Node.js · Go · Python · Rust · PHP · C# · Bun
 
-Don't see yours? [Open an issue](https://github.com/strifero/ContextEngine/issues) or submit a PR — skills are plain markdown.
+**React family.** Next.js (App Router and Pages Router, detected separately) · Remix · Vite · React
+
+**Other web frameworks.** Vue · Nuxt · SvelteKit · Angular · Astro
+
+**Server / API frameworks.** Express · NestJS · FastAPI · Django · Ruby on Rails · Laravel
+
+**Mobile.** Swift / SwiftUI · Flutter
+
+**Data and infrastructure.** Prisma · PostgreSQL · MongoDB · Docker · Azure · Stripe · Tailwind CSS
+
+**Testing.** Vitest · Jest · Playwright · Cypress
+
+**Linters and formatters.** ESLint (flat and legacy config) · Biome · Prettier
+
+**Package managers surfaced in the detected output.** npm · pnpm · yarn · bun · bundler · composer · pub, plus a Python-tool annotation (poetry / uv / pip) on FastAPI conventions. Monorepos (Turbo, Nx, pnpm-workspaces, Lerna, Rush) get a dedicated section.
+
+Don't see yours? [Open an issue](https://github.com/strifero/ContextEngine/issues) or submit a PR. Skills are plain markdown; detection is plain filesystem checks.
 
 ---
 
