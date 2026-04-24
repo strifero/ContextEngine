@@ -164,6 +164,14 @@ Every contributor who clones the repo gets full AI context from day one. When th
 
 ---
 
+## Why auto-generate?
+
+The honest critique of auto-generated context files: they rot, they inflate every session with boilerplate, and a stale `CLAUDE.md` is worse than none. ContextEngine treats its output as a starting point, not a finished document. On first run it scans your lockfiles, configs, and dependencies and writes `AGENTS.md`, `CLAUDE.md`, and the matching skill files. Everything past the detected-stack summary is yours to edit; `--update` reconciles on the next run instead of overwriting.
+
+The baseline context cost stays small. Skill files in `.claude/skills/` are lazy-loaded by description match, so Claude Code only pulls in a skill when the task touches it. A dozen skills on disk costs you the CLAUDE.md header plus the one or two skills the agent actually selects. `AGENTS.md` and the tool-specific equivalents are single files capped at a few KB, biased toward stack-derived facts (versions, scripts, conventions) and away from prose. The generated file is short enough to read; the repo is still the source of truth.
+
+---
+
 ## Detected Stacks
 
 TypeScript · Node.js + Express · Next.js · React · Vite · Vue · Tailwind CSS ·
