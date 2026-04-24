@@ -83,7 +83,7 @@ export function MyComponent({ id, onDone }: Props) {
 
 ## State Management
 - Local: `useState` / `useReducer`
-- Server state: React Query / SWR: never `useEffect` + `fetch`
+- Server state: React Query / SWR. Never `useEffect` + `fetch`.
 - Global: Zustand
 - URL state: `useSearchParams`
 

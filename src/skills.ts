@@ -21,8 +21,8 @@ description: TypeScript patterns, type definitions, async conventions, and modul
 # TypeScript Conventions
 
 ## Compiler Settings
-- \`"strict": true\`: non-negotiable
-- \`noUncheckedIndexedAccess: true\`: always guard array/object access
+- \`"strict": true\`. Non-negotiable.
+- \`noUncheckedIndexedAccess: true\`. Always guard array/object access.
 - \`exactOptionalPropertyTypes: true\`
 - Target \`ES2022\` or later
 
@@ -121,7 +121,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 \`\`\`
 
 ## Response Conventions
-- Error: \`{ error: string }\`: always the \`error\` key
+- Error: \`{ error: string }\`. Always the \`error\` key.
 - 400: validation failure | 401: no auth | 403: forbidden
 - 404: not found | 409: conflict | 500: server error
 
@@ -253,7 +253,7 @@ export function MyComponent({ id, onDone }: Props) {
 
 ## State Management
 - Local: \`useState\` / \`useReducer\`
-- Server state: React Query / SWR: never \`useEffect\` + \`fetch\`
+- Server state: React Query / SWR. Never \`useEffect\` + \`fetch\`.
 - Global: Zustand
 - URL state: \`useSearchParams\`
 

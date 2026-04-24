@@ -1,7 +1,8 @@
 // detect.ts: Scan a project directory and identify its tech stack
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname, resolve as resolvePath } from 'node:path';
+import { createRequire } from 'node:module';
 
 export type DetectedTech =
   | 'typescript' | 'nodejs' | 'express'
@@ -126,20 +127,79 @@ function detectMonorepo(dir: string): Monorepo {
   return null;
 }
 
-function readTsconfig(dir: string): TsconfigFlags | null {
-  const path = join(dir, 'tsconfig.json');
-  if (!existsSync(path)) return null;
+interface TsconfigShape {
+  extends?:        string | string[];
+  compilerOptions?: Record<string, unknown>;
+}
+
+// Resolve a tsconfig `extends` value to an absolute path on disk.
+// Supports two forms:
+//   - relative ("./base.json", "../tsconfig.base"): resolved against fromTsconfig dir
+//   - bare specifier ("next/tsconfig.json", "@tsconfig/node20"): resolved via
+//     createRequire against node_modules. If no .json extension is given,
+//     /tsconfig.json is appended (matches tsc behavior).
+// Returns null if resolution fails for any reason (missing module, invalid path, etc.).
+function resolveExtends(extendsValue: string, fromTsconfig: string): string | null {
+  const fromDir = dirname(fromTsconfig);
+
+  if (extendsValue.startsWith('./') || extendsValue.startsWith('../')) {
+    let candidate = resolvePath(fromDir, extendsValue);
+    if (!candidate.endsWith('.json')) candidate = candidate + '.json';
+    return existsSync(candidate) ? candidate : null;
+  }
+
   try {
-    const raw = readFileSync(path, 'utf-8');
-    const parsed = JSON.parse(stripJsonComments(raw)) as { compilerOptions?: Record<string, unknown> };
-    const co = parsed.compilerOptions ?? {};
-    return {
-      strict:                   co.strict === true,
-      noUncheckedIndexedAccess: co.noUncheckedIndexedAccess === true,
-    };
+    const req = createRequire(fromTsconfig);
+    const target = extendsValue.endsWith('.json') ? extendsValue : extendsValue + '/tsconfig.json';
+    const resolved = req.resolve(target);
+    return existsSync(resolved) ? resolved : null;
   } catch {
     return null;
   }
+}
+
+// Walk an `extends` chain and compute the effective tsconfig flags.
+// Parent values form the base; each `extends` layer overrides, and the
+// current file's compilerOptions overrides last (per tsc merge semantics).
+function readTsconfigFlags(tsconfigPath: string, seen: Set<string>, depth: number): TsconfigFlags | null {
+  if (depth > 10) return null;          // circular / pathological chain guard
+  if (seen.has(tsconfigPath)) return null;
+  seen.add(tsconfigPath);
+  if (!existsSync(tsconfigPath)) return null;
+
+  let parsed: TsconfigShape;
+  try {
+    parsed = JSON.parse(stripJsonComments(readFileSync(tsconfigPath, 'utf-8'))) as TsconfigShape;
+  } catch {
+    return null;
+  }
+
+  let flags: TsconfigFlags = { strict: false, noUncheckedIndexedAccess: false };
+
+  const extendsList = parsed.extends
+    ? (Array.isArray(parsed.extends) ? parsed.extends : [parsed.extends])
+    : [];
+
+  for (const ext of extendsList) {
+    const parentPath = resolveExtends(ext, tsconfigPath);
+    if (!parentPath) continue;
+    const parentFlags = readTsconfigFlags(parentPath, seen, depth + 1);
+    if (parentFlags) flags = { ...flags, ...parentFlags };
+  }
+
+  const co = parsed.compilerOptions ?? {};
+  if (co.strict === true || co.strict === false) flags.strict = co.strict;
+  if (co.noUncheckedIndexedAccess === true || co.noUncheckedIndexedAccess === false) {
+    flags.noUncheckedIndexedAccess = co.noUncheckedIndexedAccess;
+  }
+
+  return flags;
+}
+
+function readTsconfig(dir: string): TsconfigFlags | null {
+  const path = join(dir, 'tsconfig.json');
+  if (!existsSync(path)) return null;
+  return readTsconfigFlags(path, new Set(), 0);
 }
 
 export async function detectStack(dir: string): Promise<DetectionResult> {

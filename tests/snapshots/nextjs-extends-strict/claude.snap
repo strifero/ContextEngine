@@ -1,18 +1,17 @@
 # Snapshot
 
 ## Detected
-typescript, react, vite, nodejs, eslint-flat, vitest
+typescript, nextjs-app, react, nodejs
 
-## Files (9)
+## Files (8)
 - .claude/CLAUDE.md
 - .claude/agents/backend-engineer.md
 - .claude/agents/code-reviewer.md
 - .claude/agents/frontend-engineer.md
+- .claude/skills/nextjs-app/SKILL.md
 - .claude/skills/nodejs/SKILL.md
 - .claude/skills/react/SKILL.md
 - .claude/skills/typescript/SKILL.md
-- .claude/skills/vite/SKILL.md
-- .claude/skills/vitest/SKILL.md
 
 ---
 FILE: .claude/CLAUDE.md
@@ -25,7 +24,7 @@ FILE: .claude/CLAUDE.md
 
 ## Project Overview
 
-**Detected stack:** typescript, react, vite, nodejs, eslint-flat, vitest
+**Detected stack:** typescript, nextjs-app, react, nodejs
 
 <!--
   Fill in the sections below to give Claude more context about your project.
@@ -47,9 +46,8 @@ FILE: .claude/CLAUDE.md
 ## Available Skills
 - `typescript`
 - `nodejs`
+- `nextjs-app`
 - `react`
-- `vite`
-- `vitest`
 
 ## Available Agents
 - `code-reviewer`
@@ -136,6 +134,55 @@ You are a senior frontend engineer. Focus on user experience, accessibility, and
 - Keyboard navigable
 
 ---
+FILE: .claude/skills/nextjs-app/SKILL.md
+---
+---
+name: nextjs-app
+description: Next.js App Router conventions: Server Components, Client Components, API routes, data fetching, and project structure. Use whenever building or editing Next.js pages, layouts, API routes, or server actions. Also trigger for routing, metadata, or image optimization questions.
+---
+
+# Next.js App Router Conventions
+
+## Structure
+```
+app/
+├── layout.tsx
+├── page.tsx
+├── (marketing)/
+├── dashboard/
+│   ├── layout.tsx
+│   └── page.tsx
+└── api/
+    └── route.ts
+```
+
+## Server vs Client Components
+- Default: Server Component (no `'use client'`)
+- Add `'use client'` only for: hooks, browser APIs, event listeners
+- Keep Client Components as leaf nodes
+
+## Data Fetching
+```typescript
+export default async function Page() {
+  const data = await fetchData();
+  return <UI data={data} />;
+}
+```
+
+## API Routes
+```typescript
+export async function GET(req: NextRequest) {
+  const id = req.nextUrl.searchParams.get('id');
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+  return NextResponse.json(await getData(id));
+}
+```
+
+## Environment Variables
+- Server-only: `SOME_KEY`
+- Client-exposed: `NEXT_PUBLIC_SOME_KEY`
+
+---
 FILE: .claude/skills/nodejs/SKILL.md
 ---
 ---
@@ -218,7 +265,7 @@ description: TypeScript patterns, type definitions, async conventions, and modul
 ---
 
 > Detected in tsconfig: `strict: true`.
-> Detected in tsconfig: `noUncheckedIndexedAccess` is NOT enabled. Consider turning it on.
+> Detected in tsconfig: `noUncheckedIndexedAccess: true`.
 
 # TypeScript Conventions
 
@@ -253,62 +300,3 @@ description: TypeScript patterns, type definitions, async conventions, and modul
 ## Imports
 - Use path aliases (`@/lib/...`): no deep relative paths
 - Group: external → internal → types → relative
-
----
-FILE: .claude/skills/vite/SKILL.md
----
----
-name: vite
-description: Vite project conventions: config structure, environment variables, build optimization, and plugin setup.
----
-
-# Vite Conventions
-
-## Config
-```typescript
-export default defineConfig({
-  plugins: [],
-  resolve: { alias: { '@': '/src' } },
-  build: { target: 'es2022', sourcemap: false },
-});
-```
-
-## Environment Variables
-- Prefix with `VITE_` to expose to client
-- Access via `import.meta.env.VITE_API_URL`
-- `.env.local` for local overrides: never commit
-
-## Build
-- Dynamic `import()` for route-level code splitting
-- `vite-bundle-visualizer` to diagnose large bundles
-
----
-FILE: .claude/skills/vitest/SKILL.md
----
----
-name: vitest
-description: Vitest test patterns, configuration, and assertions. Use when writing, running, or debugging unit or integration tests in a Vitest project.
----
-
-<!-- review before release -->
-
-# Vitest Conventions
-
-## File Layout
-- Co-locate `<file>.test.ts` or `<file>.spec.ts` next to the module under test.
-- Pure test-only modules live in `tests/` or `__tests__/`.
-
-## Running
-- `vitest` for watch mode, `vitest run` for one shot (use this in CI).
-- Filter by pattern: `vitest run path/to/file`.
-
-## Assertions
-- `expect(...).toEqual(...)` for deep equality, `toBe` for primitives and identity.
-- `expect.soft` to collect multiple failures in one test before throwing.
-
-## Mocking
-- `vi.mock('module-path', ...)` at the top level of the test file.
-- Fake timers: `vi.useFakeTimers()`, with a matching `vi.useRealTimers()` in an `afterEach`.
-
-## TypeScript
-- Vitest reuses the project's tsconfig. No separate config required.

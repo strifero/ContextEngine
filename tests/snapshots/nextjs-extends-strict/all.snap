@@ -1,7 +1,7 @@
 # Snapshot
 
 ## Detected
-typescript, vue, nodejs, nuxt
+typescript, nextjs-app, react, nodejs
 
 ## Files (23)
 - .amazonq/rules/project.md
@@ -9,15 +9,15 @@ typescript, vue, nodejs, nuxt
 - .claude/agents/backend-engineer.md
 - .claude/agents/code-reviewer.md
 - .claude/agents/frontend-engineer.md
+- .claude/skills/nextjs-app/SKILL.md
 - .claude/skills/nodejs/SKILL.md
-- .claude/skills/nuxt/SKILL.md
+- .claude/skills/react/SKILL.md
 - .claude/skills/typescript/SKILL.md
-- .claude/skills/vue/SKILL.md
 - .clinerules
+- .cursor/rules/nextjs-app.mdc
 - .cursor/rules/nodejs.mdc
-- .cursor/rules/nuxt.mdc
+- .cursor/rules/react.mdc
 - .cursor/rules/typescript.mdc
-- .cursor/rules/vue.mdc
 - .github/copilot-instructions.md
 - .junie/guidelines.md
 - .opencode/AGENTS.md
@@ -31,44 +31,45 @@ typescript, vue, nodejs, nuxt
 ---
 FILE: .amazonq/rules/project.md
 ---
-# my-nuxt-app
+# nextjs-extends-strict
 
 > AGENTS.md: instructions for AI coding agents working on this project.
 > Human contributors: see README.md.
 
 ## Stack
 
-- TypeScript
-- Vue 3.4.0
+- TypeScript 5.5.0
+- Next.js (App Router) 14.2.0
+- React 18.3.0
 - Node.js
-- Nuxt 3.12.0
 
 ## Commands
 
-- `npm run dev`: `nuxt dev`
-- `npm run build`: `nuxt build`
-- `npm run start`: `nuxt preview`
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
 
 ## Conventions
 
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- Composition API with `<script setup>` for new components.
-- Props typed via `defineProps<...>()`, emits via `defineEmits<...>()`.
+- App Router by default. Server Components unless the file declares `"use client"`.
+- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
+- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- Function components and hooks only.
+- Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
-- Pages under `pages/`, API under `server/api/`, composables under `composables/` (auto-imported).
-- Data fetching with `useFetch` or `useAsyncData` so SSR and client stay aligned.
-- Runtime config via `useRuntimeConfig()`. Keep secrets out of the `public` sub-object.
 
 ## What to avoid
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- Options API in new components, unless matching existing files.
+- `getServerSideProps` and `getStaticProps`. The App Router replaced them.
+- Importing server-only modules from client components.
+- Class components in new code.
+- Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
-- Calling APIs in `onMounted`. Use `useFetch` and let Nuxt compose data on the server.
 
 ---
 
@@ -85,7 +86,7 @@ FILE: .claude/CLAUDE.md
 
 ## Project Overview
 
-**Detected stack:** typescript, vue, nodejs, nuxt
+**Detected stack:** typescript, nextjs-app, react, nodejs
 
 <!--
   Fill in the sections below to give Claude more context about your project.
@@ -107,8 +108,8 @@ FILE: .claude/CLAUDE.md
 ## Available Skills
 - `typescript`
 - `nodejs`
-- `vue`
-- `nuxt`
+- `nextjs-app`
+- `react`
 
 ## Available Agents
 - `code-reviewer`
@@ -195,6 +196,55 @@ You are a senior frontend engineer. Focus on user experience, accessibility, and
 - Keyboard navigable
 
 ---
+FILE: .claude/skills/nextjs-app/SKILL.md
+---
+---
+name: nextjs-app
+description: Next.js App Router conventions: Server Components, Client Components, API routes, data fetching, and project structure. Use whenever building or editing Next.js pages, layouts, API routes, or server actions. Also trigger for routing, metadata, or image optimization questions.
+---
+
+# Next.js App Router Conventions
+
+## Structure
+```
+app/
+├── layout.tsx
+├── page.tsx
+├── (marketing)/
+├── dashboard/
+│   ├── layout.tsx
+│   └── page.tsx
+└── api/
+    └── route.ts
+```
+
+## Server vs Client Components
+- Default: Server Component (no `'use client'`)
+- Add `'use client'` only for: hooks, browser APIs, event listeners
+- Keep Client Components as leaf nodes
+
+## Data Fetching
+```typescript
+export default async function Page() {
+  const data = await fetchData();
+  return <UI data={data} />;
+}
+```
+
+## API Routes
+```typescript
+export async function GET(req: NextRequest) {
+  const id = req.nextUrl.searchParams.get('id');
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+  return NextResponse.json(await getData(id));
+}
+```
+
+## Environment Variables
+- Server-only: `SOME_KEY`
+- Client-exposed: `NEXT_PUBLIC_SOME_KEY`
+
+---
 FILE: .claude/skills/nodejs/SKILL.md
 ---
 ---
@@ -233,51 +283,40 @@ for (const key of required) {
 - Scripts: always define `start`, `build`, `dev`, `typecheck`, `lint`
 
 ---
-FILE: .claude/skills/nuxt/SKILL.md
+FILE: .claude/skills/react/SKILL.md
 ---
 ---
-name: nuxt
-description: Nuxt conventions: pages, components auto-import, server routes, composables, and Nitro runtime. Use when building or editing a Nuxt 3+ app, pages, API routes, or composables.
+name: react
+description: React component patterns, hooks, state management, and accessibility conventions. Use whenever building React components, managing state, handling forms, writing custom hooks, or composing UI.
 ---
 
-<!-- review before release -->
+# React Conventions
 
-# Nuxt Conventions
+## Component Structure
+```typescript
+interface Props { id: string; onDone?: () => void; }
 
-## Structure
+export function MyComponent({ id, onDone }: Props) {
+  // 1. Hooks  2. Derived state  3. Handlers  4. Effects  5. Render
+}
 ```
-├── pages/                  (file-based routes)
-│   ├── index.vue
-│   └── users/[id].vue
-├── components/             (auto-imported)
-├── composables/            (auto-imported, prefixed use*)
-├── server/
-│   ├── api/                (HTTP endpoints)
-│   └── routes/             (non-API server routes)
-├── layouts/
-└── nuxt.config.ts
-```
+- Named exports (except Next.js pages)
 
-## Data Fetching
-- `useFetch('/api/users')` in components: isomorphic, dedupes on SSR.
-- `useAsyncData('key', () => $fetch(...))` for custom data shapes.
-- Avoid calling APIs in mounted lifecycle hooks; compose data on the server.
+## State Management
+- Local: `useState` / `useReducer`
+- Server state: React Query / SWR. Never `useEffect` + `fetch`.
+- Global: Zustand
+- URL state: `useSearchParams`
 
-## Server Routes
-- `server/api/hello.ts` exports a default handler: `export default defineEventHandler((event) => ...)`.
-- Route params via `getRouterParam(event, 'id')`. Body via `readBody(event)`.
+## Performance
+- `memo()` only after measuring
+- Key prop: stable IDs, never array index
 
-## Auto-imports
-- Components from `components/` imported automatically.
-- Composables (`useX`) auto-imported from `composables/`.
-- Vue and Nuxt APIs are globally available; no explicit imports needed.
-
-## Runtime Config
-- Declare in `nuxt.config.ts` under `runtimeConfig`. Public keys under `public`.
-- Access via `useRuntimeConfig()` on server, `useRuntimeConfig().public` on client.
-
-## Modules
-- Extend Nuxt via modules (`@nuxt/image`, `@nuxtjs/tailwindcss`, etc.). Configure in `nuxt.config.ts`.
+## Accessibility
+- Keyboard navigable interactive elements
+- Descriptive `alt` on all images
+- `<label>` associated with every form field
+- Semantic HTML: `<button>`, `<nav>`, `<main>`
 
 ---
 FILE: .claude/skills/typescript/SKILL.md
@@ -286,6 +325,9 @@ FILE: .claude/skills/typescript/SKILL.md
 name: typescript
 description: TypeScript patterns, type definitions, async conventions, and module structure. Use whenever writing, editing, or reviewing TypeScript code, defining types or interfaces, handling async logic, or structuring modules. Also trigger for strict mode errors, generics, or type inference questions.
 ---
+
+> Detected in tsconfig: `strict: true`.
+> Detected in tsconfig: `noUncheckedIndexedAccess: true`.
 
 # TypeScript Conventions
 
@@ -322,88 +364,106 @@ description: TypeScript patterns, type definitions, async conventions, and modul
 - Group: external → internal → types → relative
 
 ---
-FILE: .claude/skills/vue/SKILL.md
----
----
-name: vue
-description: Vue 3 Composition API patterns, component structure, reactivity, and routing.
----
-
-# Vue 3 Conventions
-
-## Always `<script setup>`
-```vue
-<script setup lang="ts">
-interface Props { id: string; }
-const props = defineProps<Props>();
-const count = ref(0);
-const doubled = computed(() => count.value * 2);
-</script>
-```
-
-## Composables
-```typescript
-export function useUser(id: string) {
-  const user = ref<User | null>(null);
-  const isLoading = ref(false);
-  return { user, isLoading };
-}
-```
-
-## State: Pinia (Composition API style only)
-```typescript
-export const useCartStore = defineStore('cart', () => {
-  const items = ref<Item[]>([]);
-  function add(item: Item) { items.value.push(item); }
-  return { items, add };
-});
-```
-
----
 FILE: .clinerules
 ---
-# my-nuxt-app
+# nextjs-extends-strict
 
 > AGENTS.md: instructions for AI coding agents working on this project.
 > Human contributors: see README.md.
 
 ## Stack
 
-- TypeScript
-- Vue 3.4.0
+- TypeScript 5.5.0
+- Next.js (App Router) 14.2.0
+- React 18.3.0
 - Node.js
-- Nuxt 3.12.0
 
 ## Commands
 
-- `npm run dev`: `nuxt dev`
-- `npm run build`: `nuxt build`
-- `npm run start`: `nuxt preview`
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
 
 ## Conventions
 
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- Composition API with `<script setup>` for new components.
-- Props typed via `defineProps<...>()`, emits via `defineEmits<...>()`.
+- App Router by default. Server Components unless the file declares `"use client"`.
+- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
+- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- Function components and hooks only.
+- Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
-- Pages under `pages/`, API under `server/api/`, composables under `composables/` (auto-imported).
-- Data fetching with `useFetch` or `useAsyncData` so SSR and client stay aligned.
-- Runtime config via `useRuntimeConfig()`. Keep secrets out of the `public` sub-object.
 
 ## What to avoid
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- Options API in new components, unless matching existing files.
+- `getServerSideProps` and `getStaticProps`. The App Router replaced them.
+- Importing server-only modules from client components.
+- Class components in new code.
+- Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
-- Calling APIs in `onMounted`. Use `useFetch` and let Nuxt compose data on the server.
 
 ---
 
 *Generated by [ContextEngine](https://github.com/strifero/ContextEngine). Re-run to refresh.*
+
+---
+FILE: .cursor/rules/nextjs-app.mdc
+---
+---
+description: nextjs-app best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: nextjs-app
+description: Next.js App Router conventions: Server Components, Client Components, API routes, data fetching, and project structure. Use whenever building or editing Next.js pages, layouts, API routes, or server actions. Also trigger for routing, metadata, or image optimization questions.
+---
+
+# Next.js App Router Conventions
+
+## Structure
+```
+app/
+├── layout.tsx
+├── page.tsx
+├── (marketing)/
+├── dashboard/
+│   ├── layout.tsx
+│   └── page.tsx
+└── api/
+    └── route.ts
+```
+
+## Server vs Client Components
+- Default: Server Component (no `'use client'`)
+- Add `'use client'` only for: hooks, browser APIs, event listeners
+- Keep Client Components as leaf nodes
+
+## Data Fetching
+```typescript
+export default async function Page() {
+  const data = await fetchData();
+  return <UI data={data} />;
+}
+```
+
+## API Routes
+```typescript
+export async function GET(req: NextRequest) {
+  const id = req.nextUrl.searchParams.get('id');
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+  return NextResponse.json(await getData(id));
+}
+```
+
+## Environment Variables
+- Server-only: `SOME_KEY`
+- Client-exposed: `NEXT_PUBLIC_SOME_KEY`
 
 ---
 FILE: .cursor/rules/nodejs.mdc
@@ -450,57 +510,46 @@ for (const key of required) {
 - Scripts: always define `start`, `build`, `dev`, `typecheck`, `lint`
 
 ---
-FILE: .cursor/rules/nuxt.mdc
+FILE: .cursor/rules/react.mdc
 ---
 ---
-description: nuxt best practices and conventions
+description: react best practices and conventions
 globs: ["**/*"]
 alwaysApply: false
 ---
 
 ---
-name: nuxt
-description: Nuxt conventions: pages, components auto-import, server routes, composables, and Nitro runtime. Use when building or editing a Nuxt 3+ app, pages, API routes, or composables.
+name: react
+description: React component patterns, hooks, state management, and accessibility conventions. Use whenever building React components, managing state, handling forms, writing custom hooks, or composing UI.
 ---
 
-<!-- review before release -->
+# React Conventions
 
-# Nuxt Conventions
+## Component Structure
+```typescript
+interface Props { id: string; onDone?: () => void; }
 
-## Structure
+export function MyComponent({ id, onDone }: Props) {
+  // 1. Hooks  2. Derived state  3. Handlers  4. Effects  5. Render
+}
 ```
-├── pages/                  (file-based routes)
-│   ├── index.vue
-│   └── users/[id].vue
-├── components/             (auto-imported)
-├── composables/            (auto-imported, prefixed use*)
-├── server/
-│   ├── api/                (HTTP endpoints)
-│   └── routes/             (non-API server routes)
-├── layouts/
-└── nuxt.config.ts
-```
+- Named exports (except Next.js pages)
 
-## Data Fetching
-- `useFetch('/api/users')` in components: isomorphic, dedupes on SSR.
-- `useAsyncData('key', () => $fetch(...))` for custom data shapes.
-- Avoid calling APIs in mounted lifecycle hooks; compose data on the server.
+## State Management
+- Local: `useState` / `useReducer`
+- Server state: React Query / SWR. Never `useEffect` + `fetch`.
+- Global: Zustand
+- URL state: `useSearchParams`
 
-## Server Routes
-- `server/api/hello.ts` exports a default handler: `export default defineEventHandler((event) => ...)`.
-- Route params via `getRouterParam(event, 'id')`. Body via `readBody(event)`.
+## Performance
+- `memo()` only after measuring
+- Key prop: stable IDs, never array index
 
-## Auto-imports
-- Components from `components/` imported automatically.
-- Composables (`useX`) auto-imported from `composables/`.
-- Vue and Nuxt APIs are globally available; no explicit imports needed.
-
-## Runtime Config
-- Declare in `nuxt.config.ts` under `runtimeConfig`. Public keys under `public`.
-- Access via `useRuntimeConfig()` on server, `useRuntimeConfig().public` on client.
-
-## Modules
-- Extend Nuxt via modules (`@nuxt/image`, `@nuxtjs/tailwindcss`, etc.). Configure in `nuxt.config.ts`.
+## Accessibility
+- Keyboard navigable interactive elements
+- Descriptive `alt` on all images
+- `<label>` associated with every form field
+- Semantic HTML: `<button>`, `<nav>`, `<main>`
 
 ---
 FILE: .cursor/rules/typescript.mdc
@@ -515,6 +564,9 @@ alwaysApply: false
 name: typescript
 description: TypeScript patterns, type definitions, async conventions, and module structure. Use whenever writing, editing, or reviewing TypeScript code, defining types or interfaces, handling async logic, or structuring modules. Also trigger for strict mode errors, generics, or type inference questions.
 ---
+
+> Detected in tsconfig: `strict: true`.
+> Detected in tsconfig: `noUncheckedIndexedAccess: true`.
 
 # TypeScript Conventions
 
@@ -551,50 +603,6 @@ description: TypeScript patterns, type definitions, async conventions, and modul
 - Group: external → internal → types → relative
 
 ---
-FILE: .cursor/rules/vue.mdc
----
----
-description: vue best practices and conventions
-globs: ["**/*"]
-alwaysApply: false
----
-
----
-name: vue
-description: Vue 3 Composition API patterns, component structure, reactivity, and routing.
----
-
-# Vue 3 Conventions
-
-## Always `<script setup>`
-```vue
-<script setup lang="ts">
-interface Props { id: string; }
-const props = defineProps<Props>();
-const count = ref(0);
-const doubled = computed(() => count.value * 2);
-</script>
-```
-
-## Composables
-```typescript
-export function useUser(id: string) {
-  const user = ref<User | null>(null);
-  const isLoading = ref(false);
-  return { user, isLoading };
-}
-```
-
-## State: Pinia (Composition API style only)
-```typescript
-export const useCartStore = defineStore('cart', () => {
-  const items = ref<Item[]>([]);
-  function add(item: Item) { items.value.push(item); }
-  return { items, add };
-});
-```
-
----
 FILE: .github/copilot-instructions.md
 ---
 # GitHub Copilot Instructions
@@ -603,7 +611,7 @@ FILE: .github/copilot-instructions.md
 
 ## Project Stack
 
-**Detected:** typescript, vue, nodejs, nuxt
+**Detected:** typescript, nextjs-app, react, nodejs
 
 ## Conventions
 
@@ -617,6 +625,9 @@ FILE: .github/copilot-instructions.md
 name: typescript
 description: TypeScript patterns, type definitions, async conventions, and module structure. Use whenever writing, editing, or reviewing TypeScript code, defining types or interfaces, handling async logic, or structuring modules. Also trigger for strict mode errors, generics, or type inference questions.
 ---
+
+> Detected in tsconfig: `strict: true`.
+> Detected in tsconfig: `noUncheckedIndexedAccess: true`.
 
 # TypeScript Conventions
 
@@ -693,132 +704,133 @@ for (const key of required) {
 
 ---
 
-## vue
+## nextjs-app
 
 ---
-name: vue
-description: Vue 3 Composition API patterns, component structure, reactivity, and routing.
+name: nextjs-app
+description: Next.js App Router conventions: Server Components, Client Components, API routes, data fetching, and project structure. Use whenever building or editing Next.js pages, layouts, API routes, or server actions. Also trigger for routing, metadata, or image optimization questions.
 ---
 
-# Vue 3 Conventions
-
-## Always `<script setup>`
-```vue
-<script setup lang="ts">
-interface Props { id: string; }
-const props = defineProps<Props>();
-const count = ref(0);
-const doubled = computed(() => count.value * 2);
-</script>
-```
-
-## Composables
-```typescript
-export function useUser(id: string) {
-  const user = ref<User | null>(null);
-  const isLoading = ref(false);
-  return { user, isLoading };
-}
-```
-
-## State: Pinia (Composition API style only)
-```typescript
-export const useCartStore = defineStore('cart', () => {
-  const items = ref<Item[]>([]);
-  function add(item: Item) { items.value.push(item); }
-  return { items, add };
-});
-```
-
----
-
-## nuxt
-
----
-name: nuxt
-description: Nuxt conventions: pages, components auto-import, server routes, composables, and Nitro runtime. Use when building or editing a Nuxt 3+ app, pages, API routes, or composables.
----
-
-<!-- review before release -->
-
-# Nuxt Conventions
+# Next.js App Router Conventions
 
 ## Structure
 ```
-├── pages/                  (file-based routes)
-│   ├── index.vue
-│   └── users/[id].vue
-├── components/             (auto-imported)
-├── composables/            (auto-imported, prefixed use*)
-├── server/
-│   ├── api/                (HTTP endpoints)
-│   └── routes/             (non-API server routes)
-├── layouts/
-└── nuxt.config.ts
+app/
+├── layout.tsx
+├── page.tsx
+├── (marketing)/
+├── dashboard/
+│   ├── layout.tsx
+│   └── page.tsx
+└── api/
+    └── route.ts
 ```
 
+## Server vs Client Components
+- Default: Server Component (no `'use client'`)
+- Add `'use client'` only for: hooks, browser APIs, event listeners
+- Keep Client Components as leaf nodes
+
 ## Data Fetching
-- `useFetch('/api/users')` in components: isomorphic, dedupes on SSR.
-- `useAsyncData('key', () => $fetch(...))` for custom data shapes.
-- Avoid calling APIs in mounted lifecycle hooks; compose data on the server.
+```typescript
+export default async function Page() {
+  const data = await fetchData();
+  return <UI data={data} />;
+}
+```
 
-## Server Routes
-- `server/api/hello.ts` exports a default handler: `export default defineEventHandler((event) => ...)`.
-- Route params via `getRouterParam(event, 'id')`. Body via `readBody(event)`.
+## API Routes
+```typescript
+export async function GET(req: NextRequest) {
+  const id = req.nextUrl.searchParams.get('id');
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+  return NextResponse.json(await getData(id));
+}
+```
 
-## Auto-imports
-- Components from `components/` imported automatically.
-- Composables (`useX`) auto-imported from `composables/`.
-- Vue and Nuxt APIs are globally available; no explicit imports needed.
+## Environment Variables
+- Server-only: `SOME_KEY`
+- Client-exposed: `NEXT_PUBLIC_SOME_KEY`
 
-## Runtime Config
-- Declare in `nuxt.config.ts` under `runtimeConfig`. Public keys under `public`.
-- Access via `useRuntimeConfig()` on server, `useRuntimeConfig().public` on client.
+---
 
-## Modules
-- Extend Nuxt via modules (`@nuxt/image`, `@nuxtjs/tailwindcss`, etc.). Configure in `nuxt.config.ts`.
+## react
+
+---
+name: react
+description: React component patterns, hooks, state management, and accessibility conventions. Use whenever building React components, managing state, handling forms, writing custom hooks, or composing UI.
+---
+
+# React Conventions
+
+## Component Structure
+```typescript
+interface Props { id: string; onDone?: () => void; }
+
+export function MyComponent({ id, onDone }: Props) {
+  // 1. Hooks  2. Derived state  3. Handlers  4. Effects  5. Render
+}
+```
+- Named exports (except Next.js pages)
+
+## State Management
+- Local: `useState` / `useReducer`
+- Server state: React Query / SWR. Never `useEffect` + `fetch`.
+- Global: Zustand
+- URL state: `useSearchParams`
+
+## Performance
+- `memo()` only after measuring
+- Key prop: stable IDs, never array index
+
+## Accessibility
+- Keyboard navigable interactive elements
+- Descriptive `alt` on all images
+- `<label>` associated with every form field
+- Semantic HTML: `<button>`, `<nav>`, `<main>`
 
 ---
 FILE: .junie/guidelines.md
 ---
-# my-nuxt-app
+# nextjs-extends-strict
 
 > AGENTS.md: instructions for AI coding agents working on this project.
 > Human contributors: see README.md.
 
 ## Stack
 
-- TypeScript
-- Vue 3.4.0
+- TypeScript 5.5.0
+- Next.js (App Router) 14.2.0
+- React 18.3.0
 - Node.js
-- Nuxt 3.12.0
 
 ## Commands
 
-- `npm run dev`: `nuxt dev`
-- `npm run build`: `nuxt build`
-- `npm run start`: `nuxt preview`
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
 
 ## Conventions
 
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- Composition API with `<script setup>` for new components.
-- Props typed via `defineProps<...>()`, emits via `defineEmits<...>()`.
+- App Router by default. Server Components unless the file declares `"use client"`.
+- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
+- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- Function components and hooks only.
+- Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
-- Pages under `pages/`, API under `server/api/`, composables under `composables/` (auto-imported).
-- Data fetching with `useFetch` or `useAsyncData` so SSR and client stay aligned.
-- Runtime config via `useRuntimeConfig()`. Keep secrets out of the `public` sub-object.
 
 ## What to avoid
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- Options API in new components, unless matching existing files.
+- `getServerSideProps` and `getStaticProps`. The App Router replaced them.
+- Importing server-only modules from client components.
+- Class components in new code.
+- Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
-- Calling APIs in `onMounted`. Use `useFetch` and let Nuxt compose data on the server.
 
 ---
 
@@ -827,44 +839,45 @@ FILE: .junie/guidelines.md
 ---
 FILE: .opencode/AGENTS.md
 ---
-# my-nuxt-app
+# nextjs-extends-strict
 
 > AGENTS.md: instructions for AI coding agents working on this project.
 > Human contributors: see README.md.
 
 ## Stack
 
-- TypeScript
-- Vue 3.4.0
+- TypeScript 5.5.0
+- Next.js (App Router) 14.2.0
+- React 18.3.0
 - Node.js
-- Nuxt 3.12.0
 
 ## Commands
 
-- `npm run dev`: `nuxt dev`
-- `npm run build`: `nuxt build`
-- `npm run start`: `nuxt preview`
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
 
 ## Conventions
 
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- Composition API with `<script setup>` for new components.
-- Props typed via `defineProps<...>()`, emits via `defineEmits<...>()`.
+- App Router by default. Server Components unless the file declares `"use client"`.
+- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
+- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- Function components and hooks only.
+- Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
-- Pages under `pages/`, API under `server/api/`, composables under `composables/` (auto-imported).
-- Data fetching with `useFetch` or `useAsyncData` so SSR and client stay aligned.
-- Runtime config via `useRuntimeConfig()`. Keep secrets out of the `public` sub-object.
 
 ## What to avoid
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- Options API in new components, unless matching existing files.
+- `getServerSideProps` and `getStaticProps`. The App Router replaced them.
+- Importing server-only modules from client components.
+- Class components in new code.
+- Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
-- Calling APIs in `onMounted`. Use `useFetch` and let Nuxt compose data on the server.
 
 ---
 
@@ -873,44 +886,45 @@ FILE: .opencode/AGENTS.md
 ---
 FILE: .roo/rules.md
 ---
-# my-nuxt-app
+# nextjs-extends-strict
 
 > AGENTS.md: instructions for AI coding agents working on this project.
 > Human contributors: see README.md.
 
 ## Stack
 
-- TypeScript
-- Vue 3.4.0
+- TypeScript 5.5.0
+- Next.js (App Router) 14.2.0
+- React 18.3.0
 - Node.js
-- Nuxt 3.12.0
 
 ## Commands
 
-- `npm run dev`: `nuxt dev`
-- `npm run build`: `nuxt build`
-- `npm run start`: `nuxt preview`
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
 
 ## Conventions
 
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- Composition API with `<script setup>` for new components.
-- Props typed via `defineProps<...>()`, emits via `defineEmits<...>()`.
+- App Router by default. Server Components unless the file declares `"use client"`.
+- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
+- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- Function components and hooks only.
+- Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
-- Pages under `pages/`, API under `server/api/`, composables under `composables/` (auto-imported).
-- Data fetching with `useFetch` or `useAsyncData` so SSR and client stay aligned.
-- Runtime config via `useRuntimeConfig()`. Keep secrets out of the `public` sub-object.
 
 ## What to avoid
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- Options API in new components, unless matching existing files.
+- `getServerSideProps` and `getStaticProps`. The App Router replaced them.
+- Importing server-only modules from client components.
+- Class components in new code.
+- Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
-- Calling APIs in `onMounted`. Use `useFetch` and let Nuxt compose data on the server.
 
 ---
 
@@ -919,44 +933,45 @@ FILE: .roo/rules.md
 ---
 FILE: .rules
 ---
-# my-nuxt-app
+# nextjs-extends-strict
 
 > AGENTS.md: instructions for AI coding agents working on this project.
 > Human contributors: see README.md.
 
 ## Stack
 
-- TypeScript
-- Vue 3.4.0
+- TypeScript 5.5.0
+- Next.js (App Router) 14.2.0
+- React 18.3.0
 - Node.js
-- Nuxt 3.12.0
 
 ## Commands
 
-- `npm run dev`: `nuxt dev`
-- `npm run build`: `nuxt build`
-- `npm run start`: `nuxt preview`
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
 
 ## Conventions
 
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- Composition API with `<script setup>` for new components.
-- Props typed via `defineProps<...>()`, emits via `defineEmits<...>()`.
+- App Router by default. Server Components unless the file declares `"use client"`.
+- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
+- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- Function components and hooks only.
+- Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
-- Pages under `pages/`, API under `server/api/`, composables under `composables/` (auto-imported).
-- Data fetching with `useFetch` or `useAsyncData` so SSR and client stay aligned.
-- Runtime config via `useRuntimeConfig()`. Keep secrets out of the `public` sub-object.
 
 ## What to avoid
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- Options API in new components, unless matching existing files.
+- `getServerSideProps` and `getStaticProps`. The App Router replaced them.
+- Importing server-only modules from client components.
+- Class components in new code.
+- Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
-- Calling APIs in `onMounted`. Use `useFetch` and let Nuxt compose data on the server.
 
 ---
 
@@ -965,44 +980,45 @@ FILE: .rules
 ---
 FILE: .windsurfrules
 ---
-# my-nuxt-app
+# nextjs-extends-strict
 
 > AGENTS.md: instructions for AI coding agents working on this project.
 > Human contributors: see README.md.
 
 ## Stack
 
-- TypeScript
-- Vue 3.4.0
+- TypeScript 5.5.0
+- Next.js (App Router) 14.2.0
+- React 18.3.0
 - Node.js
-- Nuxt 3.12.0
 
 ## Commands
 
-- `npm run dev`: `nuxt dev`
-- `npm run build`: `nuxt build`
-- `npm run start`: `nuxt preview`
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
 
 ## Conventions
 
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- Composition API with `<script setup>` for new components.
-- Props typed via `defineProps<...>()`, emits via `defineEmits<...>()`.
+- App Router by default. Server Components unless the file declares `"use client"`.
+- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
+- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- Function components and hooks only.
+- Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
-- Pages under `pages/`, API under `server/api/`, composables under `composables/` (auto-imported).
-- Data fetching with `useFetch` or `useAsyncData` so SSR and client stay aligned.
-- Runtime config via `useRuntimeConfig()`. Keep secrets out of the `public` sub-object.
 
 ## What to avoid
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- Options API in new components, unless matching existing files.
+- `getServerSideProps` and `getStaticProps`. The App Router replaced them.
+- Importing server-only modules from client components.
+- Class components in new code.
+- Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
-- Calling APIs in `onMounted`. Use `useFetch` and let Nuxt compose data on the server.
 
 ---
 
@@ -1011,44 +1027,45 @@ FILE: .windsurfrules
 ---
 FILE: AGENTS.md
 ---
-# my-nuxt-app
+# nextjs-extends-strict
 
 > AGENTS.md: instructions for AI coding agents working on this project.
 > Human contributors: see README.md.
 
 ## Stack
 
-- TypeScript
-- Vue 3.4.0
+- TypeScript 5.5.0
+- Next.js (App Router) 14.2.0
+- React 18.3.0
 - Node.js
-- Nuxt 3.12.0
 
 ## Commands
 
-- `npm run dev`: `nuxt dev`
-- `npm run build`: `nuxt build`
-- `npm run start`: `nuxt preview`
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
 
 ## Conventions
 
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- Composition API with `<script setup>` for new components.
-- Props typed via `defineProps<...>()`, emits via `defineEmits<...>()`.
+- App Router by default. Server Components unless the file declares `"use client"`.
+- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
+- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- Function components and hooks only.
+- Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
-- Pages under `pages/`, API under `server/api/`, composables under `composables/` (auto-imported).
-- Data fetching with `useFetch` or `useAsyncData` so SSR and client stay aligned.
-- Runtime config via `useRuntimeConfig()`. Keep secrets out of the `public` sub-object.
 
 ## What to avoid
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- Options API in new components, unless matching existing files.
+- `getServerSideProps` and `getStaticProps`. The App Router replaced them.
+- Importing server-only modules from client components.
+- Class components in new code.
+- Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
-- Calling APIs in `onMounted`. Use `useFetch` and let Nuxt compose data on the server.
 
 ---
 
@@ -1057,44 +1074,45 @@ FILE: AGENTS.md
 ---
 FILE: CONVENTIONS.md
 ---
-# my-nuxt-app
+# nextjs-extends-strict
 
 > AGENTS.md: instructions for AI coding agents working on this project.
 > Human contributors: see README.md.
 
 ## Stack
 
-- TypeScript
-- Vue 3.4.0
+- TypeScript 5.5.0
+- Next.js (App Router) 14.2.0
+- React 18.3.0
 - Node.js
-- Nuxt 3.12.0
 
 ## Commands
 
-- `npm run dev`: `nuxt dev`
-- `npm run build`: `nuxt build`
-- `npm run start`: `nuxt preview`
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
 
 ## Conventions
 
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- Composition API with `<script setup>` for new components.
-- Props typed via `defineProps<...>()`, emits via `defineEmits<...>()`.
+- App Router by default. Server Components unless the file declares `"use client"`.
+- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
+- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- Function components and hooks only.
+- Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
-- Pages under `pages/`, API under `server/api/`, composables under `composables/` (auto-imported).
-- Data fetching with `useFetch` or `useAsyncData` so SSR and client stay aligned.
-- Runtime config via `useRuntimeConfig()`. Keep secrets out of the `public` sub-object.
 
 ## What to avoid
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- Options API in new components, unless matching existing files.
+- `getServerSideProps` and `getStaticProps`. The App Router replaced them.
+- Importing server-only modules from client components.
+- Class components in new code.
+- Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
-- Calling APIs in `onMounted`. Use `useFetch` and let Nuxt compose data on the server.
 
 ---
 
@@ -1103,44 +1121,45 @@ FILE: CONVENTIONS.md
 ---
 FILE: GEMINI.md
 ---
-# my-nuxt-app
+# nextjs-extends-strict
 
 > AGENTS.md: instructions for AI coding agents working on this project.
 > Human contributors: see README.md.
 
 ## Stack
 
-- TypeScript
-- Vue 3.4.0
+- TypeScript 5.5.0
+- Next.js (App Router) 14.2.0
+- React 18.3.0
 - Node.js
-- Nuxt 3.12.0
 
 ## Commands
 
-- `npm run dev`: `nuxt dev`
-- `npm run build`: `nuxt build`
-- `npm run start`: `nuxt preview`
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
 
 ## Conventions
 
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- Composition API with `<script setup>` for new components.
-- Props typed via `defineProps<...>()`, emits via `defineEmits<...>()`.
+- App Router by default. Server Components unless the file declares `"use client"`.
+- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
+- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- Function components and hooks only.
+- Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
-- Pages under `pages/`, API under `server/api/`, composables under `composables/` (auto-imported).
-- Data fetching with `useFetch` or `useAsyncData` so SSR and client stay aligned.
-- Runtime config via `useRuntimeConfig()`. Keep secrets out of the `public` sub-object.
 
 ## What to avoid
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- Options API in new components, unless matching existing files.
+- `getServerSideProps` and `getStaticProps`. The App Router replaced them.
+- Importing server-only modules from client components.
+- Class components in new code.
+- Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
-- Calling APIs in `onMounted`. Use `useFetch` and let Nuxt compose data on the server.
 
 ---
 
