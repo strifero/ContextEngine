@@ -1,6 +1,6 @@
 // registry.ts — Maps detected technologies to skill and agent files
 
-import type { DetectedTech } from './detect.js';
+import type { DetectedTech, DetectionResult, TsconfigFlags } from './detect.js';
 import type { SkillFile } from './skills.js';
 import {
   SKILL_TYPESCRIPT, SKILL_NODEJS, SKILL_EXPRESS,
@@ -66,10 +66,10 @@ const AGENT_REGISTRY: SkillEntry[] = [
 const ALWAYS: SkillFile[] = [AGENT_REVIEWER];
 
 export function selectFiles(
-  detected: DetectedTech[],
+  detection: DetectionResult,
   includeAgents: boolean,
 ): SkillFile[] {
-  const detectedSet = new Set(detected);
+  const detectedSet = new Set(detection.techs);
   const selected = new Map<string, SkillFile>();
 
   for (const f of ALWAYS) selected.set(f.path, f);
@@ -88,5 +88,38 @@ export function selectFiles(
     }
   }
 
-  return Array.from(selected.values());
+  return Array.from(selected.values()).map(f => adaptSkill(f, detection));
+}
+
+// Hook detected project state into otherwise-static skill content.
+// Today: inject a one-line tsconfig state callout into the TypeScript skill
+// so it reflects the project's real `strict` / `noUncheckedIndexedAccess`
+// settings instead of unconditionally prescribing them.
+function adaptSkill(file: SkillFile, detection: DetectionResult): SkillFile {
+  if (file.path === SKILL_TYPESCRIPT.path && detection.tsconfig) {
+    return { ...file, content: injectTypescriptState(file.content, detection.tsconfig) };
+  }
+  return file;
+}
+
+function injectTypescriptState(content: string, ts: TsconfigFlags): string {
+  const strictLine = ts.strict
+    ? 'Detected in tsconfig: `strict: true`.'
+    : 'Detected in tsconfig: `strict` is NOT enabled. Consider turning it on.';
+  const nuLine = ts.noUncheckedIndexedAccess
+    ? 'Detected in tsconfig: `noUncheckedIndexedAccess: true`.'
+    : 'Detected in tsconfig: `noUncheckedIndexedAccess` is NOT enabled. Consider turning it on.';
+
+  const lines = content.split('\n');
+  let dashes = 0;
+  let insertAt = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i] === '---') {
+      dashes++;
+      if (dashes === 2) { insertAt = i + 1; break; }
+    }
+  }
+  if (insertAt === -1) return content;
+  lines.splice(insertAt, 0, '', `> ${strictLine}`, `> ${nuLine}`);
+  return lines.join('\n');
 }

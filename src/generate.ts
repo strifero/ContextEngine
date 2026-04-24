@@ -108,7 +108,7 @@ async function generateClaude(opts: GenerateOptions): Promise<GenerateResult> {
   const claudeDir = join(projectDir, '.claude');
   const writtenFiles: string[] = [];
 
-  const skillFiles = selectFiles(detected, includeAgents);
+  const skillFiles = selectFiles(detection, includeAgents);
 
   for (const file of skillFiles) {
     const fullPath = join(claudeDir, file.path);
@@ -144,7 +144,7 @@ async function generateCursor(opts: GenerateOptions): Promise<GenerateResult> {
   const rulesDir = join(projectDir, '.cursor', 'rules');
   const writtenFiles: string[] = [];
 
-  const skillFiles = selectFiles(detection.techs, false);
+  const skillFiles = selectFiles(detection, false);
   for (const file of skillFiles) {
     if (!file.path.includes('skills/')) continue;
     const tech = file.path.split('skills/')[1].split('/')[0];
@@ -166,7 +166,7 @@ async function generateCopilot(opts: GenerateOptions): Promise<GenerateResult> {
   const outPath = join(githubDir, 'copilot-instructions.md');
   const writtenFiles: string[] = [];
 
-  const skillFiles = selectFiles(detected, false);
+  const skillFiles = selectFiles(detection, false);
   const stackLine = detected.length > 0 ? detected.join(', ') : 'generic project';
 
   const sections = skillFiles

@@ -30,6 +30,9 @@ name: typescript
 description: TypeScript patterns, type definitions, async conventions, and module structure. Use whenever writing, editing, or reviewing TypeScript code, defining types or interfaces, handling async logic, or structuring modules. Also trigger for strict mode errors, generics, or type inference questions.
 ---
 
+> Detected in tsconfig: `strict: true`.
+> Detected in tsconfig: `noUncheckedIndexedAccess` is NOT enabled. Consider turning it on.
+
 # TypeScript Conventions
 
 ## Compiler Settings

@@ -98,7 +98,7 @@ export async function updateProject(opts: UpdateOptions): Promise<UpdateResult> 
 
   const result: UpdateResult = { added: [], removed: [], kept: [], claudeMdUpdated: false };
 
-  const desired = selectFiles(detected, includeAgents);
+  const desired = selectFiles(detection, includeAgents);
   const desiredPaths = new Set(desired.map(f => f.path));
   const existing = new Set([
     ...collectFiles(claudeDir, 'skills'),

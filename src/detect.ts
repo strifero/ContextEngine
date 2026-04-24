@@ -13,10 +13,16 @@ export type DetectedTech =
 
 export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun' | 'unknown';
 
+export interface TsconfigFlags {
+  strict:                   boolean;
+  noUncheckedIndexedAccess: boolean;
+}
+
 export interface DetectionResult {
   techs:          DetectedTech[];
   packageManager: PackageManager;
   scripts:        Record<string, string>;
+  tsconfig:       TsconfigFlags | null;
 }
 
 interface PackageJson {
@@ -62,6 +68,30 @@ function detectPackageManager(dir: string): PackageManager {
   if (hasFile(dir, 'yarn.lock'))             return 'yarn';
   if (hasFile(dir, 'package-lock.json'))     return 'npm';
   return 'unknown';
+}
+
+// Strip // line and /* */ block comments so tsconfig (JSON-with-comments) parses.
+// Not string-aware, but tsconfig values rarely contain // or /* literally.
+function stripJsonComments(raw: string): string {
+  return raw
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+}
+
+function readTsconfig(dir: string): TsconfigFlags | null {
+  const path = join(dir, 'tsconfig.json');
+  if (!existsSync(path)) return null;
+  try {
+    const raw = readFileSync(path, 'utf-8');
+    const parsed = JSON.parse(stripJsonComments(raw)) as { compilerOptions?: Record<string, unknown> };
+    const co = parsed.compilerOptions ?? {};
+    return {
+      strict:                   co.strict === true,
+      noUncheckedIndexedAccess: co.noUncheckedIndexedAccess === true,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function detectStack(dir: string): Promise<DetectionResult> {
@@ -140,5 +170,6 @@ export async function detectStack(dir: string): Promise<DetectionResult> {
     techs:          Array.from(detected),
     packageManager: detectPackageManager(dir),
     scripts:        pkg?.scripts ?? {},
+    tsconfig:       readTsconfig(dir),
   };
 }
