@@ -246,6 +246,7 @@ const DISPLAY_NAME: Record<DetectedTech, string> = {
   remix:          'Remix',
   nuxt:           'Nuxt',
   nestjs:         'NestJS',
+  fastapi:        'FastAPI',
 };
 
 const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
@@ -603,6 +604,24 @@ const AGENTS_SUMMARY: Record<DetectedTech, AgentsSummary> = {
       'Business logic in controllers. Delegate to services; controllers only wire HTTP to service calls.',
     ],
   },
+  fastapi: {
+    conventions: [
+      'Group routes into `APIRouter`s by resource. Mount them from `main.py`.',
+      'Pydantic models for request and response shapes. Annotate return types for OpenAPI.',
+      '`async def` endpoints. Move CPU work to `run_in_threadpool` so the event loop stays free.',
+    ],
+    avoid: [
+      'Blocking calls (sync DB drivers, `time.sleep`) in `async` endpoints.',
+    ],
+  },
+};
+
+// For fastapi, surface the detected Python tool (poetry/uv/pip) as an
+// additional Conventions bullet so agents know which tooling is in use.
+const PYTHON_TOOL_BULLETS: Record<Exclude<DetectionResult['pythonTool'], null>, string> = {
+  poetry: 'Poetry-managed: `poetry install`, `poetry run uvicorn <app>:app --reload`. Deps live in pyproject.toml.',
+  uv:     'uv-managed: `uv sync`, `uv run uvicorn <app>:app --reload`. Deps live in pyproject.toml.',
+  pip:    'pip-managed: `pip install -r requirements.txt`, then `uvicorn <app>:app --reload`.',
 };
 
 // Techs dropped first when AGENTS.md exceeds the 8 KB cap. Order:
@@ -648,12 +667,16 @@ function buildCommandsSection(scripts: Record<string, string>, runPrefix: string
   return entries.map(([k, v]) => `- \`${runPrefix} ${k}\`: \`${v}\``).join('\n');
 }
 
-function buildSummarySection(techs: DetectedTech[], key: 'conventions' | 'avoid'): string {
+function buildSummarySection(techs: DetectedTech[], key: 'conventions' | 'avoid', detection: DetectionResult): string {
   const bullets: string[] = [];
   for (const t of techs) {
     const entry = AGENTS_SUMMARY[t];
     if (!entry) continue;
     for (const line of entry[key]) bullets.push(`- ${line}`);
+    // Dynamic: surface detected Python tool in fastapi's conventions.
+    if (t === 'fastapi' && key === 'conventions' && detection.pythonTool) {
+      bullets.push(`- ${PYTHON_TOOL_BULLETS[detection.pythonTool]}`);
+    }
   }
   return bullets.length > 0 ? bullets.join('\n') : '(no stack-specific guidance)';
 }
@@ -685,8 +708,8 @@ function renderAgentsMd(
   const stack       = buildStackSection(detected, pkg);
   const monorepo    = buildMonorepoSection(detection.monorepo);
   const commands    = buildCommandsSection(detection.scripts, runPrefixFor(detection.packageManager));
-  const conventions = buildSummarySection(summaryTechs, 'conventions');
-  const avoid       = buildSummarySection(summaryTechs, 'avoid');
+  const conventions = buildSummarySection(summaryTechs, 'conventions', detection);
+  const avoid       = buildSummarySection(summaryTechs, 'avoid', detection);
 
   return `# ${projectName}
 

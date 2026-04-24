@@ -828,6 +828,58 @@ public async Task<User?> GetUserAsync(string id, CancellationToken ct = default)
 // Frameworks added in phase 4 (review before release)
 // ---------------------------------------------------------------------------
 
+export const SKILL_FASTAPI: SkillFile = {
+  path: 'skills/fastapi/SKILL.md',
+  content: `---
+name: fastapi
+description: FastAPI conventions: path operations, Pydantic models, dependency injection, async I/O, routers, and ASGI deployment. Use when building or editing FastAPI services, endpoints, or schemas.
+---
+
+<!-- review before release -->
+
+# FastAPI Conventions
+
+## Structure
+\`\`\`
+app/
+├── main.py                 (FastAPI() instance, router mounts)
+├── api/
+│   ├── routes/
+│   │   └── users.py        (APIRouter per resource)
+│   └── deps.py             (Depends() providers)
+├── schemas/                (Pydantic models for request/response)
+├── services/               (business logic)
+└── db/                     (session, models)
+\`\`\`
+
+## Path Operations
+- Decorators: \`@router.get("/users/{id}")\`, \`@router.post("/users")\`.
+- Request body: typed Pydantic model as a function parameter.
+- Return type annotated for auto-generated OpenAPI schema.
+
+\`\`\`python
+@router.post("/users", response_model=UserRead, status_code=201)
+async def create_user(payload: UserCreate, db: Session = Depends(get_db)) -> UserRead:
+    return await user_service.create(db, payload)
+\`\`\`
+
+## Dependency Injection
+- \`Depends(...)\` for DB sessions, auth, request-scoped resources.
+- Overridable in tests via \`app.dependency_overrides[fn] = stub\`.
+
+## Validation
+- Pydantic v2 for request/response shape. Constrain fields with \`Field(..., min_length=...)\`.
+- Validation errors return 422 with the failing field path automatically.
+
+## Async Patterns
+- Prefer \`async def\` for endpoints and DB calls backed by async drivers.
+- Never block the event loop: move CPU work to a thread pool via \`run_in_threadpool\`.
+
+## Deployment
+- ASGI server: uvicorn (\`uvicorn app.main:app --reload\` in dev, \`gunicorn -k uvicorn.workers.UvicornWorker\` in prod).
+`,
+};
+
 export const SKILL_NESTJS: SkillFile = {
   path: 'skills/nestjs/SKILL.md',
   content: `---

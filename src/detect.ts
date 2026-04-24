@@ -12,9 +12,11 @@ export type DetectedTech =
   | 'go' | 'python' | 'django' | 'rust' | 'bun' | 'php' | 'csharp'
   | 'vitest' | 'jest' | 'playwright' | 'cypress'
   | 'eslint' | 'eslint-flat' | 'biome' | 'prettier'
-  | 'astro' | 'sveltekit' | 'remix' | 'nuxt' | 'nestjs';
+  | 'astro' | 'sveltekit' | 'remix' | 'nuxt' | 'nestjs' | 'fastapi';
 
 export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun' | 'unknown';
+
+export type PythonTool = 'poetry' | 'uv' | 'pip' | null;
 
 export interface TsconfigFlags {
   strict:                   boolean;
@@ -29,6 +31,7 @@ export interface DetectionResult {
   scripts:        Record<string, string>;
   tsconfig:       TsconfigFlags | null;
   monorepo:       Monorepo;
+  pythonTool:     PythonTool;
 }
 
 interface PackageJson {
@@ -88,6 +91,20 @@ function stripJsonComments(raw: string): string {
   return raw
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+}
+
+function fileContainsCI(path: string, needle: string): boolean {
+  if (!existsSync(path)) return false;
+  try { return readFileSync(path, 'utf-8').toLowerCase().includes(needle.toLowerCase()); }
+  catch { return false; }
+}
+
+function detectPythonTool(dir: string): PythonTool {
+  const pyproject = join(dir, 'pyproject.toml');
+  if (hasFile(dir, 'poetry.lock') || fileContainsCI(pyproject, '[tool.poetry]')) return 'poetry';
+  if (hasFile(dir, 'uv.lock')      || fileContainsCI(pyproject, '[tool.uv]'))     return 'uv';
+  if (hasFile(dir, 'requirements.txt') || existsSync(pyproject))                  return 'pip';
+  return null;
 }
 
 function detectMonorepo(dir: string): Monorepo {
@@ -202,6 +219,10 @@ export async function detectStack(dir: string): Promise<DetectionResult> {
   if (hasFile(dir, 'nest-cli.json') || hasDep(pkg, '@nestjs/core'))
     detected.add('nestjs');
 
+  if (fileContainsCI(join(dir, 'requirements.txt'), 'fastapi') ||
+      fileContainsCI(join(dir, 'pyproject.toml'),    'fastapi'))
+    detected.add('fastapi');
+
   // Linters and formatters. eslint-flat wins over eslint if both are present.
   if (hasFile(dir, 'eslint.config.js', 'eslint.config.mjs', 'eslint.config.ts', 'eslint.config.cjs')) {
     detected.add('eslint-flat');
@@ -235,5 +256,6 @@ export async function detectStack(dir: string): Promise<DetectionResult> {
     scripts:        pkg?.scripts ?? {},
     tsconfig:       readTsconfig(dir),
     monorepo:       detectMonorepo(dir),
+    pythonTool:     detectPythonTool(dir),
   };
 }
