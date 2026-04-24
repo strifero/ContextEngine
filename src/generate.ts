@@ -210,11 +210,12 @@ ${sections}
 // the single source of AGENTS.md's condensed guidance.
 
 const DISPLAY_NAME: Record<DetectedTech, string> = {
-  typescript: 'TypeScript',
-  nodejs:     'Node.js',
-  express:    'Express',
-  nextjs:     'Next.js',
-  react:      'React',
+  typescript:    'TypeScript',
+  nodejs:        'Node.js',
+  express:       'Express',
+  'nextjs-app':  'Next.js (App Router)',
+  'nextjs-pages':'Next.js (Pages Router)',
+  react:         'React',
   vite:       'Vite',
   vue:        'Vue',
   tailwind:   'Tailwind CSS',
@@ -235,15 +236,16 @@ const DISPLAY_NAME: Record<DetectedTech, string> = {
 };
 
 const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
-  nextjs:     'next',
-  react:      'react',
-  typescript: 'typescript',
-  vite:       'vite',
-  vue:        'vue',
-  tailwind:   'tailwindcss',
-  express:    'express',
-  stripe:     'stripe',
-  prisma:     '@prisma/client',
+  'nextjs-app':   'next',
+  'nextjs-pages': 'next',
+  react:          'react',
+  typescript:     'typescript',
+  vite:           'vite',
+  vue:            'vue',
+  tailwind:       'tailwindcss',
+  express:        'express',
+  stripe:         'stripe',
+  prisma:         '@prisma/client',
 };
 
 interface AgentsSummary { conventions: string[]; avoid: string[]; }
@@ -278,15 +280,26 @@ const AGENTS_SUMMARY: Record<DetectedTech, AgentsSummary> = {
       'Throwing inside route handlers without a surrounding try/catch.',
     ],
   },
-  nextjs: {
+  'nextjs-app': {
     conventions: [
       'App Router by default. Server Components unless the file declares `"use client"`.',
       'Database access lives in Server Components, Route Handlers, or Server Actions, never client code.',
       'Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).',
     ],
     avoid: [
-      '`getServerSideProps` and `getStaticProps` in App Router projects.',
+      '`getServerSideProps` and `getStaticProps`. The App Router replaced them.',
       'Importing server-only modules from client components.',
+    ],
+  },
+  'nextjs-pages': {
+    conventions: [
+      'File-based routing under `pages/`. Each file maps to a route.',
+      '`getServerSideProps` for per-request data, `getStaticProps` with `getStaticPaths` for build-time data.',
+      'API routes at `pages/api/<name>.ts` export a default handler taking `(req, res)`.',
+    ],
+    avoid: [
+      'App Router conventions (`app/`, Route Handlers, Server Actions) inside `pages/` code.',
+      'Mutating state in `getStaticProps`: it runs at build, not per-request.',
     ],
   },
   react: {

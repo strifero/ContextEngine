@@ -1,7 +1,7 @@
 # Snapshot
 
 ## Detected
-typescript, nextjs, react, nodejs, tailwind
+typescript, nextjs-app, react, nodejs, tailwind
 
 ## Files (1)
 - GEMINI.md
@@ -17,7 +17,7 @@ FILE: GEMINI.md
 ## Stack
 
 - TypeScript 5.5.0
-- Next.js 14.2.0
+- Next.js (App Router) 14.2.0
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
@@ -49,7 +49,7 @@ FILE: GEMINI.md
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- `getServerSideProps` and `getStaticProps` in App Router projects.
+- `getServerSideProps` and `getStaticProps`. The App Router replaced them.
 - Importing server-only modules from client components.
 - Class components in new code.
 - Derived state in `useState` when it can be computed during render.

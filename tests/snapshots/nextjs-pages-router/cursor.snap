@@ -1,64 +1,66 @@
 # Snapshot
 
 ## Detected
-typescript, nextjs, react, nodejs
+typescript, nextjs-pages, react, nodejs
 
 ## Files (4)
-- .cursor/rules/nextjs.mdc
+- .cursor/rules/nextjs-pages.mdc
 - .cursor/rules/nodejs.mdc
 - .cursor/rules/react.mdc
 - .cursor/rules/typescript.mdc
 
 ---
-FILE: .cursor/rules/nextjs.mdc
+FILE: .cursor/rules/nextjs-pages.mdc
 ---
 ---
-description: nextjs best practices and conventions
+description: nextjs-pages best practices and conventions
 globs: ["**/*"]
 alwaysApply: false
 ---
 
 ---
-name: nextjs
-description: Next.js App Router conventions — Server Components, Client Components, API routes, data fetching, and project structure. Use whenever building or editing Next.js pages, layouts, API routes, or server actions. Also trigger for routing, metadata, or image optimization questions.
+name: nextjs-pages
+description: Next.js Pages Router conventions: file-based routing under pages/, getServerSideProps, getStaticProps, API routes at pages/api, and _app / _document customization. Use whenever building or editing a Pages Router project, or the Pages half of a mixed App plus Pages codebase.
 ---
 
-# Next.js App Router Conventions
+# Next.js Pages Router Conventions
 
 ## Structure
 ```
-app/
-├── layout.tsx
-├── page.tsx
-├── (marketing)/
+pages/
+├── _app.tsx
+├── _document.tsx
+├── index.tsx
+├── about.tsx
 ├── dashboard/
-│   ├── layout.tsx
-│   └── page.tsx
+│   └── index.tsx
 └── api/
-    └── route.ts
+    └── users.ts
 ```
 
-## Server vs Client Components
-- Default: Server Component (no `'use client'`)
-- Add `'use client'` only for: hooks, browser APIs, event listeners
-- Keep Client Components as leaf nodes
-
 ## Data Fetching
+- `getServerSideProps` for per-request data
+- `getStaticProps` (with `getStaticPaths` for dynamic routes) for build-time data
+- Client-side fetching only for user-specific or highly interactive data
+
 ```typescript
-export default async function Page() {
-  const data = await fetchData();
-  return <UI data={data} />;
+export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+  const data = await fetchData(ctx.query.id as string);
+  return { props: { data } };
 }
 ```
 
 ## API Routes
 ```typescript
-export async function GET(req: NextRequest) {
-  const id = req.nextUrl.searchParams.get('id');
-  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
-  return NextResponse.json(await getData(id));
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'GET') return res.status(405).end();
+  res.json({ ok: true });
 }
 ```
+
+## Migration Notes
+- New Next.js features (Server Actions, streaming, new metadata API) land on App Router first.
+- Pages Router stays supported. Mixed projects are legal: Pages Router and App Router can coexist during migration.
 
 ## Environment Variables
 - Server-only: `SOME_KEY`

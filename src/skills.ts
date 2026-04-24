@@ -130,10 +130,10 @@ router.get('/:id', async (req: Request, res: Response) => {
 `,
 };
 
-export const SKILL_NEXTJS: SkillFile = {
-  path: 'skills/nextjs/SKILL.md',
+export const SKILL_NEXTJS_APP: SkillFile = {
+  path: 'skills/nextjs-app/SKILL.md',
   content: `---
-name: nextjs
+name: nextjs-app
 description: Next.js App Router conventions — Server Components, Client Components, API routes, data fetching, and project structure. Use whenever building or editing Next.js pages, layouts, API routes, or server actions. Also trigger for routing, metadata, or image optimization questions.
 ---
 
@@ -173,6 +173,58 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(await getData(id));
 }
 \`\`\`
+
+## Environment Variables
+- Server-only: \`SOME_KEY\`
+- Client-exposed: \`NEXT_PUBLIC_SOME_KEY\`
+`,
+};
+
+export const SKILL_NEXTJS_PAGES: SkillFile = {
+  path: 'skills/nextjs-pages/SKILL.md',
+  content: `---
+name: nextjs-pages
+description: Next.js Pages Router conventions: file-based routing under pages/, getServerSideProps, getStaticProps, API routes at pages/api, and _app / _document customization. Use whenever building or editing a Pages Router project, or the Pages half of a mixed App plus Pages codebase.
+---
+
+# Next.js Pages Router Conventions
+
+## Structure
+\`\`\`
+pages/
+├── _app.tsx
+├── _document.tsx
+├── index.tsx
+├── about.tsx
+├── dashboard/
+│   └── index.tsx
+└── api/
+    └── users.ts
+\`\`\`
+
+## Data Fetching
+- \`getServerSideProps\` for per-request data
+- \`getStaticProps\` (with \`getStaticPaths\` for dynamic routes) for build-time data
+- Client-side fetching only for user-specific or highly interactive data
+
+\`\`\`typescript
+export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+  const data = await fetchData(ctx.query.id as string);
+  return { props: { data } };
+}
+\`\`\`
+
+## API Routes
+\`\`\`typescript
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'GET') return res.status(405).end();
+  res.json({ ok: true });
+}
+\`\`\`
+
+## Migration Notes
+- New Next.js features (Server Actions, streaming, new metadata API) land on App Router first.
+- Pages Router stays supported. Mixed projects are legal: Pages Router and App Router can coexist during migration.
 
 ## Environment Variables
 - Server-only: \`SOME_KEY\`

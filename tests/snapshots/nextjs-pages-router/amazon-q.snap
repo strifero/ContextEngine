@@ -1,7 +1,7 @@
 # Snapshot
 
 ## Detected
-typescript, nextjs, react, nodejs
+typescript, nextjs-pages, react, nodejs
 
 ## Files (1)
 - .amazonq/rules/project.md
@@ -17,7 +17,7 @@ FILE: .amazonq/rules/project.md
 ## Stack
 
 - TypeScript
-- Next.js 13.5.0
+- Next.js (Pages Router) 13.5.0
 - React 18.2.0
 - Node.js
 
@@ -30,9 +30,9 @@ FILE: .amazonq/rules/project.md
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- App Router by default. Server Components unless the file declares `"use client"`.
-- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
-- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- File-based routing under `pages/`. Each file maps to a route.
+- `getServerSideProps` for per-request data, `getStaticProps` with `getStaticPaths` for build-time data.
+- API routes at `pages/api/<name>.ts` export a default handler taking `(req, res)`.
 - Function components and hooks only.
 - Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
@@ -42,8 +42,8 @@ FILE: .amazonq/rules/project.md
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- `getServerSideProps` and `getStaticProps` in App Router projects.
-- Importing server-only modules from client components.
+- App Router conventions (`app/`, Route Handlers, Server Actions) inside `pages/` code.
+- Mutating state in `getStaticProps`: it runs at build, not per-request.
 - Class components in new code.
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.

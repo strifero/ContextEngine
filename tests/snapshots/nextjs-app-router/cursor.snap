@@ -1,26 +1,26 @@
 # Snapshot
 
 ## Detected
-typescript, nextjs, react, nodejs, tailwind
+typescript, nextjs-app, react, nodejs, tailwind
 
 ## Files (5)
-- .cursor/rules/nextjs.mdc
+- .cursor/rules/nextjs-app.mdc
 - .cursor/rules/nodejs.mdc
 - .cursor/rules/react.mdc
 - .cursor/rules/tailwind.mdc
 - .cursor/rules/typescript.mdc
 
 ---
-FILE: .cursor/rules/nextjs.mdc
+FILE: .cursor/rules/nextjs-app.mdc
 ---
 ---
-description: nextjs best practices and conventions
+description: nextjs-app best practices and conventions
 globs: ["**/*"]
 alwaysApply: false
 ---
 
 ---
-name: nextjs
+name: nextjs-app
 description: Next.js App Router conventions — Server Components, Client Components, API routes, data fetching, and project structure. Use whenever building or editing Next.js pages, layouts, API routes, or server actions. Also trigger for routing, metadata, or image optimization questions.
 ---
 

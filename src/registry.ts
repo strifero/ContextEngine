@@ -3,7 +3,9 @@
 import type { DetectedTech } from './detect.js';
 import type { SkillFile } from './skills.js';
 import {
-  SKILL_TYPESCRIPT, SKILL_NODEJS, SKILL_EXPRESS, SKILL_NEXTJS, SKILL_REACT,
+  SKILL_TYPESCRIPT, SKILL_NODEJS, SKILL_EXPRESS,
+  SKILL_NEXTJS_APP, SKILL_NEXTJS_PAGES,
+  SKILL_REACT,
   SKILL_VITE, SKILL_VUE, SKILL_TAILWIND, SKILL_SWIFTUI, SKILL_STRIPE,
   SKILL_PRISMA, SKILL_POSTGRESQL, SKILL_MONGODB, SKILL_AZURE, SKILL_DOCKER,
   SKILL_GO, SKILL_PYTHON, SKILL_DJANGO, SKILL_RUST, SKILL_BUN,
@@ -20,7 +22,8 @@ const SKILL_REGISTRY: SkillEntry[] = [
   { triggers: ['typescript'],               files: [SKILL_TYPESCRIPT] },
   { triggers: ['nodejs'],                   files: [SKILL_NODEJS] },
   { triggers: ['express'],                  files: [SKILL_EXPRESS] },
-  { triggers: ['nextjs'],                   files: [SKILL_NEXTJS, SKILL_REACT] },
+  { triggers: ['nextjs-app'],               files: [SKILL_NEXTJS_APP, SKILL_REACT] },
+  { triggers: ['nextjs-pages'],             files: [SKILL_NEXTJS_PAGES, SKILL_REACT] },
   { triggers: ['react'],                    files: [SKILL_REACT] },
   { triggers: ['vite'],                     files: [SKILL_VITE] },
   { triggers: ['vue'],                      files: [SKILL_VUE] },
@@ -43,11 +46,11 @@ const SKILL_REGISTRY: SkillEntry[] = [
 
 const AGENT_REGISTRY: SkillEntry[] = [
   {
-    triggers: ['nodejs', 'express', 'nextjs', 'typescript', 'prisma', 'postgresql', 'mongodb', 'go', 'python', 'django', 'rust', 'bun', 'php'],
+    triggers: ['nodejs', 'express', 'nextjs-app', 'nextjs-pages', 'typescript', 'prisma', 'postgresql', 'mongodb', 'go', 'python', 'django', 'rust', 'bun', 'php'],
     files: [AGENT_BACKEND],
   },
   {
-    triggers: ['nextjs', 'react', 'vue', 'vite', 'tailwind'],
+    triggers: ['nextjs-app', 'nextjs-pages', 'react', 'vue', 'vite', 'tailwind'],
     files: [AGENT_FRONTEND],
   },
   {

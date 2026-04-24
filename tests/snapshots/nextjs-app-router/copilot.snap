@@ -1,7 +1,7 @@
 # Snapshot
 
 ## Detected
-typescript, nextjs, react, nodejs, tailwind
+typescript, nextjs-app, react, nodejs, tailwind
 
 ## Files (1)
 - .github/copilot-instructions.md
@@ -15,7 +15,7 @@ FILE: .github/copilot-instructions.md
 
 ## Project Stack
 
-**Detected:** typescript, nextjs, react, nodejs, tailwind
+**Detected:** typescript, nextjs-app, react, nodejs, tailwind
 
 ## Conventions
 
@@ -105,10 +105,10 @@ for (const key of required) {
 
 ---
 
-## nextjs
+## nextjs-app
 
 ---
-name: nextjs
+name: nextjs-app
 description: Next.js App Router conventions — Server Components, Client Components, API routes, data fetching, and project structure. Use whenever building or editing Next.js pages, layouts, API routes, or server actions. Also trigger for routing, metadata, or image optimization questions.
 ---
 

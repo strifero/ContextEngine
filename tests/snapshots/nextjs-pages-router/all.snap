@@ -1,7 +1,7 @@
 # Snapshot
 
 ## Detected
-typescript, nextjs, react, nodejs
+typescript, nextjs-pages, react, nodejs
 
 ## Files (23)
 - .amazonq/rules/project.md
@@ -9,12 +9,12 @@ typescript, nextjs, react, nodejs
 - .claude/agents/backend-engineer.md
 - .claude/agents/code-reviewer.md
 - .claude/agents/frontend-engineer.md
-- .claude/skills/nextjs/SKILL.md
+- .claude/skills/nextjs-pages/SKILL.md
 - .claude/skills/nodejs/SKILL.md
 - .claude/skills/react/SKILL.md
 - .claude/skills/typescript/SKILL.md
 - .clinerules
-- .cursor/rules/nextjs.mdc
+- .cursor/rules/nextjs-pages.mdc
 - .cursor/rules/nodejs.mdc
 - .cursor/rules/react.mdc
 - .cursor/rules/typescript.mdc
@@ -39,7 +39,7 @@ FILE: .amazonq/rules/project.md
 ## Stack
 
 - TypeScript
-- Next.js 13.5.0
+- Next.js (Pages Router) 13.5.0
 - React 18.2.0
 - Node.js
 
@@ -52,9 +52,9 @@ FILE: .amazonq/rules/project.md
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- App Router by default. Server Components unless the file declares `"use client"`.
-- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
-- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- File-based routing under `pages/`. Each file maps to a route.
+- `getServerSideProps` for per-request data, `getStaticProps` with `getStaticPaths` for build-time data.
+- API routes at `pages/api/<name>.ts` export a default handler taking `(req, res)`.
 - Function components and hooks only.
 - Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
@@ -64,8 +64,8 @@ FILE: .amazonq/rules/project.md
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- `getServerSideProps` and `getStaticProps` in App Router projects.
-- Importing server-only modules from client components.
+- App Router conventions (`app/`, Route Handlers, Server Actions) inside `pages/` code.
+- Mutating state in `getStaticProps`: it runs at build, not per-request.
 - Class components in new code.
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
@@ -85,7 +85,7 @@ FILE: .claude/CLAUDE.md
 
 ## Project Overview
 
-**Detected stack:** typescript, nextjs, react, nodejs
+**Detected stack:** typescript, nextjs-pages, react, nodejs
 
 <!--
   Fill in the sections below to give Claude more context about your project.
@@ -107,7 +107,7 @@ FILE: .claude/CLAUDE.md
 ## Available Skills
 - `typescript`
 - `nodejs`
-- `nextjs`
+- `nextjs-pages`
 - `react`
 
 ## Available Agents
@@ -195,49 +195,51 @@ You are a senior frontend engineer. Focus on user experience, accessibility, and
 - Keyboard navigable
 
 ---
-FILE: .claude/skills/nextjs/SKILL.md
+FILE: .claude/skills/nextjs-pages/SKILL.md
 ---
 ---
-name: nextjs
-description: Next.js App Router conventions — Server Components, Client Components, API routes, data fetching, and project structure. Use whenever building or editing Next.js pages, layouts, API routes, or server actions. Also trigger for routing, metadata, or image optimization questions.
+name: nextjs-pages
+description: Next.js Pages Router conventions: file-based routing under pages/, getServerSideProps, getStaticProps, API routes at pages/api, and _app / _document customization. Use whenever building or editing a Pages Router project, or the Pages half of a mixed App plus Pages codebase.
 ---
 
-# Next.js App Router Conventions
+# Next.js Pages Router Conventions
 
 ## Structure
 ```
-app/
-├── layout.tsx
-├── page.tsx
-├── (marketing)/
+pages/
+├── _app.tsx
+├── _document.tsx
+├── index.tsx
+├── about.tsx
 ├── dashboard/
-│   ├── layout.tsx
-│   └── page.tsx
+│   └── index.tsx
 └── api/
-    └── route.ts
+    └── users.ts
 ```
 
-## Server vs Client Components
-- Default: Server Component (no `'use client'`)
-- Add `'use client'` only for: hooks, browser APIs, event listeners
-- Keep Client Components as leaf nodes
-
 ## Data Fetching
+- `getServerSideProps` for per-request data
+- `getStaticProps` (with `getStaticPaths` for dynamic routes) for build-time data
+- Client-side fetching only for user-specific or highly interactive data
+
 ```typescript
-export default async function Page() {
-  const data = await fetchData();
-  return <UI data={data} />;
+export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+  const data = await fetchData(ctx.query.id as string);
+  return { props: { data } };
 }
 ```
 
 ## API Routes
 ```typescript
-export async function GET(req: NextRequest) {
-  const id = req.nextUrl.searchParams.get('id');
-  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
-  return NextResponse.json(await getData(id));
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'GET') return res.status(405).end();
+  res.json({ ok: true });
 }
 ```
+
+## Migration Notes
+- New Next.js features (Server Actions, streaming, new metadata API) land on App Router first.
+- Pages Router stays supported. Mixed projects are legal: Pages Router and App Router can coexist during migration.
 
 ## Environment Variables
 - Server-only: `SOME_KEY`
@@ -370,7 +372,7 @@ FILE: .clinerules
 ## Stack
 
 - TypeScript
-- Next.js 13.5.0
+- Next.js (Pages Router) 13.5.0
 - React 18.2.0
 - Node.js
 
@@ -383,9 +385,9 @@ FILE: .clinerules
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- App Router by default. Server Components unless the file declares `"use client"`.
-- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
-- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- File-based routing under `pages/`. Each file maps to a route.
+- `getServerSideProps` for per-request data, `getStaticProps` with `getStaticPaths` for build-time data.
+- API routes at `pages/api/<name>.ts` export a default handler taking `(req, res)`.
 - Function components and hooks only.
 - Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
@@ -395,8 +397,8 @@ FILE: .clinerules
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- `getServerSideProps` and `getStaticProps` in App Router projects.
-- Importing server-only modules from client components.
+- App Router conventions (`app/`, Route Handlers, Server Actions) inside `pages/` code.
+- Mutating state in `getStaticProps`: it runs at build, not per-request.
 - Class components in new code.
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
@@ -406,55 +408,57 @@ FILE: .clinerules
 *Generated by [ContextEngine](https://github.com/strifero/ContextEngine). Re-run to refresh.*
 
 ---
-FILE: .cursor/rules/nextjs.mdc
+FILE: .cursor/rules/nextjs-pages.mdc
 ---
 ---
-description: nextjs best practices and conventions
+description: nextjs-pages best practices and conventions
 globs: ["**/*"]
 alwaysApply: false
 ---
 
 ---
-name: nextjs
-description: Next.js App Router conventions — Server Components, Client Components, API routes, data fetching, and project structure. Use whenever building or editing Next.js pages, layouts, API routes, or server actions. Also trigger for routing, metadata, or image optimization questions.
+name: nextjs-pages
+description: Next.js Pages Router conventions: file-based routing under pages/, getServerSideProps, getStaticProps, API routes at pages/api, and _app / _document customization. Use whenever building or editing a Pages Router project, or the Pages half of a mixed App plus Pages codebase.
 ---
 
-# Next.js App Router Conventions
+# Next.js Pages Router Conventions
 
 ## Structure
 ```
-app/
-├── layout.tsx
-├── page.tsx
-├── (marketing)/
+pages/
+├── _app.tsx
+├── _document.tsx
+├── index.tsx
+├── about.tsx
 ├── dashboard/
-│   ├── layout.tsx
-│   └── page.tsx
+│   └── index.tsx
 └── api/
-    └── route.ts
+    └── users.ts
 ```
 
-## Server vs Client Components
-- Default: Server Component (no `'use client'`)
-- Add `'use client'` only for: hooks, browser APIs, event listeners
-- Keep Client Components as leaf nodes
-
 ## Data Fetching
+- `getServerSideProps` for per-request data
+- `getStaticProps` (with `getStaticPaths` for dynamic routes) for build-time data
+- Client-side fetching only for user-specific or highly interactive data
+
 ```typescript
-export default async function Page() {
-  const data = await fetchData();
-  return <UI data={data} />;
+export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+  const data = await fetchData(ctx.query.id as string);
+  return { props: { data } };
 }
 ```
 
 ## API Routes
 ```typescript
-export async function GET(req: NextRequest) {
-  const id = req.nextUrl.searchParams.get('id');
-  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
-  return NextResponse.json(await getData(id));
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'GET') return res.status(405).end();
+  res.json({ ok: true });
 }
 ```
+
+## Migration Notes
+- New Next.js features (Server Actions, streaming, new metadata API) land on App Router first.
+- Pages Router stays supported. Mixed projects are legal: Pages Router and App Router can coexist during migration.
 
 ## Environment Variables
 - Server-only: `SOME_KEY`
@@ -603,7 +607,7 @@ FILE: .github/copilot-instructions.md
 
 ## Project Stack
 
-**Detected:** typescript, nextjs, react, nodejs
+**Detected:** typescript, nextjs-pages, react, nodejs
 
 ## Conventions
 
@@ -693,49 +697,51 @@ for (const key of required) {
 
 ---
 
-## nextjs
+## nextjs-pages
 
 ---
-name: nextjs
-description: Next.js App Router conventions — Server Components, Client Components, API routes, data fetching, and project structure. Use whenever building or editing Next.js pages, layouts, API routes, or server actions. Also trigger for routing, metadata, or image optimization questions.
+name: nextjs-pages
+description: Next.js Pages Router conventions: file-based routing under pages/, getServerSideProps, getStaticProps, API routes at pages/api, and _app / _document customization. Use whenever building or editing a Pages Router project, or the Pages half of a mixed App plus Pages codebase.
 ---
 
-# Next.js App Router Conventions
+# Next.js Pages Router Conventions
 
 ## Structure
 ```
-app/
-├── layout.tsx
-├── page.tsx
-├── (marketing)/
+pages/
+├── _app.tsx
+├── _document.tsx
+├── index.tsx
+├── about.tsx
 ├── dashboard/
-│   ├── layout.tsx
-│   └── page.tsx
+│   └── index.tsx
 └── api/
-    └── route.ts
+    └── users.ts
 ```
 
-## Server vs Client Components
-- Default: Server Component (no `'use client'`)
-- Add `'use client'` only for: hooks, browser APIs, event listeners
-- Keep Client Components as leaf nodes
-
 ## Data Fetching
+- `getServerSideProps` for per-request data
+- `getStaticProps` (with `getStaticPaths` for dynamic routes) for build-time data
+- Client-side fetching only for user-specific or highly interactive data
+
 ```typescript
-export default async function Page() {
-  const data = await fetchData();
-  return <UI data={data} />;
+export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+  const data = await fetchData(ctx.query.id as string);
+  return { props: { data } };
 }
 ```
 
 ## API Routes
 ```typescript
-export async function GET(req: NextRequest) {
-  const id = req.nextUrl.searchParams.get('id');
-  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
-  return NextResponse.json(await getData(id));
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'GET') return res.status(405).end();
+  res.json({ ok: true });
 }
 ```
+
+## Migration Notes
+- New Next.js features (Server Actions, streaming, new metadata API) land on App Router first.
+- Pages Router stays supported. Mixed projects are legal: Pages Router and App Router can coexist during migration.
 
 ## Environment Variables
 - Server-only: `SOME_KEY`
@@ -789,7 +795,7 @@ FILE: .junie/guidelines.md
 ## Stack
 
 - TypeScript
-- Next.js 13.5.0
+- Next.js (Pages Router) 13.5.0
 - React 18.2.0
 - Node.js
 
@@ -802,9 +808,9 @@ FILE: .junie/guidelines.md
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- App Router by default. Server Components unless the file declares `"use client"`.
-- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
-- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- File-based routing under `pages/`. Each file maps to a route.
+- `getServerSideProps` for per-request data, `getStaticProps` with `getStaticPaths` for build-time data.
+- API routes at `pages/api/<name>.ts` export a default handler taking `(req, res)`.
 - Function components and hooks only.
 - Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
@@ -814,8 +820,8 @@ FILE: .junie/guidelines.md
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- `getServerSideProps` and `getStaticProps` in App Router projects.
-- Importing server-only modules from client components.
+- App Router conventions (`app/`, Route Handlers, Server Actions) inside `pages/` code.
+- Mutating state in `getStaticProps`: it runs at build, not per-request.
 - Class components in new code.
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
@@ -835,7 +841,7 @@ FILE: .opencode/AGENTS.md
 ## Stack
 
 - TypeScript
-- Next.js 13.5.0
+- Next.js (Pages Router) 13.5.0
 - React 18.2.0
 - Node.js
 
@@ -848,9 +854,9 @@ FILE: .opencode/AGENTS.md
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- App Router by default. Server Components unless the file declares `"use client"`.
-- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
-- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- File-based routing under `pages/`. Each file maps to a route.
+- `getServerSideProps` for per-request data, `getStaticProps` with `getStaticPaths` for build-time data.
+- API routes at `pages/api/<name>.ts` export a default handler taking `(req, res)`.
 - Function components and hooks only.
 - Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
@@ -860,8 +866,8 @@ FILE: .opencode/AGENTS.md
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- `getServerSideProps` and `getStaticProps` in App Router projects.
-- Importing server-only modules from client components.
+- App Router conventions (`app/`, Route Handlers, Server Actions) inside `pages/` code.
+- Mutating state in `getStaticProps`: it runs at build, not per-request.
 - Class components in new code.
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
@@ -881,7 +887,7 @@ FILE: .roo/rules.md
 ## Stack
 
 - TypeScript
-- Next.js 13.5.0
+- Next.js (Pages Router) 13.5.0
 - React 18.2.0
 - Node.js
 
@@ -894,9 +900,9 @@ FILE: .roo/rules.md
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- App Router by default. Server Components unless the file declares `"use client"`.
-- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
-- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- File-based routing under `pages/`. Each file maps to a route.
+- `getServerSideProps` for per-request data, `getStaticProps` with `getStaticPaths` for build-time data.
+- API routes at `pages/api/<name>.ts` export a default handler taking `(req, res)`.
 - Function components and hooks only.
 - Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
@@ -906,8 +912,8 @@ FILE: .roo/rules.md
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- `getServerSideProps` and `getStaticProps` in App Router projects.
-- Importing server-only modules from client components.
+- App Router conventions (`app/`, Route Handlers, Server Actions) inside `pages/` code.
+- Mutating state in `getStaticProps`: it runs at build, not per-request.
 - Class components in new code.
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
@@ -927,7 +933,7 @@ FILE: .rules
 ## Stack
 
 - TypeScript
-- Next.js 13.5.0
+- Next.js (Pages Router) 13.5.0
 - React 18.2.0
 - Node.js
 
@@ -940,9 +946,9 @@ FILE: .rules
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- App Router by default. Server Components unless the file declares `"use client"`.
-- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
-- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- File-based routing under `pages/`. Each file maps to a route.
+- `getServerSideProps` for per-request data, `getStaticProps` with `getStaticPaths` for build-time data.
+- API routes at `pages/api/<name>.ts` export a default handler taking `(req, res)`.
 - Function components and hooks only.
 - Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
@@ -952,8 +958,8 @@ FILE: .rules
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- `getServerSideProps` and `getStaticProps` in App Router projects.
-- Importing server-only modules from client components.
+- App Router conventions (`app/`, Route Handlers, Server Actions) inside `pages/` code.
+- Mutating state in `getStaticProps`: it runs at build, not per-request.
 - Class components in new code.
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
@@ -973,7 +979,7 @@ FILE: .windsurfrules
 ## Stack
 
 - TypeScript
-- Next.js 13.5.0
+- Next.js (Pages Router) 13.5.0
 - React 18.2.0
 - Node.js
 
@@ -986,9 +992,9 @@ FILE: .windsurfrules
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- App Router by default. Server Components unless the file declares `"use client"`.
-- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
-- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- File-based routing under `pages/`. Each file maps to a route.
+- `getServerSideProps` for per-request data, `getStaticProps` with `getStaticPaths` for build-time data.
+- API routes at `pages/api/<name>.ts` export a default handler taking `(req, res)`.
 - Function components and hooks only.
 - Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
@@ -998,8 +1004,8 @@ FILE: .windsurfrules
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- `getServerSideProps` and `getStaticProps` in App Router projects.
-- Importing server-only modules from client components.
+- App Router conventions (`app/`, Route Handlers, Server Actions) inside `pages/` code.
+- Mutating state in `getStaticProps`: it runs at build, not per-request.
 - Class components in new code.
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
@@ -1019,7 +1025,7 @@ FILE: AGENTS.md
 ## Stack
 
 - TypeScript
-- Next.js 13.5.0
+- Next.js (Pages Router) 13.5.0
 - React 18.2.0
 - Node.js
 
@@ -1032,9 +1038,9 @@ FILE: AGENTS.md
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- App Router by default. Server Components unless the file declares `"use client"`.
-- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
-- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- File-based routing under `pages/`. Each file maps to a route.
+- `getServerSideProps` for per-request data, `getStaticProps` with `getStaticPaths` for build-time data.
+- API routes at `pages/api/<name>.ts` export a default handler taking `(req, res)`.
 - Function components and hooks only.
 - Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
@@ -1044,8 +1050,8 @@ FILE: AGENTS.md
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- `getServerSideProps` and `getStaticProps` in App Router projects.
-- Importing server-only modules from client components.
+- App Router conventions (`app/`, Route Handlers, Server Actions) inside `pages/` code.
+- Mutating state in `getStaticProps`: it runs at build, not per-request.
 - Class components in new code.
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
@@ -1065,7 +1071,7 @@ FILE: CONVENTIONS.md
 ## Stack
 
 - TypeScript
-- Next.js 13.5.0
+- Next.js (Pages Router) 13.5.0
 - React 18.2.0
 - Node.js
 
@@ -1078,9 +1084,9 @@ FILE: CONVENTIONS.md
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- App Router by default. Server Components unless the file declares `"use client"`.
-- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
-- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- File-based routing under `pages/`. Each file maps to a route.
+- `getServerSideProps` for per-request data, `getStaticProps` with `getStaticPaths` for build-time data.
+- API routes at `pages/api/<name>.ts` export a default handler taking `(req, res)`.
 - Function components and hooks only.
 - Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
@@ -1090,8 +1096,8 @@ FILE: CONVENTIONS.md
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- `getServerSideProps` and `getStaticProps` in App Router projects.
-- Importing server-only modules from client components.
+- App Router conventions (`app/`, Route Handlers, Server Actions) inside `pages/` code.
+- Mutating state in `getStaticProps`: it runs at build, not per-request.
 - Class components in new code.
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
@@ -1111,7 +1117,7 @@ FILE: GEMINI.md
 ## Stack
 
 - TypeScript
-- Next.js 13.5.0
+- Next.js (Pages Router) 13.5.0
 - React 18.2.0
 - Node.js
 
@@ -1124,9 +1130,9 @@ FILE: GEMINI.md
 - Run with `strict: true` in tsconfig. Prefer `interface` for object shapes and `type` for unions.
 - All async code uses async/await. No raw `.then()` chains in application code.
 - Files kebab-case, types PascalCase, functions and vars camelCase, constants SCREAMING_SNAKE_CASE.
-- App Router by default. Server Components unless the file declares `"use client"`.
-- Database access lives in Server Components, Route Handlers, or Server Actions, never client code.
-- Route Handlers at `app/<path>/route.ts` export named methods (GET, POST, etc.).
+- File-based routing under `pages/`. Each file maps to a route.
+- `getServerSideProps` for per-request data, `getStaticProps` with `getStaticPaths` for build-time data.
+- API routes at `pages/api/<name>.ts` export a default handler taking `(req, res)`.
 - Function components and hooks only.
 - Lift state to the lowest common ancestor. Co-locate state with the component that owns it.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
@@ -1136,8 +1142,8 @@ FILE: GEMINI.md
 
 - Using `any`. Reach for `unknown` and narrow with type guards.
 - Type assertions (`as X`) except at boundaries you control.
-- `getServerSideProps` and `getStaticProps` in App Router projects.
-- Importing server-only modules from client components.
+- App Router conventions (`app/`, Route Handlers, Server Actions) inside `pages/` code.
+- Mutating state in `getStaticProps`: it runs at build, not per-request.
 - Class components in new code.
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.

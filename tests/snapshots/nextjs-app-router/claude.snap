@@ -1,14 +1,14 @@
 # Snapshot
 
 ## Detected
-typescript, nextjs, react, nodejs, tailwind
+typescript, nextjs-app, react, nodejs, tailwind
 
 ## Files (9)
 - .claude/CLAUDE.md
 - .claude/agents/backend-engineer.md
 - .claude/agents/code-reviewer.md
 - .claude/agents/frontend-engineer.md
-- .claude/skills/nextjs/SKILL.md
+- .claude/skills/nextjs-app/SKILL.md
 - .claude/skills/nodejs/SKILL.md
 - .claude/skills/react/SKILL.md
 - .claude/skills/tailwind/SKILL.md
@@ -25,7 +25,7 @@ FILE: .claude/CLAUDE.md
 
 ## Project Overview
 
-**Detected stack:** typescript, nextjs, react, nodejs, tailwind
+**Detected stack:** typescript, nextjs-app, react, nodejs, tailwind
 
 <!--
   Fill in the sections below to give Claude more context about your project.
@@ -47,7 +47,7 @@ FILE: .claude/CLAUDE.md
 ## Available Skills
 - `typescript`
 - `nodejs`
-- `nextjs`
+- `nextjs-app`
 - `react`
 - `tailwind`
 
@@ -136,10 +136,10 @@ You are a senior frontend engineer. Focus on user experience, accessibility, and
 - Keyboard navigable
 
 ---
-FILE: .claude/skills/nextjs/SKILL.md
+FILE: .claude/skills/nextjs-app/SKILL.md
 ---
 ---
-name: nextjs
+name: nextjs-app
 description: Next.js App Router conventions — Server Components, Client Components, API routes, data fetching, and project structure. Use whenever building or editing Next.js pages, layouts, API routes, or server actions. Also trigger for routing, metadata, or image optimization questions.
 ---
 

@@ -4,7 +4,9 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 export type DetectedTech =
-  | 'typescript' | 'nodejs' | 'express' | 'nextjs' | 'react'
+  | 'typescript' | 'nodejs' | 'express'
+  | 'nextjs-app' | 'nextjs-pages'
+  | 'react'
   | 'vite' | 'vue' | 'tailwind' | 'swiftui' | 'stripe'
   | 'prisma' | 'postgresql' | 'mongodb' | 'azure' | 'docker'
   | 'go' | 'python' | 'django' | 'rust' | 'bun' | 'php' | 'csharp';
@@ -69,8 +71,18 @@ export async function detectStack(dir: string): Promise<DetectionResult> {
   if (hasFile(dir, 'tsconfig.json') || hasExtension(dir, '.ts') || hasExtension(dir, '.tsx'))
     detected.add('typescript');
 
-  if (hasFile(dir, 'next.config.js', 'next.config.ts', 'next.config.mjs') || hasDep(pkg, 'next')) {
-    detected.add('nextjs'); detected.add('react'); detected.add('nodejs');
+  const hasNext = hasFile(dir, 'next.config.js', 'next.config.ts', 'next.config.mjs') || hasDep(pkg, 'next');
+  if (hasNext) {
+    // Plan task 3.3:
+    //   app/ present (or both)          -> nextjs-app
+    //   pages/ present and no app/      -> nextjs-pages
+    //   neither present                 -> nextjs-app (new-project default)
+    const hasAppDir   = existsSync(join(dir, 'app'))   || existsSync(join(dir, 'src', 'app'));
+    const hasPagesDir = existsSync(join(dir, 'pages')) || existsSync(join(dir, 'src', 'pages'));
+    if (hasPagesDir && !hasAppDir) detected.add('nextjs-pages');
+    else                            detected.add('nextjs-app');
+    detected.add('react');
+    detected.add('nodejs');
   }
 
   if (hasDep(pkg, 'react', 'react-dom')) detected.add('react');
@@ -80,7 +92,7 @@ export async function detectStack(dir: string): Promise<DetectionResult> {
 
   if (hasDep(pkg, 'vue', '@vue/core', 'nuxt')) detected.add('vue');
 
-  if (pkg && !detected.has('nextjs')) detected.add('nodejs');
+  if (pkg && !hasNext) detected.add('nodejs');
 
   if (hasFile(dir, 'bun.lockb', 'bun.lock')) detected.add('bun');
 
