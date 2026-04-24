@@ -242,6 +242,7 @@ const DISPLAY_NAME: Record<DetectedTech, string> = {
   biome:          'Biome',
   prettier:       'Prettier',
   astro:          'Astro',
+  sveltekit:      'SvelteKit',
 };
 
 const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
@@ -260,6 +261,7 @@ const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
   playwright:     '@playwright/test',
   cypress:        'cypress',
   astro:          'astro',
+  sveltekit:      '@sveltejs/kit',
 };
 
 interface AgentsSummary { conventions: string[]; avoid: string[]; }
@@ -553,6 +555,16 @@ const AGENTS_SUMMARY: Record<DetectedTech, AgentsSummary> = {
     ],
     avoid: [
       'Hydrating whole pages. Push `client:*` directives down to the smallest island.',
+    ],
+  },
+  sveltekit: {
+    conventions: [
+      'Routes under `src/routes/`. `+page.server.ts` for server-only loads and form actions, `+page.ts` for universal.',
+      'API endpoints: `+server.ts` exporting `GET`, `POST`, etc. Return `Response` or use `json()`.',
+      'Use `$env/static/private` and `$env/static/public` to keep secrets out of client bundles.',
+    ],
+    avoid: [
+      'Importing server-only code from `+page.svelte` or `+layout.svelte`.',
     ],
   },
 };

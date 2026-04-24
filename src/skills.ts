@@ -828,6 +828,57 @@ public async Task<User?> GetUserAsync(string id, CancellationToken ct = default)
 // Frameworks added in phase 4 (review before release)
 // ---------------------------------------------------------------------------
 
+export const SKILL_SVELTEKIT: SkillFile = {
+  path: 'skills/sveltekit/SKILL.md',
+  content: `---
+name: sveltekit
+description: SvelteKit conventions: file-based routing, load functions, form actions, adapters, and runes. Use when building or editing a SvelteKit app, routes, or API endpoints.
+---
+
+<!-- review before release -->
+
+# SvelteKit Conventions
+
+## Structure
+\`\`\`
+src/
+├── routes/
+│   ├── +layout.svelte
+│   ├── +page.svelte
+│   ├── +page.server.ts         (server-only load, actions)
+│   ├── +page.ts                (universal load)
+│   └── api/
+│       └── +server.ts          (HTTP endpoint)
+├── lib/                        (importable as $lib)
+└── app.html
+\`\`\`
+
+## Load Functions
+- \`+page.server.ts\` \`load()\` runs on the server only. Safe for secrets and DB access.
+- \`+page.ts\` \`load()\` runs on both server (first request) and client (navigation).
+- Return serializable data. Throw \`redirect()\` or \`error()\` from sveltekit for control flow.
+
+## Form Actions
+- \`+page.server.ts\` \`actions\` for progressively-enhanced forms.
+- Use \`enhance\` in \`<form use:enhance>\` for the SPA-style upgrade.
+
+## Endpoints
+- \`+server.ts\` exports \`GET\`, \`POST\`, etc. Return \`Response\` or use \`json()\`.
+
+## Runes (Svelte 5)
+- \`$state\`, \`$derived\`, \`$effect\` replace stores for component state.
+- Props: \`let { foo, bar } = $props()\`.
+
+## Adapters
+- Pick one in \`svelte.config.js\` (\`@sveltejs/adapter-auto\`, \`-node\`, \`-vercel\`, etc.).
+- Adapter determines deployment target; match it to the host.
+
+## Environment
+- Public vars: \`PUBLIC_\`-prefixed, accessed via \`$env/static/public\` or \`$env/dynamic/public\`.
+- Private vars: \`$env/static/private\` only inside server code.
+`,
+};
+
 export const SKILL_ASTRO: SkillFile = {
   path: 'skills/astro/SKILL.md',
   content: `---

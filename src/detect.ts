@@ -12,7 +12,7 @@ export type DetectedTech =
   | 'go' | 'python' | 'django' | 'rust' | 'bun' | 'php' | 'csharp'
   | 'vitest' | 'jest' | 'playwright' | 'cypress'
   | 'eslint' | 'eslint-flat' | 'biome' | 'prettier'
-  | 'astro';
+  | 'astro' | 'sveltekit';
 
 export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun' | 'unknown';
 
@@ -183,6 +183,9 @@ export async function detectStack(dir: string): Promise<DetectionResult> {
 
   if (hasFile(dir, 'astro.config.js', 'astro.config.mjs', 'astro.config.ts') || hasDep(pkg, 'astro'))
     detected.add('astro');
+
+  if (hasDep(pkg, '@sveltejs/kit'))
+    detected.add('sveltekit');
 
   // Linters and formatters. eslint-flat wins over eslint if both are present.
   if (hasFile(dir, 'eslint.config.js', 'eslint.config.mjs', 'eslint.config.ts', 'eslint.config.cjs')) {

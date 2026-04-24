@@ -1,0 +1,143 @@
+# Snapshot
+
+## Detected
+vite, nodejs, sveltekit
+
+## Files (3)
+- .cursor/rules/nodejs.mdc
+- .cursor/rules/sveltekit.mdc
+- .cursor/rules/vite.mdc
+
+---
+FILE: .cursor/rules/nodejs.mdc
+---
+---
+description: nodejs best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: nodejs
+description: Node.js runtime conventions, environment configuration, process management, and server bootstrap patterns. Use whenever writing server entry points, handling env vars, setting up process signals, or debugging Node.js runtime issues.
+---
+
+# Node.js Conventions
+
+## Runtime
+- Node.js 20+ LTS — use native `fetch`, `crypto`
+- Always specify `"engines": { "node": ">=20" }` in package.json
+
+## Environment Variables
+- Validate all required env vars at startup — fail fast
+```typescript
+const required = ['DATABASE_URL', 'API_KEY'];
+for (const key of required) {
+  if (!process.env[key]) throw new Error(`Missing env var: ${key}`);
+}
+```
+- Never read `process.env` deep in business logic — read at startup, pass down
+
+## Process Management
+- Handle `SIGTERM` and `SIGINT` for graceful shutdown
+- Register `process.on('unhandledRejection', ...)` at startup — log + exit(1)
+
+## Logging
+- Structured JSON logging (pino or similar) in production
+- Log level via `LOG_LEVEL` env var
+- Always include: timestamp, level, message, module
+
+## Package Conventions
+- Commit `package-lock.json`
+- Pin exact versions for infrastructure packages
+- Scripts: always define `start`, `build`, `dev`, `typecheck`, `lint`
+
+---
+FILE: .cursor/rules/sveltekit.mdc
+---
+---
+description: sveltekit best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: sveltekit
+description: SvelteKit conventions: file-based routing, load functions, form actions, adapters, and runes. Use when building or editing a SvelteKit app, routes, or API endpoints.
+---
+
+<!-- review before release -->
+
+# SvelteKit Conventions
+
+## Structure
+```
+src/
+├── routes/
+│   ├── +layout.svelte
+│   ├── +page.svelte
+│   ├── +page.server.ts         (server-only load, actions)
+│   ├── +page.ts                (universal load)
+│   └── api/
+│       └── +server.ts          (HTTP endpoint)
+├── lib/                        (importable as $lib)
+└── app.html
+```
+
+## Load Functions
+- `+page.server.ts` `load()` runs on the server only. Safe for secrets and DB access.
+- `+page.ts` `load()` runs on both server (first request) and client (navigation).
+- Return serializable data. Throw `redirect()` or `error()` from sveltekit for control flow.
+
+## Form Actions
+- `+page.server.ts` `actions` for progressively-enhanced forms.
+- Use `enhance` in `<form use:enhance>` for the SPA-style upgrade.
+
+## Endpoints
+- `+server.ts` exports `GET`, `POST`, etc. Return `Response` or use `json()`.
+
+## Runes (Svelte 5)
+- `$state`, `$derived`, `$effect` replace stores for component state.
+- Props: `let { foo, bar } = $props()`.
+
+## Adapters
+- Pick one in `svelte.config.js` (`@sveltejs/adapter-auto`, `-node`, `-vercel`, etc.).
+- Adapter determines deployment target; match it to the host.
+
+## Environment
+- Public vars: `PUBLIC_`-prefixed, accessed via `$env/static/public` or `$env/dynamic/public`.
+- Private vars: `$env/static/private` only inside server code.
+
+---
+FILE: .cursor/rules/vite.mdc
+---
+---
+description: vite best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: vite
+description: Vite project conventions — config structure, environment variables, build optimization, and plugin setup.
+---
+
+# Vite Conventions
+
+## Config
+```typescript
+export default defineConfig({
+  plugins: [],
+  resolve: { alias: { '@': '/src' } },
+  build: { target: 'es2022', sourcemap: false },
+});
+```
+
+## Environment Variables
+- Prefix with `VITE_` to expose to client
+- Access via `import.meta.env.VITE_API_URL`
+- `.env.local` for local overrides — never commit
+
+## Build
+- Dynamic `import()` for route-level code splitting
+- `vite-bundle-visualizer` to diagnose large bundles
