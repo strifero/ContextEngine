@@ -243,6 +243,7 @@ const DISPLAY_NAME: Record<DetectedTech, string> = {
   prettier:       'Prettier',
   astro:          'Astro',
   sveltekit:      'SvelteKit',
+  remix:          'Remix',
 };
 
 const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
@@ -262,6 +263,7 @@ const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
   cypress:        'cypress',
   astro:          'astro',
   sveltekit:      '@sveltejs/kit',
+  remix:          '@remix-run/react',
 };
 
 interface AgentsSummary { conventions: string[]; avoid: string[]; }
@@ -565,6 +567,16 @@ const AGENTS_SUMMARY: Record<DetectedTech, AgentsSummary> = {
     ],
     avoid: [
       'Importing server-only code from `+page.svelte` or `+layout.svelte`.',
+    ],
+  },
+  remix: {
+    conventions: [
+      'Data via `loader` (GET-like) and `action` (form submissions). Both server-only.',
+      'Nested routing: parents render `<Outlet />`, children compose in. Loaders run in parallel.',
+      'Resource routes (no default export) become API endpoints returning `Response`.',
+    ],
+    avoid: [
+      'Fetching in components. Move to `loader`; return via `useLoaderData()`.',
     ],
   },
 };

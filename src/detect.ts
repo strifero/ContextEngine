@@ -12,7 +12,7 @@ export type DetectedTech =
   | 'go' | 'python' | 'django' | 'rust' | 'bun' | 'php' | 'csharp'
   | 'vitest' | 'jest' | 'playwright' | 'cypress'
   | 'eslint' | 'eslint-flat' | 'biome' | 'prettier'
-  | 'astro' | 'sveltekit';
+  | 'astro' | 'sveltekit' | 'remix';
 
 export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun' | 'unknown';
 
@@ -46,6 +46,12 @@ function hasDep(pkg: PackageJson | null, ...names: string[]): boolean {
   if (!pkg) return false;
   const all = { ...pkg.dependencies, ...pkg.devDependencies };
   return names.some(n => n in all);
+}
+
+function hasDepWithPrefix(pkg: PackageJson | null, prefix: string): boolean {
+  if (!pkg) return false;
+  const all = { ...pkg.dependencies, ...pkg.devDependencies };
+  return Object.keys(all).some(k => k.startsWith(prefix));
 }
 
 function hasFile(dir: string, ...names: string[]): boolean {
@@ -186,6 +192,9 @@ export async function detectStack(dir: string): Promise<DetectionResult> {
 
   if (hasDep(pkg, '@sveltejs/kit'))
     detected.add('sveltekit');
+
+  if (hasDepWithPrefix(pkg, '@remix-run/'))
+    detected.add('remix');
 
   // Linters and formatters. eslint-flat wins over eslint if both are present.
   if (hasFile(dir, 'eslint.config.js', 'eslint.config.mjs', 'eslint.config.ts', 'eslint.config.cjs')) {

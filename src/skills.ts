@@ -828,6 +828,60 @@ public async Task<User?> GetUserAsync(string id, CancellationToken ct = default)
 // Frameworks added in phase 4 (review before release)
 // ---------------------------------------------------------------------------
 
+export const SKILL_REMIX: SkillFile = {
+  path: 'skills/remix/SKILL.md',
+  content: `---
+name: remix
+description: Remix conventions: nested routing, loaders, actions, resource routes, and progressive enhancement. Use when building or editing a Remix app, routes, or API endpoints.
+---
+
+<!-- review before release -->
+
+# Remix Conventions
+
+## Structure
+\`\`\`
+app/
+├── root.tsx                    (outer layout)
+├── routes/
+│   ├── _index.tsx              (home route)
+│   ├── about.tsx               (/about)
+│   ├── users.$id.tsx           (/users/:id)
+│   └── api.health.ts           (resource route)
+└── entry.server.tsx
+\`\`\`
+
+## Loaders and Actions
+- \`loader(args)\`: server-side data fetching. Returns JSON, a Response, or a redirect.
+- \`action(args)\`: form handling. Non-GET submissions route here.
+- Both run only on the server. Safe to read env, DB, secrets.
+
+\`\`\`typescript
+export async function loader({ params }: LoaderFunctionArgs) {
+  const user = await db.user.find(params.id);
+  if (!user) throw new Response('Not found', { status: 404 });
+  return json({ user });
+}
+\`\`\`
+
+## Form Progressive Enhancement
+- Use \`<Form method="post">\` from @remix-run/react. Works without JS; upgrades when hydrated.
+- Validation errors: return \`json({ errors }, { status: 400 })\` from action.
+
+## Resource Routes
+- Routes that export only loader/action (no component) become API endpoints.
+- Return \`Response\` directly for non-JSON payloads.
+
+## Nested Routing
+- Parent routes render an \`<Outlet />\`; children compose into it.
+- Each route's loader runs in parallel on navigation.
+
+## Environment
+- No public prefix. Everything read in server code (loaders/actions) stays server-side.
+- Expose values to the client only via loader return.
+`,
+};
+
 export const SKILL_SVELTEKIT: SkillFile = {
   path: 'skills/sveltekit/SKILL.md',
   content: `---
