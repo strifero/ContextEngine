@@ -214,7 +214,7 @@ Generated output files for common stacks:
 
 Skills are plain markdown files in `src/skills/`. To add a stack:
 
-1. Create `src/skills/<n>.ts`
+1. Create `src/skills/<name>.ts`
 2. Add detection to `src/detect.ts`
 3. Wire up in `src/registry.ts`
 4. Open a PR
