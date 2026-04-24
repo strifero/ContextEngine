@@ -1,6 +1,14 @@
 {
   "name": "nextjs-app",
   "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "vitest",
+    "prepare": "husky install"
+  },
   "dependencies": {
     "next": "14.2.0",
     "react": "18.3.0",

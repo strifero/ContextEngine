@@ -23,7 +23,12 @@ FILE: .roo/rules.md
 
 ## Commands
 
-(no package.json scripts detected. Fill in the commands agents should run for build, test, lint, etc.)
+- `npm run dev`: `tsx src/index.ts`
+- `npm run build`: `tsc`
+- `npm run start`: `node dist/index.js`
+- `npm run db:migrate`: `prisma migrate dev`
+- `npm run db:seed`: `tsx prisma/seed.ts`
+- `npm run test`: `node --test`
 
 ## Conventions
 

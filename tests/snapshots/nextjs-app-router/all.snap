@@ -48,7 +48,11 @@ FILE: .amazonq/rules/project.md
 
 ## Commands
 
-(no package.json scripts detected. Fill in the commands agents should run for build, test, lint, etc.)
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
+- `npm run start`: `next start`
+- `npm run lint`: `next lint`
+- `npm run test`: `vitest`
 
 ## Conventions
 
@@ -415,7 +419,11 @@ FILE: .clinerules
 
 ## Commands
 
-(no package.json scripts detected. Fill in the commands agents should run for build, test, lint, etc.)
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
+- `npm run start`: `next start`
+- `npm run lint`: `next lint`
+- `npm run test`: `vitest`
 
 ## Conventions
 
@@ -907,7 +915,11 @@ FILE: .junie/guidelines.md
 
 ## Commands
 
-(no package.json scripts detected. Fill in the commands agents should run for build, test, lint, etc.)
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
+- `npm run start`: `next start`
+- `npm run lint`: `next lint`
+- `npm run test`: `vitest`
 
 ## Conventions
 
@@ -957,7 +969,11 @@ FILE: .opencode/AGENTS.md
 
 ## Commands
 
-(no package.json scripts detected. Fill in the commands agents should run for build, test, lint, etc.)
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
+- `npm run start`: `next start`
+- `npm run lint`: `next lint`
+- `npm run test`: `vitest`
 
 ## Conventions
 
@@ -1007,7 +1023,11 @@ FILE: .roo/rules.md
 
 ## Commands
 
-(no package.json scripts detected. Fill in the commands agents should run for build, test, lint, etc.)
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
+- `npm run start`: `next start`
+- `npm run lint`: `next lint`
+- `npm run test`: `vitest`
 
 ## Conventions
 
@@ -1057,7 +1077,11 @@ FILE: .rules
 
 ## Commands
 
-(no package.json scripts detected. Fill in the commands agents should run for build, test, lint, etc.)
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
+- `npm run start`: `next start`
+- `npm run lint`: `next lint`
+- `npm run test`: `vitest`
 
 ## Conventions
 
@@ -1107,7 +1131,11 @@ FILE: .windsurfrules
 
 ## Commands
 
-(no package.json scripts detected. Fill in the commands agents should run for build, test, lint, etc.)
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
+- `npm run start`: `next start`
+- `npm run lint`: `next lint`
+- `npm run test`: `vitest`
 
 ## Conventions
 
@@ -1157,7 +1185,11 @@ FILE: AGENTS.md
 
 ## Commands
 
-(no package.json scripts detected. Fill in the commands agents should run for build, test, lint, etc.)
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
+- `npm run start`: `next start`
+- `npm run lint`: `next lint`
+- `npm run test`: `vitest`
 
 ## Conventions
 
@@ -1207,7 +1239,11 @@ FILE: CONVENTIONS.md
 
 ## Commands
 
-(no package.json scripts detected. Fill in the commands agents should run for build, test, lint, etc.)
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
+- `npm run start`: `next start`
+- `npm run lint`: `next lint`
+- `npm run test`: `vitest`
 
 ## Conventions
 
@@ -1257,7 +1293,11 @@ FILE: GEMINI.md
 
 ## Commands
 
-(no package.json scripts detected. Fill in the commands agents should run for build, test, lint, etc.)
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
+- `npm run start`: `next start`
+- `npm run lint`: `next lint`
+- `npm run test`: `vitest`
 
 ## Conventions
 

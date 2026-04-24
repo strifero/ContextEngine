@@ -460,11 +460,29 @@ function buildStackSection(detected: DetectedTech[], pkg: PkgJson | null): strin
   return detected.map(t => `- ${techWithVersion(t, pkg)}`).join('\n');
 }
 
-function buildCommandsSection(pkg: PkgJson | null): string {
+// Script names extracted into the Commands section. Prefix match via
+// `db:` and `test:` handled separately. Case-insensitive.
+const KNOWN_SCRIPT_NAMES = new Set([
+  'dev', 'start', 'build',
+  'test',
+  'lint', 'format',
+  'typecheck', 'type-check', 'tsc',
+  'migrate', 'seed',
+]);
+
+function isKnownScript(name: string): boolean {
+  const lower = name.toLowerCase();
+  if (KNOWN_SCRIPT_NAMES.has(lower)) return true;
+  if (lower.startsWith('test:')) return true;
+  if (lower.startsWith('db:')) return true;
+  return false;
+}
+
+function buildCommandsSection(pkg: PkgJson | null, runPrefix: string = 'npm run'): string {
   const scripts = pkg?.scripts ?? {};
-  const entries = Object.entries(scripts);
-  if (entries.length === 0) return '(no package.json scripts detected. Fill in the commands agents should run for build, test, lint, etc.)';
-  return entries.map(([k, v]) => `- \`npm run ${k}\`: \`${v}\``).join('\n');
+  const entries = Object.entries(scripts).filter(([k]) => isKnownScript(k));
+  if (entries.length === 0) return '(no recognized package.json scripts. Fill in the commands agents should run for build, test, lint, etc.)';
+  return entries.map(([k, v]) => `- \`${runPrefix} ${k}\`: \`${v}\``).join('\n');
 }
 
 function buildSummarySection(techs: DetectedTech[], key: 'conventions' | 'avoid'): string {

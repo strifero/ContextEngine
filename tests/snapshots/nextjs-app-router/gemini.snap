@@ -24,7 +24,11 @@ FILE: GEMINI.md
 
 ## Commands
 
-(no package.json scripts detected. Fill in the commands agents should run for build, test, lint, etc.)
+- `npm run dev`: `next dev`
+- `npm run build`: `next build`
+- `npm run start`: `next start`
+- `npm run lint`: `next lint`
+- `npm run test`: `vitest`
 
 ## Conventions
 

@@ -21,7 +21,7 @@ FILE: AGENTS.md
 
 ## Commands
 
-(no package.json scripts detected. Fill in the commands agents should run for build, test, lint, etc.)
+(no recognized package.json scripts. Fill in the commands agents should run for build, test, lint, etc.)
 
 ## Conventions
 
