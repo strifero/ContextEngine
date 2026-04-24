@@ -13,14 +13,14 @@ export type DetectedTech =
   | 'vitest' | 'jest' | 'playwright' | 'cypress'
   | 'eslint' | 'eslint-flat' | 'biome' | 'prettier'
   | 'astro' | 'sveltekit' | 'remix' | 'nuxt' | 'nestjs' | 'fastapi'
-  | 'rails';
+  | 'rails' | 'laravel';
 
 // Widened in phase 4 to cover non-Node ecosystems. The prefix logic in
 // generate.ts only produces script prefixes for the Node-family tools
 // (npm/pnpm/yarn/bun); non-Node values are informational.
 export type PackageManager =
   | 'npm' | 'pnpm' | 'yarn' | 'bun'
-  | 'bundler'
+  | 'bundler' | 'composer'
   | 'unknown';
 
 export type PythonTool = 'poetry' | 'uv' | 'pip' | null;
@@ -89,7 +89,8 @@ function detectPackageManager(dir: string): PackageManager {
   if (hasFile(dir, 'pnpm-lock.yaml'))        return 'pnpm';
   if (hasFile(dir, 'yarn.lock'))             return 'yarn';
   if (hasFile(dir, 'package-lock.json'))     return 'npm';
-  if (hasFile(dir, 'Gemfile.lock', 'Gemfile')) return 'bundler';
+  if (hasFile(dir, 'Gemfile.lock', 'Gemfile'))      return 'bundler';
+  if (hasFile(dir, 'composer.lock', 'composer.json')) return 'composer';
   return 'unknown';
 }
 
@@ -233,6 +234,9 @@ export async function detectStack(dir: string): Promise<DetectionResult> {
 
   if (fileContainsCI(join(dir, 'Gemfile'), 'rails') || existsSync(join(dir, 'config', 'application.rb')))
     detected.add('rails');
+
+  if (fileContainsCI(join(dir, 'composer.json'), 'laravel/framework') || existsSync(join(dir, 'artisan')))
+    detected.add('laravel');
 
   // Linters and formatters. eslint-flat wins over eslint if both are present.
   if (hasFile(dir, 'eslint.config.js', 'eslint.config.mjs', 'eslint.config.ts', 'eslint.config.cjs')) {

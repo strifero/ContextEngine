@@ -12,7 +12,7 @@ import {
   SKILL_PHP, SKILL_CSHARP,
   SKILL_VITEST, SKILL_JEST, SKILL_PLAYWRIGHT, SKILL_CYPRESS,
   SKILL_ASTRO, SKILL_SVELTEKIT, SKILL_REMIX, SKILL_NUXT, SKILL_NESTJS,
-  SKILL_FASTAPI, SKILL_RAILS,
+  SKILL_FASTAPI, SKILL_RAILS, SKILL_LARAVEL,
   AGENT_BACKEND, AGENT_FRONTEND, AGENT_IOS, AGENT_REVIEWER, AGENT_DEVOPS,
 } from './skills.js';
 
@@ -52,6 +52,7 @@ const SKILL_REGISTRY: SkillEntry[] = [
   { triggers: ['nestjs'],                   files: [SKILL_NESTJS] },
   { triggers: ['fastapi'],                  files: [SKILL_FASTAPI] },
   { triggers: ['rails'],                    files: [SKILL_RAILS] },
+  { triggers: ['laravel'],                  files: [SKILL_LARAVEL] },
   { triggers: ['vitest'],                   files: [SKILL_VITEST] },
   { triggers: ['jest'],                     files: [SKILL_JEST] },
   { triggers: ['playwright'],               files: [SKILL_PLAYWRIGHT] },
@@ -60,7 +61,7 @@ const SKILL_REGISTRY: SkillEntry[] = [
 
 const AGENT_REGISTRY: SkillEntry[] = [
   {
-    triggers: ['nodejs', 'express', 'nextjs-app', 'nextjs-pages', 'nestjs', 'fastapi', 'rails', 'typescript', 'prisma', 'postgresql', 'mongodb', 'go', 'python', 'django', 'rust', 'bun', 'php'],
+    triggers: ['nodejs', 'express', 'nextjs-app', 'nextjs-pages', 'nestjs', 'fastapi', 'rails', 'laravel', 'typescript', 'prisma', 'postgresql', 'mongodb', 'go', 'python', 'django', 'rust', 'bun', 'php'],
     files: [AGENT_BACKEND],
   },
   {

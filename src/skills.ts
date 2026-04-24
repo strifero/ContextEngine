@@ -828,6 +828,63 @@ public async Task<User?> GetUserAsync(string id, CancellationToken ct = default)
 // Frameworks added in phase 4 (review before release)
 // ---------------------------------------------------------------------------
 
+export const SKILL_LARAVEL: SkillFile = {
+  path: 'skills/laravel/SKILL.md',
+  content: `---
+name: laravel
+description: Laravel conventions: routing, controllers, Eloquent ORM, migrations, Artisan commands, queued jobs, and validation. Use when building or editing a Laravel app, controllers, models, or migrations.
+---
+
+<!-- review before release -->
+
+# Laravel Conventions
+
+## Structure
+\`\`\`
+app/
+├── Http/
+│   ├── Controllers/
+│   ├── Middleware/
+│   └── Requests/           (Form Request classes for validation)
+├── Models/                 (Eloquent)
+├── Jobs/                   (queued work)
+├── Services/               (business logic, when extracted)
+└── Providers/
+routes/
+  ├── web.php
+  └── api.php
+database/
+  ├── migrations/
+  └── seeders/
+config/
+\`\`\`
+
+## Routing and Controllers
+- Routes in \`routes/web.php\` (sessions, CSRF) and \`routes/api.php\` (stateless).
+- Resource controllers for CRUD: \`Route::resource('posts', PostController::class)\`.
+- Validate requests with Form Request classes, not inline in the controller.
+
+## Eloquent
+- Models in \`app/Models/\`. Define relationships, casts, and scopes on the model.
+- Avoid N+1: eager-load with \`with(['author'])\` when iterating collections.
+
+## Migrations
+- One change per migration. \`php artisan make:migration <name>\`.
+- Run with \`php artisan migrate\`. Roll back with \`migrate:rollback\`.
+
+## Artisan
+- \`php artisan <command>\` is the task runner: migrations, make:*, tinker, queue:work.
+- Custom commands live in \`app/Console/Commands/\` and self-register.
+
+## Queues and Jobs
+- Dispatch jobs with \`Job::dispatch(...)\`. Run workers with \`php artisan queue:work\`.
+- Choose a queue driver (database, redis, sqs) via \`QUEUE_CONNECTION\` in \`.env\`.
+
+## Testing
+- Feature tests hit the HTTP layer; unit tests stay pure. Use \`RefreshDatabase\` for per-test isolation.
+`,
+};
+
 export const SKILL_RAILS: SkillFile = {
   path: 'skills/rails/SKILL.md',
   content: `---

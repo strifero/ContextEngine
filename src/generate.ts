@@ -248,6 +248,7 @@ const DISPLAY_NAME: Record<DetectedTech, string> = {
   nestjs:         'NestJS',
   fastapi:        'FastAPI',
   rails:          'Ruby on Rails',
+  laravel:        'Laravel',
 };
 
 const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
@@ -623,6 +624,16 @@ const AGENTS_SUMMARY: Record<DetectedTech, AgentsSummary> = {
     ],
     avoid: [
       'Business logic in views. Push it to helpers, services, or model methods.',
+    ],
+  },
+  laravel: {
+    conventions: [
+      'Validate with Form Request classes; keep controllers focused on HTTP.',
+      'Schema via migrations (`php artisan make:migration`, `php artisan migrate`). Seed with seeders, not ad-hoc scripts.',
+      'Use `php artisan` for every task runner need: migrations, queues, custom commands.',
+    ],
+    avoid: [
+      'Inline validation inside controllers when a Form Request fits.',
     ],
   },
 };

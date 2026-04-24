@@ -1,0 +1,101 @@
+# Snapshot
+
+## Detected
+php, laravel
+
+## Files (2)
+- .cursor/rules/laravel.mdc
+- .cursor/rules/php.mdc
+
+---
+FILE: .cursor/rules/laravel.mdc
+---
+---
+description: laravel best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: laravel
+description: Laravel conventions: routing, controllers, Eloquent ORM, migrations, Artisan commands, queued jobs, and validation. Use when building or editing a Laravel app, controllers, models, or migrations.
+---
+
+<!-- review before release -->
+
+# Laravel Conventions
+
+## Structure
+```
+app/
+├── Http/
+│   ├── Controllers/
+│   ├── Middleware/
+│   └── Requests/           (Form Request classes for validation)
+├── Models/                 (Eloquent)
+├── Jobs/                   (queued work)
+├── Services/               (business logic, when extracted)
+└── Providers/
+routes/
+  ├── web.php
+  └── api.php
+database/
+  ├── migrations/
+  └── seeders/
+config/
+```
+
+## Routing and Controllers
+- Routes in `routes/web.php` (sessions, CSRF) and `routes/api.php` (stateless).
+- Resource controllers for CRUD: `Route::resource('posts', PostController::class)`.
+- Validate requests with Form Request classes, not inline in the controller.
+
+## Eloquent
+- Models in `app/Models/`. Define relationships, casts, and scopes on the model.
+- Avoid N+1: eager-load with `with(['author'])` when iterating collections.
+
+## Migrations
+- One change per migration. `php artisan make:migration <name>`.
+- Run with `php artisan migrate`. Roll back with `migrate:rollback`.
+
+## Artisan
+- `php artisan <command>` is the task runner: migrations, make:*, tinker, queue:work.
+- Custom commands live in `app/Console/Commands/` and self-register.
+
+## Queues and Jobs
+- Dispatch jobs with `Job::dispatch(...)`. Run workers with `php artisan queue:work`.
+- Choose a queue driver (database, redis, sqs) via `QUEUE_CONNECTION` in `.env`.
+
+## Testing
+- Feature tests hit the HTTP layer; unit tests stay pure. Use `RefreshDatabase` for per-test isolation.
+
+---
+FILE: .cursor/rules/php.mdc
+---
+---
+description: php best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: php
+description: PHP conventions — modern PHP patterns, Composer, and WordPress plugin development.
+---
+
+# PHP Conventions
+
+## Modern PHP (8.1+)
+- `declare(strict_types=1);` at top of every file
+- Constructor promotion:
+```php
+public function __construct(
+    private readonly UserRepository $repo,
+) {}
+```
+
+## WordPress Plugins
+- Prefix all functions, classes, hooks, option keys with plugin slug
+- Never access superglobals directly — use `sanitize_*()`, `esc_*()`, `wp_verify_nonce()`
+- Database writes via `$wpdb->prepare()`
+- Enqueue scripts via `wp_enqueue_scripts` hook
