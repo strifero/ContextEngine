@@ -22,9 +22,9 @@ Free. Open source. Runs entirely on your machine. No account required.
 
 ## The Problem
 
-Every AI coding session starts blank. You ask Claude Code to add an endpoint — it suggests `pages/api/` because it doesn't know you're on the App Router. You ask Cursor to write a query — it ignores your Prisma setup. You spend 10 minutes re-establishing context before doing any real work.
+Every AI coding session starts blank. You ask Claude Code to add an endpoint, and it suggests `pages/api/` because it doesn't know you're on the App Router. You ask Cursor to write a query, and it ignores your Prisma setup. You spend 10 minutes re-establishing context before doing any real work.
 
-`CLAUDE.md`, `.cursorrules`, and `copilot-instructions.md` fix this — your AI tool reads them automatically and starts with full context. But writing a good one is tedious.
+`CLAUDE.md`, `.cursorrules`, and `copilot-instructions.md` fix this: your AI tool reads them automatically and starts with full context. But writing a good one is tedious.
 
 **ContextEngine generates them automatically from your actual codebase.**
 
@@ -225,4 +225,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## License
 
-MIT — by [Strife Technologies](https://strifetech.com)
+MIT, by [Strife Technologies](https://strifetech.com)
