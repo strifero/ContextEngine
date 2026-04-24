@@ -1,0 +1,45 @@
+# Snapshot
+
+## Detected
+rust
+
+## Files (1)
+- .cursor/rules/rust.mdc
+
+---
+FILE: .cursor/rules/rust.mdc
+---
+---
+description: rust best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: rust
+description: Rust conventions — error handling with Result/Option, async with Tokio, and project structure.
+---
+
+# Rust Conventions
+
+## Error Handling
+```rust
+#[derive(Debug, thiserror::Error)]
+pub enum AppError {
+    #[error("not found: {0}")]
+    NotFound(String),
+    #[error("database error: {0}")]
+    Database(#[from] sqlx::Error),
+}
+```
+- Never `unwrap()` in production — use `?`
+
+## Async — Tokio
+```rust
+#[tokio::main]
+async fn main() -> anyhow::Result<()> { ... }
+```
+
+## Ownership
+- Prefer borrowing (`&T`) over cloning
+- `Arc<T>` for shared state across threads

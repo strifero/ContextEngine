@@ -1,0 +1,171 @@
+# Snapshot
+
+## Detected
+nodejs, express, prisma, postgresql
+
+## Files (4)
+- .cursor/rules/express.mdc
+- .cursor/rules/nodejs.mdc
+- .cursor/rules/postgresql.mdc
+- .cursor/rules/prisma.mdc
+
+---
+FILE: .cursor/rules/express.mdc
+---
+---
+description: express best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: express
+description: Express.js route structure, middleware patterns, error handling, and API response conventions. Use whenever creating routes, middleware, request validation, or error handlers. Also trigger for REST API design, auth middleware, or CORS questions.
+---
+
+# Express.js Conventions
+
+## Router Structure
+- One router per domain (`routes/users.ts`, `routes/orders.ts`)
+- Routers are thin — all logic lives in `lib/`
+- Mount routers in `app.ts`, not `server.ts`
+
+```typescript
+router.get('/:id', async (req: Request, res: Response) => {
+  try {
+    const item = await getItem(req.params.id);
+    if (!item) { res.status(404).json({ error: 'Not found' }); return; }
+    res.json(item);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    res.status(500).json({ error: message });
+  }
+});
+```
+
+## Response Conventions
+- Error: `{ error: string }` — always the `error` key
+- 400 — validation failure | 401 — no auth | 403 — forbidden
+- 404 — not found | 409 — conflict | 500 — server error
+
+## Middleware Order
+1. `express.json()`  2. CORS  3. Logging  4. Routes  5. 404 handler  6. Error handler
+
+---
+FILE: .cursor/rules/nodejs.mdc
+---
+---
+description: nodejs best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: nodejs
+description: Node.js runtime conventions, environment configuration, process management, and server bootstrap patterns. Use whenever writing server entry points, handling env vars, setting up process signals, or debugging Node.js runtime issues.
+---
+
+# Node.js Conventions
+
+## Runtime
+- Node.js 20+ LTS — use native `fetch`, `crypto`
+- Always specify `"engines": { "node": ">=20" }` in package.json
+
+## Environment Variables
+- Validate all required env vars at startup — fail fast
+```typescript
+const required = ['DATABASE_URL', 'API_KEY'];
+for (const key of required) {
+  if (!process.env[key]) throw new Error(`Missing env var: ${key}`);
+}
+```
+- Never read `process.env` deep in business logic — read at startup, pass down
+
+## Process Management
+- Handle `SIGTERM` and `SIGINT` for graceful shutdown
+- Register `process.on('unhandledRejection', ...)` at startup — log + exit(1)
+
+## Logging
+- Structured JSON logging (pino or similar) in production
+- Log level via `LOG_LEVEL` env var
+- Always include: timestamp, level, message, module
+
+## Package Conventions
+- Commit `package-lock.json`
+- Pin exact versions for infrastructure packages
+- Scripts: always define `start`, `build`, `dev`, `typecheck`, `lint`
+
+---
+FILE: .cursor/rules/postgresql.mdc
+---
+---
+description: postgresql best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: postgresql
+description: PostgreSQL patterns — schema design, indexes, parameterized queries, and connection pooling.
+---
+
+# PostgreSQL Conventions
+
+## Always Parameterized
+```typescript
+const { rows } = await pool.query<User>(
+  'SELECT id, email FROM users WHERE id = $1 AND deleted_at IS NULL',
+  [userId]
+);
+```
+
+## Schema
+- Primary keys: `gen_random_uuid()`
+- Always `TIMESTAMPTZ` not `TIMESTAMP`
+- Soft deletes: `deleted_at TIMESTAMPTZ`
+
+## Indexes
+```sql
+CREATE INDEX CONCURRENTLY idx_orders_user ON orders(user_id);
+CREATE INDEX CONCURRENTLY idx_active ON users(email) WHERE deleted_at IS NULL;
+```
+
+---
+FILE: .cursor/rules/prisma.mdc
+---
+---
+description: prisma best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: prisma
+description: Prisma ORM patterns — schema design, migrations, typed queries, and connection pooling.
+---
+
+# Prisma Conventions
+
+## Client Singleton
+```typescript
+import { PrismaClient } from '@prisma/client';
+const g = globalThis as { prisma?: PrismaClient };
+export const prisma = g.prisma ?? new PrismaClient({ log: ['error'] });
+if (process.env.NODE_ENV !== 'production') g.prisma = prisma;
+```
+
+## Schema
+```prisma
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+## Migrations
+```bash
+npx prisma migrate dev --name describe_change
+npx prisma migrate deploy   # production
+```

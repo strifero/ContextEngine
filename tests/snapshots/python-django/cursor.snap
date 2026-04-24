@@ -1,0 +1,80 @@
+# Snapshot
+
+## Detected
+python, django
+
+## Files (2)
+- .cursor/rules/django.mdc
+- .cursor/rules/python.mdc
+
+---
+FILE: .cursor/rules/django.mdc
+---
+---
+description: django best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: django
+description: Django conventions — settings, models, migrations, and REST Framework patterns.
+---
+
+# Django Conventions
+
+## Settings
+- Split: `settings/base.py`, `settings/dev.py`, `settings/prod.py`
+- Secrets via `django-environ` — never committed
+
+## Models
+```python
+class Article(models.Model):
+    title      = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+```
+
+## Query Optimization
+- `select_related()` for FK, `prefetch_related()` for M2M
+- Django Debug Toolbar in dev to catch N+1
+
+---
+FILE: .cursor/rules/python.mdc
+---
+---
+description: python best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: python
+description: Python conventions — project structure, type hints, async patterns, and error handling.
+---
+
+# Python Conventions
+
+## Type Hints — Always
+```python
+def get_user(user_id: str) -> Optional[User]:
+    ...
+```
+
+## Async (FastAPI)
+```python
+@app.get("/users/{user_id}")
+async def get_user(user_id: str) -> User:
+    user = await db.get_user(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Not found")
+    return user
+```
+
+## Tooling
+- `uv` or `pip` with `pyproject.toml`
+- `ruff` for linting and formatting
+- `mypy` for type checking in CI
