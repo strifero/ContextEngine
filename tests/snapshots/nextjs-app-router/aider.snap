@@ -1,7 +1,7 @@
 # Snapshot
 
 ## Detected
-typescript, nextjs-app, react, nodejs, tailwind
+typescript, nextjs-app, react, nodejs, tailwind, playwright
 
 ## Files (1)
 - CONVENTIONS.md
@@ -21,6 +21,7 @@ FILE: CONVENTIONS.md
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Playwright
 
 ## Commands
 
@@ -44,6 +45,8 @@ FILE: CONVENTIONS.md
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
+- Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
 
 ## What to avoid
 
@@ -55,6 +58,7 @@ FILE: CONVENTIONS.md
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `page.waitForTimeout`. Assert visibility or wait on a network response.
 
 ---
 

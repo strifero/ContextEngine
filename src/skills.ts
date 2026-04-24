@@ -825,6 +825,133 @@ public async Task<User?> GetUserAsync(string id, CancellationToken ct = default)
 };
 
 // ---------------------------------------------------------------------------
+// Testing frameworks (added phase 3.6, review before release)
+// ---------------------------------------------------------------------------
+
+export const SKILL_VITEST: SkillFile = {
+  path: 'skills/vitest/SKILL.md',
+  content: `---
+name: vitest
+description: Vitest test patterns, configuration, and assertions. Use when writing, running, or debugging unit or integration tests in a Vitest project.
+---
+
+<!-- review before release -->
+
+# Vitest Conventions
+
+## File Layout
+- Co-locate \`<file>.test.ts\` or \`<file>.spec.ts\` next to the module under test.
+- Pure test-only modules live in \`tests/\` or \`__tests__/\`.
+
+## Running
+- \`vitest\` for watch mode, \`vitest run\` for one shot (use this in CI).
+- Filter by pattern: \`vitest run path/to/file\`.
+
+## Assertions
+- \`expect(...).toEqual(...)\` for deep equality, \`toBe\` for primitives and identity.
+- \`expect.soft\` to collect multiple failures in one test before throwing.
+
+## Mocking
+- \`vi.mock('module-path', ...)\` at the top level of the test file.
+- Fake timers: \`vi.useFakeTimers()\`, with a matching \`vi.useRealTimers()\` in an \`afterEach\`.
+
+## TypeScript
+- Vitest reuses the project's tsconfig. No separate config required.
+`,
+};
+
+export const SKILL_JEST: SkillFile = {
+  path: 'skills/jest/SKILL.md',
+  content: `---
+name: jest
+description: Jest test patterns, configuration, and assertions. Use when writing, running, or debugging unit tests in a Jest project.
+---
+
+<!-- review before release -->
+
+# Jest Conventions
+
+## File Layout
+- Co-locate tests: \`<file>.test.ts\` or \`<file>.spec.ts\`.
+- Shared test utilities under \`__mocks__/\` or \`__tests__/__helpers__/\`.
+
+## Running
+- \`jest\` runs everything; pass a path or pattern to scope.
+- Watch mode: \`jest --watch\`. Filter in the interactive menu.
+
+## Assertions
+- \`expect(x).toEqual(...)\` for deep equality, \`toBe\` for identity or primitives.
+- Async: \`await expect(promise).resolves.toEqual(...)\`.
+
+## Mocking
+- \`jest.mock('module')\` hoists. Keep it at the top of the file.
+- Reset between tests with \`afterEach(() => jest.resetAllMocks())\`, or set \`resetMocks: true\` in config.
+
+## TypeScript
+- ts-jest or @swc/jest for compilation. Make sure the config's transform covers \`.ts\`.
+`,
+};
+
+export const SKILL_PLAYWRIGHT: SkillFile = {
+  path: 'skills/playwright/SKILL.md',
+  content: `---
+name: playwright
+description: Playwright end-to-end test patterns, fixtures, selectors, and reliability. Use when writing or debugging Playwright browser tests or investigating flaky behavior.
+---
+
+<!-- review before release -->
+
+# Playwright Conventions
+
+## Structure
+- Tests under \`tests/\` (or \`e2e/\`). One flow per file.
+- Shared setup via fixtures: \`test.extend({ authedPage: ... })\`.
+
+## Selectors
+- Role-based first: \`page.getByRole('button', { name: 'Save' })\`.
+- \`getByTestId\` for elements without accessible labels.
+- Avoid CSS selectors: they couple tests to markup rather than behavior.
+
+## Waits
+- Never \`page.waitForTimeout(ms)\`. Use \`expect(locator).toBeVisible()\` or explicit network waits.
+- Playwright auto-waits for actionability. Trust it first; reach for explicit waits only while debugging.
+
+## Reliability
+- Reset state between tests: seed DB, mock API, or create a fresh user per test.
+- \`trace: 'retain-on-failure'\` in \`playwright.config\` so failures are debuggable from CI artifacts.
+`,
+};
+
+export const SKILL_CYPRESS: SkillFile = {
+  path: 'skills/cypress/SKILL.md',
+  content: `---
+name: cypress
+description: Cypress end-to-end test patterns, custom commands, and network stubbing. Use when writing or debugging Cypress tests or investigating flaky behavior.
+---
+
+<!-- review before release -->
+
+# Cypress Conventions
+
+## Structure
+- Tests under \`cypress/e2e/\`. One feature per file.
+- Support code: \`cypress/support/commands.ts\` (custom commands), \`cypress/support/e2e.ts\` (per-test hooks).
+
+## Selectors
+- \`data-cy\` attributes: \`cy.get('[data-cy=save]')\`.
+- Avoid selectors tied to styling (\`.btn-primary\`) or generated class names.
+
+## Waits
+- Never \`cy.wait(<ms>)\`. Use \`cy.intercept\` with \`cy.wait('@alias')\` for network, or command retry for DOM.
+- Cypress retries commands automatically until the assertion passes or the default timeout expires.
+
+## Network
+- Stub with \`cy.intercept('GET', '/api/users', { fixture: 'users.json' })\`.
+- Baseline realistic network behavior first, override for edge cases per test.
+`,
+};
+
+// ---------------------------------------------------------------------------
 // Agents
 // ---------------------------------------------------------------------------
 

@@ -1,9 +1,9 @@
 # Snapshot
 
 ## Detected
-typescript, react, vite, nodejs
+typescript, react, vite, nodejs, vitest
 
-## Files (23)
+## Files (25)
 - .amazonq/rules/project.md
 - .claude/CLAUDE.md
 - .claude/agents/backend-engineer.md
@@ -13,11 +13,13 @@ typescript, react, vite, nodejs
 - .claude/skills/react/SKILL.md
 - .claude/skills/typescript/SKILL.md
 - .claude/skills/vite/SKILL.md
+- .claude/skills/vitest/SKILL.md
 - .clinerules
 - .cursor/rules/nodejs.mdc
 - .cursor/rules/react.mdc
 - .cursor/rules/typescript.mdc
 - .cursor/rules/vite.mdc
+- .cursor/rules/vitest.mdc
 - .github/copilot-instructions.md
 - .junie/guidelines.md
 - .opencode/AGENTS.md
@@ -42,6 +44,7 @@ FILE: .amazonq/rules/project.md
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- Vitest
 
 ## Commands
 
@@ -60,6 +63,8 @@ FILE: .amazonq/rules/project.md
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Co-locate `<file>.test.ts` next to the module under test.
+- `vitest run` in CI, `vitest` for watch locally.
 
 ## What to avoid
 
@@ -69,6 +74,7 @@ FILE: .amazonq/rules/project.md
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
 
@@ -85,7 +91,7 @@ FILE: .claude/CLAUDE.md
 
 ## Project Overview
 
-**Detected stack:** typescript, react, vite, nodejs
+**Detected stack:** typescript, react, vite, nodejs, vitest
 
 <!--
   Fill in the sections below to give Claude more context about your project.
@@ -109,6 +115,7 @@ FILE: .claude/CLAUDE.md
 - `nodejs`
 - `react`
 - `vite`
+- `vitest`
 
 ## Available Agents
 - `code-reviewer`
@@ -342,6 +349,37 @@ export default defineConfig({
 - `vite-bundle-visualizer` to diagnose large bundles
 
 ---
+FILE: .claude/skills/vitest/SKILL.md
+---
+---
+name: vitest
+description: Vitest test patterns, configuration, and assertions. Use when writing, running, or debugging unit or integration tests in a Vitest project.
+---
+
+<!-- review before release -->
+
+# Vitest Conventions
+
+## File Layout
+- Co-locate `<file>.test.ts` or `<file>.spec.ts` next to the module under test.
+- Pure test-only modules live in `tests/` or `__tests__/`.
+
+## Running
+- `vitest` for watch mode, `vitest run` for one shot (use this in CI).
+- Filter by pattern: `vitest run path/to/file`.
+
+## Assertions
+- `expect(...).toEqual(...)` for deep equality, `toBe` for primitives and identity.
+- `expect.soft` to collect multiple failures in one test before throwing.
+
+## Mocking
+- `vi.mock('module-path', ...)` at the top level of the test file.
+- Fake timers: `vi.useFakeTimers()`, with a matching `vi.useRealTimers()` in an `afterEach`.
+
+## TypeScript
+- Vitest reuses the project's tsconfig. No separate config required.
+
+---
 FILE: .clinerules
 ---
 # vite-react-ts
@@ -355,6 +393,7 @@ FILE: .clinerules
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- Vitest
 
 ## Commands
 
@@ -373,6 +412,8 @@ FILE: .clinerules
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Co-locate `<file>.test.ts` next to the module under test.
+- `vitest run` in CI, `vitest` for watch locally.
 
 ## What to avoid
 
@@ -382,6 +423,7 @@ FILE: .clinerules
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
 
@@ -559,6 +601,43 @@ export default defineConfig({
 - `vite-bundle-visualizer` to diagnose large bundles
 
 ---
+FILE: .cursor/rules/vitest.mdc
+---
+---
+description: vitest best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: vitest
+description: Vitest test patterns, configuration, and assertions. Use when writing, running, or debugging unit or integration tests in a Vitest project.
+---
+
+<!-- review before release -->
+
+# Vitest Conventions
+
+## File Layout
+- Co-locate `<file>.test.ts` or `<file>.spec.ts` next to the module under test.
+- Pure test-only modules live in `tests/` or `__tests__/`.
+
+## Running
+- `vitest` for watch mode, `vitest run` for one shot (use this in CI).
+- Filter by pattern: `vitest run path/to/file`.
+
+## Assertions
+- `expect(...).toEqual(...)` for deep equality, `toBe` for primitives and identity.
+- `expect.soft` to collect multiple failures in one test before throwing.
+
+## Mocking
+- `vi.mock('module-path', ...)` at the top level of the test file.
+- Fake timers: `vi.useFakeTimers()`, with a matching `vi.useRealTimers()` in an `afterEach`.
+
+## TypeScript
+- Vitest reuses the project's tsconfig. No separate config required.
+
+---
 FILE: .github/copilot-instructions.md
 ---
 # GitHub Copilot Instructions
@@ -567,7 +646,7 @@ FILE: .github/copilot-instructions.md
 
 ## Project Stack
 
-**Detected:** typescript, react, vite, nodejs
+**Detected:** typescript, react, vite, nodejs, vitest
 
 ## Conventions
 
@@ -725,6 +804,38 @@ export default defineConfig({
 - `vite-bundle-visualizer` to diagnose large bundles
 
 ---
+
+## vitest
+
+---
+name: vitest
+description: Vitest test patterns, configuration, and assertions. Use when writing, running, or debugging unit or integration tests in a Vitest project.
+---
+
+<!-- review before release -->
+
+# Vitest Conventions
+
+## File Layout
+- Co-locate `<file>.test.ts` or `<file>.spec.ts` next to the module under test.
+- Pure test-only modules live in `tests/` or `__tests__/`.
+
+## Running
+- `vitest` for watch mode, `vitest run` for one shot (use this in CI).
+- Filter by pattern: `vitest run path/to/file`.
+
+## Assertions
+- `expect(...).toEqual(...)` for deep equality, `toBe` for primitives and identity.
+- `expect.soft` to collect multiple failures in one test before throwing.
+
+## Mocking
+- `vi.mock('module-path', ...)` at the top level of the test file.
+- Fake timers: `vi.useFakeTimers()`, with a matching `vi.useRealTimers()` in an `afterEach`.
+
+## TypeScript
+- Vitest reuses the project's tsconfig. No separate config required.
+
+---
 FILE: .junie/guidelines.md
 ---
 # vite-react-ts
@@ -738,6 +849,7 @@ FILE: .junie/guidelines.md
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- Vitest
 
 ## Commands
 
@@ -756,6 +868,8 @@ FILE: .junie/guidelines.md
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Co-locate `<file>.test.ts` next to the module under test.
+- `vitest run` in CI, `vitest` for watch locally.
 
 ## What to avoid
 
@@ -765,6 +879,7 @@ FILE: .junie/guidelines.md
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
 
@@ -784,6 +899,7 @@ FILE: .opencode/AGENTS.md
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- Vitest
 
 ## Commands
 
@@ -802,6 +918,8 @@ FILE: .opencode/AGENTS.md
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Co-locate `<file>.test.ts` next to the module under test.
+- `vitest run` in CI, `vitest` for watch locally.
 
 ## What to avoid
 
@@ -811,6 +929,7 @@ FILE: .opencode/AGENTS.md
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
 
@@ -830,6 +949,7 @@ FILE: .roo/rules.md
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- Vitest
 
 ## Commands
 
@@ -848,6 +968,8 @@ FILE: .roo/rules.md
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Co-locate `<file>.test.ts` next to the module under test.
+- `vitest run` in CI, `vitest` for watch locally.
 
 ## What to avoid
 
@@ -857,6 +979,7 @@ FILE: .roo/rules.md
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
 
@@ -876,6 +999,7 @@ FILE: .rules
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- Vitest
 
 ## Commands
 
@@ -894,6 +1018,8 @@ FILE: .rules
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Co-locate `<file>.test.ts` next to the module under test.
+- `vitest run` in CI, `vitest` for watch locally.
 
 ## What to avoid
 
@@ -903,6 +1029,7 @@ FILE: .rules
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
 
@@ -922,6 +1049,7 @@ FILE: .windsurfrules
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- Vitest
 
 ## Commands
 
@@ -940,6 +1068,8 @@ FILE: .windsurfrules
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Co-locate `<file>.test.ts` next to the module under test.
+- `vitest run` in CI, `vitest` for watch locally.
 
 ## What to avoid
 
@@ -949,6 +1079,7 @@ FILE: .windsurfrules
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
 
@@ -968,6 +1099,7 @@ FILE: AGENTS.md
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- Vitest
 
 ## Commands
 
@@ -986,6 +1118,8 @@ FILE: AGENTS.md
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Co-locate `<file>.test.ts` next to the module under test.
+- `vitest run` in CI, `vitest` for watch locally.
 
 ## What to avoid
 
@@ -995,6 +1129,7 @@ FILE: AGENTS.md
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
 
@@ -1014,6 +1149,7 @@ FILE: CONVENTIONS.md
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- Vitest
 
 ## Commands
 
@@ -1032,6 +1168,8 @@ FILE: CONVENTIONS.md
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Co-locate `<file>.test.ts` next to the module under test.
+- `vitest run` in CI, `vitest` for watch locally.
 
 ## What to avoid
 
@@ -1041,6 +1179,7 @@ FILE: CONVENTIONS.md
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
 
@@ -1060,6 +1199,7 @@ FILE: GEMINI.md
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- Vitest
 
 ## Commands
 
@@ -1078,6 +1218,8 @@ FILE: GEMINI.md
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Co-locate `<file>.test.ts` next to the module under test.
+- `vitest run` in CI, `vitest` for watch locally.
 
 ## What to avoid
 
@@ -1087,6 +1229,7 @@ FILE: GEMINI.md
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
 

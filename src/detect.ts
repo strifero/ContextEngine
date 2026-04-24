@@ -9,7 +9,8 @@ export type DetectedTech =
   | 'react'
   | 'vite' | 'vue' | 'tailwind' | 'swiftui' | 'stripe'
   | 'prisma' | 'postgresql' | 'mongodb' | 'azure' | 'docker'
-  | 'go' | 'python' | 'django' | 'rust' | 'bun' | 'php' | 'csharp';
+  | 'go' | 'python' | 'django' | 'rust' | 'bun' | 'php' | 'csharp'
+  | 'vitest' | 'jest' | 'playwright' | 'cypress';
 
 export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun' | 'unknown';
 
@@ -177,6 +178,19 @@ export async function detectStack(dir: string): Promise<DetectionResult> {
   if (hasFile(dir, 'global.json') || hasExtension(dir, '.csproj') ||
       hasExtension(dir, '.sln') || hasExtension(dir, '.cs'))
     detected.add('csharp');
+
+  if (hasFile(dir, 'vitest.config.ts', 'vitest.config.js', 'vitest.config.mjs') || hasDep(pkg, 'vitest'))
+    detected.add('vitest');
+
+  if (hasFile(dir, 'jest.config.ts', 'jest.config.js', 'jest.config.mjs', 'jest.config.json') ||
+      hasDep(pkg, 'jest'))
+    detected.add('jest');
+
+  if (hasFile(dir, 'playwright.config.ts', 'playwright.config.js') || hasDep(pkg, '@playwright/test'))
+    detected.add('playwright');
+
+  if (hasFile(dir, 'cypress.config.ts', 'cypress.config.js') || hasDep(pkg, 'cypress'))
+    detected.add('cypress');
 
   return {
     techs:          Array.from(detected),

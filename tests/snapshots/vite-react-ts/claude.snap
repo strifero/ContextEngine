@@ -1,9 +1,9 @@
 # Snapshot
 
 ## Detected
-typescript, react, vite, nodejs
+typescript, react, vite, nodejs, vitest
 
-## Files (8)
+## Files (9)
 - .claude/CLAUDE.md
 - .claude/agents/backend-engineer.md
 - .claude/agents/code-reviewer.md
@@ -12,6 +12,7 @@ typescript, react, vite, nodejs
 - .claude/skills/react/SKILL.md
 - .claude/skills/typescript/SKILL.md
 - .claude/skills/vite/SKILL.md
+- .claude/skills/vitest/SKILL.md
 
 ---
 FILE: .claude/CLAUDE.md
@@ -24,7 +25,7 @@ FILE: .claude/CLAUDE.md
 
 ## Project Overview
 
-**Detected stack:** typescript, react, vite, nodejs
+**Detected stack:** typescript, react, vite, nodejs, vitest
 
 <!--
   Fill in the sections below to give Claude more context about your project.
@@ -48,6 +49,7 @@ FILE: .claude/CLAUDE.md
 - `nodejs`
 - `react`
 - `vite`
+- `vitest`
 
 ## Available Agents
 - `code-reviewer`
@@ -279,3 +281,34 @@ export default defineConfig({
 ## Build
 - Dynamic `import()` for route-level code splitting
 - `vite-bundle-visualizer` to diagnose large bundles
+
+---
+FILE: .claude/skills/vitest/SKILL.md
+---
+---
+name: vitest
+description: Vitest test patterns, configuration, and assertions. Use when writing, running, or debugging unit or integration tests in a Vitest project.
+---
+
+<!-- review before release -->
+
+# Vitest Conventions
+
+## File Layout
+- Co-locate `<file>.test.ts` or `<file>.spec.ts` next to the module under test.
+- Pure test-only modules live in `tests/` or `__tests__/`.
+
+## Running
+- `vitest` for watch mode, `vitest run` for one shot (use this in CI).
+- Filter by pattern: `vitest run path/to/file`.
+
+## Assertions
+- `expect(...).toEqual(...)` for deep equality, `toBe` for primitives and identity.
+- `expect.soft` to collect multiple failures in one test before throwing.
+
+## Mocking
+- `vi.mock('module-path', ...)` at the top level of the test file.
+- Fake timers: `vi.useFakeTimers()`, with a matching `vi.useRealTimers()` in an `afterEach`.
+
+## TypeScript
+- Vitest reuses the project's tsconfig. No separate config required.

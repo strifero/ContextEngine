@@ -1,7 +1,7 @@
 # Snapshot
 
 ## Detected
-typescript, nextjs-app, react, nodejs, tailwind
+typescript, nextjs-app, react, nodejs, tailwind, playwright
 
 ## Files (1)
 - .github/copilot-instructions.md
@@ -15,7 +15,7 @@ FILE: .github/copilot-instructions.md
 
 ## Project Stack
 
-**Detected:** typescript, nextjs-app, react, nodejs, tailwind
+**Detected:** typescript, nextjs-app, react, nodejs, tailwind, playwright
 
 ## Conventions
 
@@ -224,3 +224,33 @@ Input:  flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm
 - Define brand colors in `tailwind.config.ts` under `theme.extend.colors`
 - Semantic names: `primary`, `secondary`, `destructive`, `muted`
 - Dark mode via `class` strategy
+
+---
+
+## playwright
+
+---
+name: playwright
+description: Playwright end-to-end test patterns, fixtures, selectors, and reliability. Use when writing or debugging Playwright browser tests or investigating flaky behavior.
+---
+
+<!-- review before release -->
+
+# Playwright Conventions
+
+## Structure
+- Tests under `tests/` (or `e2e/`). One flow per file.
+- Shared setup via fixtures: `test.extend({ authedPage: ... })`.
+
+## Selectors
+- Role-based first: `page.getByRole('button', { name: 'Save' })`.
+- `getByTestId` for elements without accessible labels.
+- Avoid CSS selectors: they couple tests to markup rather than behavior.
+
+## Waits
+- Never `page.waitForTimeout(ms)`. Use `expect(locator).toBeVisible()` or explicit network waits.
+- Playwright auto-waits for actionability. Trust it first; reach for explicit waits only while debugging.
+
+## Reliability
+- Reset state between tests: seed DB, mock API, or create a fresh user per test.
+- `trace: 'retain-on-failure'` in `playwright.config` so failures are debuggable from CI artifacts.

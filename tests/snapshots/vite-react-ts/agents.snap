@@ -1,7 +1,7 @@
 # Snapshot
 
 ## Detected
-typescript, react, vite, nodejs
+typescript, react, vite, nodejs, vitest
 
 ## Files (1)
 - AGENTS.md
@@ -20,6 +20,7 @@ FILE: AGENTS.md
 - React 18.3.0
 - Vite 5.0.0
 - Node.js
+- Vitest
 
 ## Commands
 
@@ -38,6 +39,8 @@ FILE: AGENTS.md
 - Reference static assets via `new URL(path, import.meta.url)`.
 - ES modules (`"type": "module"`) with explicit `.js` extensions on imports.
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
+- Co-locate `<file>.test.ts` next to the module under test.
+- `vitest run` in CI, `vitest` for watch locally.
 
 ## What to avoid
 
@@ -47,6 +50,7 @@ FILE: AGENTS.md
 - Derived state in `useState` when it can be computed during render.
 - Reading `process.env` directly in client code. Use `import.meta.env`.
 - Mixing CommonJS and ESM in the same package.
+- `vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.
 
 ---
 

@@ -10,6 +10,7 @@ import {
   SKILL_PRISMA, SKILL_POSTGRESQL, SKILL_MONGODB, SKILL_AZURE, SKILL_DOCKER,
   SKILL_GO, SKILL_PYTHON, SKILL_DJANGO, SKILL_RUST, SKILL_BUN,
   SKILL_PHP, SKILL_CSHARP,
+  SKILL_VITEST, SKILL_JEST, SKILL_PLAYWRIGHT, SKILL_CYPRESS,
   AGENT_BACKEND, AGENT_FRONTEND, AGENT_IOS, AGENT_REVIEWER, AGENT_DEVOPS,
 } from './skills.js';
 
@@ -42,6 +43,10 @@ const SKILL_REGISTRY: SkillEntry[] = [
   { triggers: ['bun'],                      files: [SKILL_BUN] },
   { triggers: ['php'],                      files: [SKILL_PHP] },
   { triggers: ['csharp'],                   files: [SKILL_CSHARP] },
+  { triggers: ['vitest'],                   files: [SKILL_VITEST] },
+  { triggers: ['jest'],                     files: [SKILL_JEST] },
+  { triggers: ['playwright'],               files: [SKILL_PLAYWRIGHT] },
+  { triggers: ['cypress'],                  files: [SKILL_CYPRESS] },
 ];
 
 const AGENT_REGISTRY: SkillEntry[] = [

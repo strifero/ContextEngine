@@ -1,9 +1,9 @@
 # Snapshot
 
 ## Detected
-typescript, nextjs-app, react, nodejs, tailwind
+typescript, nextjs-app, react, nodejs, tailwind, playwright
 
-## Files (25)
+## Files (27)
 - .amazonq/rules/project.md
 - .claude/CLAUDE.md
 - .claude/agents/backend-engineer.md
@@ -11,12 +11,14 @@ typescript, nextjs-app, react, nodejs, tailwind
 - .claude/agents/frontend-engineer.md
 - .claude/skills/nextjs-app/SKILL.md
 - .claude/skills/nodejs/SKILL.md
+- .claude/skills/playwright/SKILL.md
 - .claude/skills/react/SKILL.md
 - .claude/skills/tailwind/SKILL.md
 - .claude/skills/typescript/SKILL.md
 - .clinerules
 - .cursor/rules/nextjs-app.mdc
 - .cursor/rules/nodejs.mdc
+- .cursor/rules/playwright.mdc
 - .cursor/rules/react.mdc
 - .cursor/rules/tailwind.mdc
 - .cursor/rules/typescript.mdc
@@ -45,6 +47,7 @@ FILE: .amazonq/rules/project.md
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Playwright
 
 ## Commands
 
@@ -68,6 +71,8 @@ FILE: .amazonq/rules/project.md
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
+- Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
 
 ## What to avoid
 
@@ -79,6 +84,7 @@ FILE: .amazonq/rules/project.md
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `page.waitForTimeout`. Assert visibility or wait on a network response.
 
 ---
 
@@ -95,7 +101,7 @@ FILE: .claude/CLAUDE.md
 
 ## Project Overview
 
-**Detected stack:** typescript, nextjs-app, react, nodejs, tailwind
+**Detected stack:** typescript, nextjs-app, react, nodejs, tailwind, playwright
 
 <!--
   Fill in the sections below to give Claude more context about your project.
@@ -120,6 +126,7 @@ FILE: .claude/CLAUDE.md
 - `nextjs-app`
 - `react`
 - `tailwind`
+- `playwright`
 
 ## Available Agents
 - `code-reviewer`
@@ -293,6 +300,35 @@ for (const key of required) {
 - Scripts: always define `start`, `build`, `dev`, `typecheck`, `lint`
 
 ---
+FILE: .claude/skills/playwright/SKILL.md
+---
+---
+name: playwright
+description: Playwright end-to-end test patterns, fixtures, selectors, and reliability. Use when writing or debugging Playwright browser tests or investigating flaky behavior.
+---
+
+<!-- review before release -->
+
+# Playwright Conventions
+
+## Structure
+- Tests under `tests/` (or `e2e/`). One flow per file.
+- Shared setup via fixtures: `test.extend({ authedPage: ... })`.
+
+## Selectors
+- Role-based first: `page.getByRole('button', { name: 'Save' })`.
+- `getByTestId` for elements without accessible labels.
+- Avoid CSS selectors: they couple tests to markup rather than behavior.
+
+## Waits
+- Never `page.waitForTimeout(ms)`. Use `expect(locator).toBeVisible()` or explicit network waits.
+- Playwright auto-waits for actionability. Trust it first; reach for explicit waits only while debugging.
+
+## Reliability
+- Reset state between tests: seed DB, mock API, or create a fresh user per test.
+- `trace: 'retain-on-failure'` in `playwright.config` so failures are debuggable from CI artifacts.
+
+---
 FILE: .claude/skills/react/SKILL.md
 ---
 ---
@@ -419,6 +455,7 @@ FILE: .clinerules
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Playwright
 
 ## Commands
 
@@ -442,6 +479,8 @@ FILE: .clinerules
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
+- Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
 
 ## What to avoid
 
@@ -453,6 +492,7 @@ FILE: .clinerules
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `page.waitForTimeout`. Assert visibility or wait on a network response.
 
 ---
 
@@ -556,6 +596,41 @@ for (const key of required) {
 - Commit `package-lock.json`
 - Pin exact versions for infrastructure packages
 - Scripts: always define `start`, `build`, `dev`, `typecheck`, `lint`
+
+---
+FILE: .cursor/rules/playwright.mdc
+---
+---
+description: playwright best practices and conventions
+globs: ["**/*"]
+alwaysApply: false
+---
+
+---
+name: playwright
+description: Playwright end-to-end test patterns, fixtures, selectors, and reliability. Use when writing or debugging Playwright browser tests or investigating flaky behavior.
+---
+
+<!-- review before release -->
+
+# Playwright Conventions
+
+## Structure
+- Tests under `tests/` (or `e2e/`). One flow per file.
+- Shared setup via fixtures: `test.extend({ authedPage: ... })`.
+
+## Selectors
+- Role-based first: `page.getByRole('button', { name: 'Save' })`.
+- `getByTestId` for elements without accessible labels.
+- Avoid CSS selectors: they couple tests to markup rather than behavior.
+
+## Waits
+- Never `page.waitForTimeout(ms)`. Use `expect(locator).toBeVisible()` or explicit network waits.
+- Playwright auto-waits for actionability. Trust it first; reach for explicit waits only while debugging.
+
+## Reliability
+- Reset state between tests: seed DB, mock API, or create a fresh user per test.
+- `trace: 'retain-on-failure'` in `playwright.config` so failures are debuggable from CI artifacts.
 
 ---
 FILE: .cursor/rules/react.mdc
@@ -696,7 +771,7 @@ FILE: .github/copilot-instructions.md
 
 ## Project Stack
 
-**Detected:** typescript, nextjs-app, react, nodejs, tailwind
+**Detected:** typescript, nextjs-app, react, nodejs, tailwind, playwright
 
 ## Conventions
 
@@ -907,6 +982,36 @@ Input:  flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm
 - Dark mode via `class` strategy
 
 ---
+
+## playwright
+
+---
+name: playwright
+description: Playwright end-to-end test patterns, fixtures, selectors, and reliability. Use when writing or debugging Playwright browser tests or investigating flaky behavior.
+---
+
+<!-- review before release -->
+
+# Playwright Conventions
+
+## Structure
+- Tests under `tests/` (or `e2e/`). One flow per file.
+- Shared setup via fixtures: `test.extend({ authedPage: ... })`.
+
+## Selectors
+- Role-based first: `page.getByRole('button', { name: 'Save' })`.
+- `getByTestId` for elements without accessible labels.
+- Avoid CSS selectors: they couple tests to markup rather than behavior.
+
+## Waits
+- Never `page.waitForTimeout(ms)`. Use `expect(locator).toBeVisible()` or explicit network waits.
+- Playwright auto-waits for actionability. Trust it first; reach for explicit waits only while debugging.
+
+## Reliability
+- Reset state between tests: seed DB, mock API, or create a fresh user per test.
+- `trace: 'retain-on-failure'` in `playwright.config` so failures are debuggable from CI artifacts.
+
+---
 FILE: .junie/guidelines.md
 ---
 # nextjs-app
@@ -921,6 +1026,7 @@ FILE: .junie/guidelines.md
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Playwright
 
 ## Commands
 
@@ -944,6 +1050,8 @@ FILE: .junie/guidelines.md
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
+- Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
 
 ## What to avoid
 
@@ -955,6 +1063,7 @@ FILE: .junie/guidelines.md
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `page.waitForTimeout`. Assert visibility or wait on a network response.
 
 ---
 
@@ -975,6 +1084,7 @@ FILE: .opencode/AGENTS.md
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Playwright
 
 ## Commands
 
@@ -998,6 +1108,8 @@ FILE: .opencode/AGENTS.md
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
+- Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
 
 ## What to avoid
 
@@ -1009,6 +1121,7 @@ FILE: .opencode/AGENTS.md
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `page.waitForTimeout`. Assert visibility or wait on a network response.
 
 ---
 
@@ -1029,6 +1142,7 @@ FILE: .roo/rules.md
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Playwright
 
 ## Commands
 
@@ -1052,6 +1166,8 @@ FILE: .roo/rules.md
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
+- Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
 
 ## What to avoid
 
@@ -1063,6 +1179,7 @@ FILE: .roo/rules.md
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `page.waitForTimeout`. Assert visibility or wait on a network response.
 
 ---
 
@@ -1083,6 +1200,7 @@ FILE: .rules
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Playwright
 
 ## Commands
 
@@ -1106,6 +1224,8 @@ FILE: .rules
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
+- Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
 
 ## What to avoid
 
@@ -1117,6 +1237,7 @@ FILE: .rules
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `page.waitForTimeout`. Assert visibility or wait on a network response.
 
 ---
 
@@ -1137,6 +1258,7 @@ FILE: .windsurfrules
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Playwright
 
 ## Commands
 
@@ -1160,6 +1282,8 @@ FILE: .windsurfrules
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
+- Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
 
 ## What to avoid
 
@@ -1171,6 +1295,7 @@ FILE: .windsurfrules
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `page.waitForTimeout`. Assert visibility or wait on a network response.
 
 ---
 
@@ -1191,6 +1316,7 @@ FILE: AGENTS.md
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Playwright
 
 ## Commands
 
@@ -1214,6 +1340,8 @@ FILE: AGENTS.md
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
+- Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
 
 ## What to avoid
 
@@ -1225,6 +1353,7 @@ FILE: AGENTS.md
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `page.waitForTimeout`. Assert visibility or wait on a network response.
 
 ---
 
@@ -1245,6 +1374,7 @@ FILE: CONVENTIONS.md
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Playwright
 
 ## Commands
 
@@ -1268,6 +1398,8 @@ FILE: CONVENTIONS.md
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
+- Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
 
 ## What to avoid
 
@@ -1279,6 +1411,7 @@ FILE: CONVENTIONS.md
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `page.waitForTimeout`. Assert visibility or wait on a network response.
 
 ---
 
@@ -1299,6 +1432,7 @@ FILE: GEMINI.md
 - React 18.3.0
 - Node.js
 - Tailwind CSS 3.4.0
+- Playwright
 
 ## Commands
 
@@ -1322,6 +1456,8 @@ FILE: GEMINI.md
 - Use native fetch where available. Reserve axios for interceptor-heavy flows.
 - Utility classes in markup. Extract to a component (not `@apply`) when a pattern repeats.
 - Design tokens live in `tailwind.config.*` under `theme.extend`.
+- Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.
+- Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.
 
 ## What to avoid
 
@@ -1333,6 +1469,7 @@ FILE: GEMINI.md
 - Derived state in `useState` when it can be computed during render.
 - Mixing CommonJS and ESM in the same package.
 - Inline `style={{ ... }}` for anything Tailwind already covers.
+- `page.waitForTimeout`. Assert visibility or wait on a network response.
 
 ---
 

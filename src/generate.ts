@@ -233,6 +233,10 @@ const DISPLAY_NAME: Record<DetectedTech, string> = {
   bun:        'Bun',
   php:        'PHP',
   csharp:     'C#',
+  vitest:     'Vitest',
+  jest:       'Jest',
+  playwright: 'Playwright',
+  cypress:    'Cypress',
 };
 
 const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
@@ -246,6 +250,10 @@ const TECH_TO_PACKAGE: Partial<Record<DetectedTech, string>> = {
   express:        'express',
   stripe:         'stripe',
   prisma:         '@prisma/client',
+  vitest:         'vitest',
+  jest:           'jest',
+  playwright:     '@playwright/test',
+  cypress:        'cypress',
 };
 
 interface AgentsSummary { conventions: string[]; avoid: string[]; }
@@ -461,6 +469,42 @@ const AGENTS_SUMMARY: Record<DetectedTech, AgentsSummary> = {
     ],
     avoid: [
       'Catching `Exception` broadly. Catch the specific type or rethrow.',
+    ],
+  },
+  vitest: {
+    conventions: [
+      'Co-locate `<file>.test.ts` next to the module under test.',
+      '`vitest run` in CI, `vitest` for watch locally.',
+    ],
+    avoid: [
+      '`vi.useFakeTimers()` without a matching `vi.useRealTimers()` in `afterEach`.',
+    ],
+  },
+  jest: {
+    conventions: [
+      'Co-locate `<file>.test.ts`. Shared helpers under `__mocks__/` or `__tests__/__helpers__/`.',
+      'Reset mocks between tests (`jest.resetAllMocks()` or `resetMocks: true` in config).',
+    ],
+    avoid: [
+      '`jest.mock` inside a test body. It hoists, so declare at top of file.',
+    ],
+  },
+  playwright: {
+    conventions: [
+      'Role-based selectors (`getByRole`, `getByLabel`) before `getByTestId`. Avoid CSS selectors.',
+      'Trust auto-waits. `trace: "retain-on-failure"` so failed runs are debuggable from CI.',
+    ],
+    avoid: [
+      '`page.waitForTimeout`. Assert visibility or wait on a network response.',
+    ],
+  },
+  cypress: {
+    conventions: [
+      '`data-cy` attributes for selectors. Avoid classes tied to styling.',
+      '`cy.intercept` plus `cy.wait("@alias")` for network waits.',
+    ],
+    avoid: [
+      '`cy.wait(<ms>)`. Use command retry or intercept aliases.',
     ],
   },
 };

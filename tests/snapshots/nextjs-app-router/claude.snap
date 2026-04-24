@@ -1,15 +1,16 @@
 # Snapshot
 
 ## Detected
-typescript, nextjs-app, react, nodejs, tailwind
+typescript, nextjs-app, react, nodejs, tailwind, playwright
 
-## Files (9)
+## Files (10)
 - .claude/CLAUDE.md
 - .claude/agents/backend-engineer.md
 - .claude/agents/code-reviewer.md
 - .claude/agents/frontend-engineer.md
 - .claude/skills/nextjs-app/SKILL.md
 - .claude/skills/nodejs/SKILL.md
+- .claude/skills/playwright/SKILL.md
 - .claude/skills/react/SKILL.md
 - .claude/skills/tailwind/SKILL.md
 - .claude/skills/typescript/SKILL.md
@@ -25,7 +26,7 @@ FILE: .claude/CLAUDE.md
 
 ## Project Overview
 
-**Detected stack:** typescript, nextjs-app, react, nodejs, tailwind
+**Detected stack:** typescript, nextjs-app, react, nodejs, tailwind, playwright
 
 <!--
   Fill in the sections below to give Claude more context about your project.
@@ -50,6 +51,7 @@ FILE: .claude/CLAUDE.md
 - `nextjs-app`
 - `react`
 - `tailwind`
+- `playwright`
 
 ## Available Agents
 - `code-reviewer`
@@ -221,6 +223,35 @@ for (const key of required) {
 - Commit `package-lock.json`
 - Pin exact versions for infrastructure packages
 - Scripts: always define `start`, `build`, `dev`, `typecheck`, `lint`
+
+---
+FILE: .claude/skills/playwright/SKILL.md
+---
+---
+name: playwright
+description: Playwright end-to-end test patterns, fixtures, selectors, and reliability. Use when writing or debugging Playwright browser tests or investigating flaky behavior.
+---
+
+<!-- review before release -->
+
+# Playwright Conventions
+
+## Structure
+- Tests under `tests/` (or `e2e/`). One flow per file.
+- Shared setup via fixtures: `test.extend({ authedPage: ... })`.
+
+## Selectors
+- Role-based first: `page.getByRole('button', { name: 'Save' })`.
+- `getByTestId` for elements without accessible labels.
+- Avoid CSS selectors: they couple tests to markup rather than behavior.
+
+## Waits
+- Never `page.waitForTimeout(ms)`. Use `expect(locator).toBeVisible()` or explicit network waits.
+- Playwright auto-waits for actionability. Trust it first; reach for explicit waits only while debugging.
+
+## Reliability
+- Reset state between tests: seed DB, mock API, or create a fresh user per test.
+- `trace: 'retain-on-failure'` in `playwright.config` so failures are debuggable from CI artifacts.
 
 ---
 FILE: .claude/skills/react/SKILL.md

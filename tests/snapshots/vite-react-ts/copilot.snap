@@ -1,7 +1,7 @@
 # Snapshot
 
 ## Detected
-typescript, react, vite, nodejs
+typescript, react, vite, nodejs, vitest
 
 ## Files (1)
 - .github/copilot-instructions.md
@@ -15,7 +15,7 @@ FILE: .github/copilot-instructions.md
 
 ## Project Stack
 
-**Detected:** typescript, react, vite, nodejs
+**Detected:** typescript, react, vite, nodejs, vitest
 
 ## Conventions
 
@@ -171,3 +171,35 @@ export default defineConfig({
 ## Build
 - Dynamic `import()` for route-level code splitting
 - `vite-bundle-visualizer` to diagnose large bundles
+
+---
+
+## vitest
+
+---
+name: vitest
+description: Vitest test patterns, configuration, and assertions. Use when writing, running, or debugging unit or integration tests in a Vitest project.
+---
+
+<!-- review before release -->
+
+# Vitest Conventions
+
+## File Layout
+- Co-locate `<file>.test.ts` or `<file>.spec.ts` next to the module under test.
+- Pure test-only modules live in `tests/` or `__tests__/`.
+
+## Running
+- `vitest` for watch mode, `vitest run` for one shot (use this in CI).
+- Filter by pattern: `vitest run path/to/file`.
+
+## Assertions
+- `expect(...).toEqual(...)` for deep equality, `toBe` for primitives and identity.
+- `expect.soft` to collect multiple failures in one test before throwing.
+
+## Mocking
+- `vi.mock('module-path', ...)` at the top level of the test file.
+- Fake timers: `vi.useFakeTimers()`, with a matching `vi.useRealTimers()` in an `afterEach`.
+
+## TypeScript
+- Vitest reuses the project's tsconfig. No separate config required.
