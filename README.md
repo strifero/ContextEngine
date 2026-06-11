@@ -99,6 +99,20 @@ skill library under `.claude/skills/` (e.g. `nextjs-app/SKILL.md`,
 
 ---
 
+## What's new in 1.3.1
+
+A safety and hardening patch. The headline: ContextEngine will not overwrite or delete your files.
+
+- **Overwrite guards everywhere.** Every target now skips files that already exist and reports the skips with a `--force` hint. A hand-written `AGENTS.md` or `.claude/CLAUDE.md` survives `--tool agents` and `--tool all`.
+- **`--update` deletion is allowlisted.** It only removes files ContextEngine itself can generate. Hand-written skills and agents under `.claude/` are never touched, even when they follow the standard layout.
+- **Prompt-injection hardening.** Strings read from the scanned repo (package name, script bodies, dependency versions) are sanitized before landing in generated markdown, so a hostile `package.json` cannot inject instructions into your agent files. Untrusted file reads are capped at 5 MB and tsconfig `extends` resolution is bounded to the project directory.
+- **Detection correctness.** tsconfig trailing commas parse, `strict: true` survives `extends` chains and diamond layouts, and specifiers like `workspace:*` or `file:` render the tech name without a bogus version.
+- **Stricter CLI.** Typos (`--updat`) and missing values (`-d` with no path) exit with a clean error instead of being silently ignored. A malformed `package.json` produces a visible warning instead of a silent empty detection.
+
+Full release notes: [v1.3.1](https://github.com/strifero/ContextEngine/releases/tag/v1.3.1).
+
+---
+
 ## What's new in 1.3.0
 
 - **AGENTS.md** is a first-class target. `--tool agents` emits the cross-tool standard; `--tool all` bundles it.
@@ -189,7 +203,7 @@ git add AGENTS.md .claude/ .cursor/ .github/copilot-instructions.md
 git commit -m "add AI context files via contextengine"
 ```
 
-Every contributor who clones the repo gets full AI context from day one. When the stack changes, re-run with `--update` for `.claude/` (preserves your edits) or `--force` for the other targets (regenerates from scratch — commit first if you've edited them).
+Every contributor who clones the repo gets full AI context from day one. When the stack changes, re-run with `--update` for `.claude/` (preserves your edits) or `--force` for the other targets (regenerates from scratch, so commit first if you've edited them).
 
 ---
 
