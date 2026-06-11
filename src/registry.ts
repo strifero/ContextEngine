@@ -81,7 +81,8 @@ const AGENT_REGISTRY: SkillEntry[] = [
   },
 ];
 
-const ALWAYS: SkillFile[] = [AGENT_REVIEWER];
+// Agents included regardless of detected stack (when agents are enabled).
+const ALWAYS_AGENTS: SkillFile[] = [AGENT_REVIEWER];
 
 export function selectFiles(
   detection: DetectionResult,
@@ -90,8 +91,6 @@ export function selectFiles(
   const detectedSet = new Set(detection.techs);
   const selected = new Map<string, SkillFile>();
 
-  for (const f of ALWAYS) selected.set(f.path, f);
-
   for (const entry of SKILL_REGISTRY) {
     if (entry.triggers.some(t => detectedSet.has(t))) {
       for (const f of entry.files) selected.set(f.path, f);
@@ -99,6 +98,7 @@ export function selectFiles(
   }
 
   if (includeAgents) {
+    for (const f of ALWAYS_AGENTS) selected.set(f.path, f);
     for (const entry of AGENT_REGISTRY) {
       if (entry.triggers.some(t => detectedSet.has(t))) {
         for (const f of entry.files) selected.set(f.path, f);
@@ -107,6 +107,18 @@ export function selectFiles(
   }
 
   return Array.from(selected.values()).map(f => adaptSkill(f, detection));
+}
+
+// Every path ContextEngine is capable of generating, across all stacks.
+// update.ts uses this to decide what it is allowed to remove: anything
+// outside this set is user-authored and must never be touched.
+export function allGeneratedPaths(): Set<string> {
+  const paths = new Set<string>();
+  for (const f of ALWAYS_AGENTS) paths.add(f.path);
+  for (const entry of [...SKILL_REGISTRY, ...AGENT_REGISTRY]) {
+    for (const f of entry.files) paths.add(f.path);
+  }
+  return paths;
 }
 
 // Hook detected project state into otherwise-static skill content.

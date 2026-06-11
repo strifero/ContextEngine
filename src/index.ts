@@ -26,18 +26,29 @@ export type TargetTool =
   | 'windsurf' | 'aider' | 'gemini' | 'cline' | 'roo' | 'junie' | 'amazon-q' | 'opencode' | 'zed'
   | 'all';
 
-const { values: flags } = parseArgs({
-  options: {
-    dir:         { type: 'string',  short: 'd', default: process.cwd() },
-    force:       { type: 'boolean', short: 'f', default: false },
-    update:      { type: 'boolean', short: 'u', default: false },
-    tool:        { type: 'string',  short: 't', default: 'claude' },
-    'no-agents': { type: 'boolean', default: false },
-    version:     { type: 'boolean', short: 'v', default: false },
-    help:        { type: 'boolean', short: 'h', default: false },
-  },
-  strict: false,
-});
+function parseCliArgs() {
+  try {
+    return parseArgs({
+      options: {
+        dir:         { type: 'string',  short: 'd', default: process.cwd() },
+        force:       { type: 'boolean', short: 'f', default: false },
+        update:      { type: 'boolean', short: 'u', default: false },
+        tool:        { type: 'string',  short: 't', default: 'claude' },
+        'no-agents': { type: 'boolean', default: false },
+        version:     { type: 'boolean', short: 'v', default: false },
+        help:        { type: 'boolean', short: 'h', default: false },
+      },
+      strict: true,
+      allowPositionals: false,
+    }).values;
+  } catch (err) {
+    console.error(pc.red(`\n  ${(err as Error).message}\n`));
+    console.error(`  Run ${pc.bold('contextengine --help')} for usage.\n`);
+    process.exit(1);
+  }
+}
+
+const flags = parseCliArgs();
 
 if (flags.version) {
   console.log(`contextengine v${VERSION}`);
@@ -64,7 +75,9 @@ ${pc.bold('Options:')}
                                 body at their tool-specific paths.
                                 'all' writes every target in one pass.
   -f, --force                   Overwrite existing context files
-  -u, --update                  Re-sync skills and agents, preserving your edits
+                                (without it, existing files are skipped)
+  -u, --update                  Re-sync skills and agents, preserving your
+                                edits (claude only)
   --no-agents                   Skip agent generation (Claude Code only)
   -v, --version                 Print version
   -h, --help                    Show this help
@@ -138,6 +151,10 @@ console.log(`  Analyzing ${pc.cyan(projectDir)}\n`);
 const detection = await detectStack(projectDir);
 const detected = detection.techs;
 
+for (const warning of detection.warnings) {
+  console.log(pc.yellow(`  ! ${warning}\n`));
+}
+
 if (detected.length === 0) {
   console.log(pc.yellow('  No recognized tech stack detected.\n'));
 } else {
@@ -191,11 +208,18 @@ try {
       detection,
       tool,
       includeAgents: !flags['no-agents'],
+      force: flags.force,
     });
 
     console.log(`\n  ${pc.green('✓')} Generated ${result.fileCount} files\n`);
     for (const file of result.files) {
       console.log(`    ${pc.dim('+')} ${file}`);
+    }
+    if (result.skipped.length > 0) {
+      console.log(`\n  ${pc.yellow('!')} Skipped ${result.skipped.length} existing files. Use ${pc.bold('--force')} to overwrite:`);
+      for (const file of result.skipped) {
+        console.log(`    ${pc.dim('=')} ${file}`);
+      }
     }
     console.log(`\n  ${pc.bold('Done.')} Your AI agent is ready.\n`);
   }

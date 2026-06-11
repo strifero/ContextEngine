@@ -1,7 +1,7 @@
 // detect.ts: Scan a project directory and identify its tech stack
 
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join, dirname, resolve as resolvePath } from 'node:path';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { join, dirname, relative, isAbsolute, resolve as resolvePath } from 'node:path';
 import { createRequire } from 'node:module';
 
 export type DetectedTech =
@@ -40,6 +40,9 @@ export interface DetectionResult {
   tsconfig:       TsconfigFlags | null;
   monorepo:       Monorepo;
   pythonTool:     PythonTool;
+  // Non-fatal problems found while scanning (e.g. a malformed package.json),
+  // surfaced so the CLI can explain an unexpectedly empty detection.
+  warnings:       string[];
 }
 
 interface PackageJson {
@@ -48,8 +51,21 @@ interface PackageJson {
   devDependencies?: Record<string, string>;
 }
 
+// Scanned repos are untrusted: cap reads so a multi-GB config file
+// cannot OOM the process.
+const MAX_READ_BYTES = 5 * 1024 * 1024;
+
+export function readTextCapped(path: string): string | null {
+  try {
+    if (statSync(path).size > MAX_READ_BYTES) return null;
+    return readFileSync(path, 'utf-8');
+  } catch { return null; }
+}
+
 function readJson<T>(path: string): T | null {
-  try { return JSON.parse(readFileSync(path, 'utf-8')) as T; }
+  const raw = readTextCapped(path);
+  if (raw === null) return null;
+  try { return JSON.parse(raw) as T; }
   catch { return null; }
 }
 
@@ -96,18 +112,20 @@ function detectPackageManager(dir: string): PackageManager {
   return 'unknown';
 }
 
-// Strip // line and /* */ block comments so tsconfig (JSON-with-comments) parses.
-// Not string-aware, but tsconfig values rarely contain // or /* literally.
+// Strip // line and /* */ block comments plus trailing commas so tsconfig
+// (JSON-with-comments, where trailing commas are valid and common) parses.
+// Not string-aware, but tsconfig values rarely contain these literally.
 function stripJsonComments(raw: string): string {
   return raw
     .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1')
+    .replace(/,\s*([}\]])/g, '$1');
 }
 
 function fileContainsCI(path: string, needle: string): boolean {
-  if (!existsSync(path)) return false;
-  try { return readFileSync(path, 'utf-8').toLowerCase().includes(needle.toLowerCase()); }
-  catch { return false; }
+  const raw = readTextCapped(path);
+  if (raw === null) return false;
+  return raw.toLowerCase().includes(needle.toLowerCase());
 }
 
 function detectPythonTool(dir: string): PythonTool {
@@ -132,19 +150,28 @@ interface TsconfigShape {
   compilerOptions?: Record<string, unknown>;
 }
 
+// True when candidate lives inside rootDir (the scanned project).
+function isWithin(rootDir: string, candidate: string): boolean {
+  const rel = relative(rootDir, candidate);
+  return rel !== '' && !rel.startsWith('..') && !isAbsolute(rel);
+}
+
 // Resolve a tsconfig `extends` value to an absolute path on disk.
 // Supports two forms:
 //   - relative ("./base.json", "../tsconfig.base"): resolved against fromTsconfig dir
 //   - bare specifier ("next/tsconfig.json", "@tsconfig/node20"): resolved via
 //     createRequire against node_modules. If no .json extension is given,
 //     /tsconfig.json is appended (matches tsc behavior).
+// Resolution is bounded to rootDir: scanned repos are untrusted, so an
+// `extends` must not cause reads outside the project being analyzed.
 // Returns null if resolution fails for any reason (missing module, invalid path, etc.).
-function resolveExtends(extendsValue: string, fromTsconfig: string): string | null {
+function resolveExtends(extendsValue: string, fromTsconfig: string, rootDir: string): string | null {
   const fromDir = dirname(fromTsconfig);
 
   if (extendsValue.startsWith('./') || extendsValue.startsWith('../')) {
     let candidate = resolvePath(fromDir, extendsValue);
     if (!candidate.endsWith('.json')) candidate = candidate + '.json';
+    if (!isWithin(rootDir, candidate)) return null;
     return existsSync(candidate) ? candidate : null;
   }
 
@@ -152,6 +179,7 @@ function resolveExtends(extendsValue: string, fromTsconfig: string): string | nu
     const req = createRequire(fromTsconfig);
     const target = extendsValue.endsWith('.json') ? extendsValue : extendsValue + '/tsconfig.json';
     const resolved = req.resolve(target);
+    if (!isWithin(rootDir, resolved)) return null;
     return existsSync(resolved) ? resolved : null;
   } catch {
     return null;
@@ -161,29 +189,40 @@ function resolveExtends(extendsValue: string, fromTsconfig: string): string | nu
 // Walk an `extends` chain and compute the effective tsconfig flags.
 // Parent values form the base; each `extends` layer overrides, and the
 // current file's compilerOptions overrides last (per tsc merge semantics).
-function readTsconfigFlags(tsconfigPath: string, seen: Set<string>, depth: number): TsconfigFlags | null {
-  if (depth > 10) return null;          // circular / pathological chain guard
+// Returns only the flags a config (or its chain) explicitly sets, so an
+// unmentioned flag never clobbers a parent's value during the merge.
+function readTsconfigFlags(
+  tsconfigPath: string,
+  rootDir: string,
+  seen: Set<string>,
+  depth: number,
+): Partial<TsconfigFlags> | null {
+  if (depth > 10) return null;          // pathological chain guard
   if (seen.has(tsconfigPath)) return null;
-  seen.add(tsconfigPath);
   if (!existsSync(tsconfigPath)) return null;
 
+  const raw = readTextCapped(tsconfigPath);
+  if (raw === null) return null;
   let parsed: TsconfigShape;
   try {
-    parsed = JSON.parse(stripJsonComments(readFileSync(tsconfigPath, 'utf-8'))) as TsconfigShape;
+    parsed = JSON.parse(stripJsonComments(raw)) as TsconfigShape;
   } catch {
     return null;
   }
 
-  let flags: TsconfigFlags = { strict: false, noUncheckedIndexedAccess: false };
+  let flags: Partial<TsconfigFlags> = {};
 
   const extendsList = parsed.extends
     ? (Array.isArray(parsed.extends) ? parsed.extends : [parsed.extends])
     : [];
 
   for (const ext of extendsList) {
-    const parentPath = resolveExtends(ext, tsconfigPath);
+    const parentPath = resolveExtends(ext, tsconfigPath, rootDir);
     if (!parentPath) continue;
-    const parentFlags = readTsconfigFlags(parentPath, seen, depth + 1);
+    // Each parent gets its own copy of `seen`: cycles within one chain are
+    // still caught, while diamond layouts (two parents sharing a base) can
+    // both read the shared base instead of the second branch coming back null.
+    const parentFlags = readTsconfigFlags(parentPath, rootDir, new Set([...seen, tsconfigPath]), depth + 1);
     if (parentFlags) flags = { ...flags, ...parentFlags };
   }
 
@@ -199,12 +238,20 @@ function readTsconfigFlags(tsconfigPath: string, seen: Set<string>, depth: numbe
 function readTsconfig(dir: string): TsconfigFlags | null {
   const path = join(dir, 'tsconfig.json');
   if (!existsSync(path)) return null;
-  return readTsconfigFlags(path, new Set(), 0);
+  const flags = readTsconfigFlags(path, dir, new Set(), 0);
+  if (flags === null) return null;
+  return { strict: flags.strict ?? false, noUncheckedIndexedAccess: flags.noUncheckedIndexedAccess ?? false };
 }
 
 export async function detectStack(dir: string): Promise<DetectionResult> {
   const detected = new Set<DetectedTech>();
-  const pkg = readJson<PackageJson>(join(dir, 'package.json'));
+  const warnings: string[] = [];
+
+  const pkgPath = join(dir, 'package.json');
+  const pkg = readJson<PackageJson>(pkgPath);
+  if (existsSync(pkgPath) && pkg === null) {
+    warnings.push('package.json exists but could not be parsed (invalid JSON or too large); detection may be incomplete.');
+  }
 
   if (hasFile(dir, 'tsconfig.json') || hasExtension(dir, '.ts') || hasExtension(dir, '.tsx'))
     detected.add('typescript');
@@ -332,12 +379,18 @@ export async function detectStack(dir: string): Promise<DetectionResult> {
   if (hasFile(dir, 'cypress.config.ts', 'cypress.config.js') || hasDep(pkg, 'cypress'))
     detected.add('cypress');
 
+  const tsconfig = readTsconfig(dir);
+  if (existsSync(join(dir, 'tsconfig.json')) && tsconfig === null) {
+    warnings.push('tsconfig.json exists but could not be parsed; strict-mode detection skipped.');
+  }
+
   return {
     techs:          Array.from(detected),
     packageManager: detectPackageManager(dir),
     scripts:        pkg?.scripts ?? {},
-    tsconfig:       readTsconfig(dir),
+    tsconfig,
     monorepo:       detectMonorepo(dir),
     pythonTool:     detectPythonTool(dir),
+    warnings,
   };
 }

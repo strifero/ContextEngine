@@ -1,8 +1,9 @@
 // generate.ts: Write context files into a project for the selected AI tool
 
-import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { join, dirname, basename } from 'node:path';
 import type { DetectedTech, DetectionResult, Monorepo, PackageManager } from './detect.js';
+import { readTextCapped } from './detect.js';
 import type { TargetTool } from './index.js';
 import { selectFiles } from './registry.js';
 
@@ -11,6 +12,9 @@ interface GenerateOptions {
   detection:     DetectionResult;
   tool:          TargetTool;
   includeAgents: boolean;
+  // Overwrite files that already exist. Without it, existing files are
+  // left untouched and reported as skipped.
+  force?:        boolean;
 }
 
 function runPrefixFor(pm: PackageManager): string {
@@ -25,6 +29,8 @@ function runPrefixFor(pm: PackageManager): string {
 interface GenerateResult {
   fileCount: number;
   files:     string[];
+  // Files that already existed and were left untouched (no --force).
+  skipped:   string[];
 }
 
 // ── package.json helpers (used by AGENTS.md) ───────────────────────
@@ -38,13 +44,27 @@ interface PkgJson {
 }
 
 function readPkg(projectDir: string): PkgJson | null {
-  try {
-    return JSON.parse(readFileSync(join(projectDir, 'package.json'), 'utf-8')) as PkgJson;
-  } catch { return null; }
+  const raw = readTextCapped(join(projectDir, 'package.json'));
+  if (raw === null) return null;
+  try { return JSON.parse(raw) as PkgJson; }
+  catch { return null; }
 }
 
+// Repo-derived strings (package name, versions, script bodies) end up inside
+// Markdown that downstream agents read as instructions. Collapse newlines and
+// strip backticks so a hostile package.json cannot inject headings or break
+// out of the code spans these strings are rendered in.
+function sanitizeInline(s: string, maxLen = 300): string {
+  return s.replace(/[`\r\n]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, maxLen);
+}
+
+// Pull a displayable version out of a specifier. Non-version specifiers
+// (workspace:*, latest, file:, npm: aliases, git URLs) yield '' and the
+// caller omits the version rather than rendering the raw specifier.
 function stripSemver(v: string): string {
-  return v.replace(/^[\^~><=\s]+/, '').trim();
+  if (/^(workspace|catalog|file|link|portal|git|github|https?|npm):/.test(v)) return '';
+  const m = v.match(/\d+(\.\d+){0,2}(-[\w.]+)?/);
+  return m ? m[0] : '';
 }
 
 // ── Claude Code ────────────────────────────────────────────────────
@@ -103,15 +123,20 @@ ${agentNames.length > 0
 }
 
 async function generateClaude(opts: GenerateOptions): Promise<GenerateResult> {
-  const { projectDir, detection, includeAgents } = opts;
+  const { projectDir, detection, includeAgents, force } = opts;
   const detected = detection.techs;
   const claudeDir = join(projectDir, '.claude');
   const writtenFiles: string[] = [];
+  const skippedFiles: string[] = [];
 
   const skillFiles = selectFiles(detection, includeAgents);
 
   for (const file of skillFiles) {
     const fullPath = join(claudeDir, file.path);
+    if (existsSync(fullPath) && !force) {
+      skippedFiles.push(`.claude/${file.path}`);
+      continue;
+    }
     const dir = dirname(fullPath);
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
     writeFileSync(fullPath, file.content, 'utf-8');
@@ -119,11 +144,15 @@ async function generateClaude(opts: GenerateOptions): Promise<GenerateResult> {
   }
 
   const claudeMdPath = join(claudeDir, 'CLAUDE.md');
-  if (!existsSync(claudeDir)) mkdirSync(claudeDir, { recursive: true });
-  writeFileSync(claudeMdPath, generateClaudeMd(detected, skillFiles.map(f => f.path)), 'utf-8');
-  writtenFiles.unshift('.claude/CLAUDE.md');
+  if (existsSync(claudeMdPath) && !force) {
+    skippedFiles.unshift('.claude/CLAUDE.md');
+  } else {
+    if (!existsSync(claudeDir)) mkdirSync(claudeDir, { recursive: true });
+    writeFileSync(claudeMdPath, generateClaudeMd(detected, skillFiles.map(f => f.path)), 'utf-8');
+    writtenFiles.unshift('.claude/CLAUDE.md');
+  }
 
-  return { fileCount: writtenFiles.length, files: writtenFiles };
+  return { fileCount: writtenFiles.length, files: writtenFiles, skipped: skippedFiles };
 }
 
 // ── Cursor ─────────────────────────────────────────────────────────
@@ -140,31 +169,40 @@ ${content}
 }
 
 async function generateCursor(opts: GenerateOptions): Promise<GenerateResult> {
-  const { projectDir, detection } = opts;
+  const { projectDir, detection, force } = opts;
   const rulesDir = join(projectDir, '.cursor', 'rules');
   const writtenFiles: string[] = [];
+  const skippedFiles: string[] = [];
 
   const skillFiles = selectFiles(detection, false);
   for (const file of skillFiles) {
     if (!file.path.includes('skills/')) continue;
     const tech = file.path.split('skills/')[1].split('/')[0];
     const outPath = join(rulesDir, `${tech}.mdc`);
+    if (existsSync(outPath) && !force) {
+      skippedFiles.push(`.cursor/rules/${tech}.mdc`);
+      continue;
+    }
     mkdirSync(rulesDir, { recursive: true });
     writeFileSync(outPath, generateCursorRule(tech, file.content), 'utf-8');
     writtenFiles.push(`.cursor/rules/${tech}.mdc`);
   }
 
-  return { fileCount: writtenFiles.length, files: writtenFiles };
+  return { fileCount: writtenFiles.length, files: writtenFiles, skipped: skippedFiles };
 }
 
 // ── GitHub Copilot ─────────────────────────────────────────────────
 
 async function generateCopilot(opts: GenerateOptions): Promise<GenerateResult> {
-  const { projectDir, detection } = opts;
+  const { projectDir, detection, force } = opts;
   const detected = detection.techs;
   const githubDir = join(projectDir, '.github');
   const outPath = join(githubDir, 'copilot-instructions.md');
   const writtenFiles: string[] = [];
+
+  if (existsSync(outPath) && !force) {
+    return { fileCount: 0, files: [], skipped: ['.github/copilot-instructions.md'] };
+  }
 
   const skillFiles = selectFiles(detection, false);
   const stackLine = detected.length > 0 ? detected.join(', ') : 'generic project';
@@ -198,7 +236,7 @@ ${sections}
   writeFileSync(outPath, content, 'utf-8');
   writtenFiles.push('.github/copilot-instructions.md');
 
-  return { fileCount: writtenFiles.length, files: writtenFiles };
+  return { fileCount: writtenFiles.length, files: writtenFiles, skipped: [] };
 }
 
 // ── AGENTS.md ──────────────────────────────────────────────────────
@@ -681,7 +719,8 @@ function techWithVersion(tech: DetectedTech, pkg: PkgJson | null): string {
   const deps = { ...pkg.dependencies, ...pkg.devDependencies };
   const raw = deps[packageName];
   if (!raw) return name;
-  return `${name} ${stripSemver(raw)}`;
+  const version = sanitizeInline(stripSemver(raw), 40);
+  return version ? `${name} ${version}` : name;
 }
 
 function buildStackSection(detected: DetectedTech[], pkg: PkgJson | null): string {
@@ -710,7 +749,7 @@ function isKnownScript(name: string): boolean {
 function buildCommandsSection(scripts: Record<string, string>, runPrefix: string): string {
   const entries = Object.entries(scripts).filter(([k]) => isKnownScript(k));
   if (entries.length === 0) return '(no commands detected. Fill in the commands agents should run for build, test, lint, etc.)';
-  return entries.map(([k, v]) => `- \`${runPrefix} ${k}\`: \`${v}\``).join('\n');
+  return entries.map(([k, v]) => `- \`${runPrefix} ${sanitizeInline(k, 60)}\`: \`${sanitizeInline(v)}\``).join('\n');
 }
 
 function buildSummarySection(techs: DetectedTech[], key: 'conventions' | 'avoid', detection: DetectionResult): string {
@@ -786,7 +825,7 @@ ${avoid}
 
 function generateAgentsMd(projectDir: string, detection: DetectionResult): string {
   const pkg = readPkg(projectDir);
-  const projectName = pkg?.name || basename(projectDir) || 'project';
+  const projectName = sanitizeInline(pkg?.name || basename(projectDir) || 'project', 100) || 'project';
   const detected = detection.techs;
 
   let summaryTechs = [...detected];
@@ -817,12 +856,15 @@ const AGENTS_BODY_TARGETS: ReadonlyArray<{ tool: TargetTool; path: string }> = [
 ];
 
 async function writeAgentsTarget(opts: GenerateOptions, outputPath: string): Promise<GenerateResult> {
-  const { projectDir, detection } = opts;
-  const body = generateAgentsMd(projectDir, detection);
+  const { projectDir, detection, force } = opts;
   const full = join(projectDir, outputPath);
+  if (existsSync(full) && !force) {
+    return { fileCount: 0, files: [], skipped: [outputPath] };
+  }
+  const body = generateAgentsMd(projectDir, detection);
   mkdirSync(dirname(full), { recursive: true });
   writeFileSync(full, body, 'utf-8');
-  return { fileCount: 1, files: [outputPath] };
+  return { fileCount: 1, files: [outputPath], skipped: [] };
 }
 
 // ── Main export ────────────────────────────────────────────────────
@@ -841,6 +883,7 @@ export async function generateFiles(opts: GenerateOptions): Promise<GenerateResu
     return {
       fileCount: everything.reduce((n, r) => n + r.fileCount, 0),
       files:     everything.flatMap(r => r.files),
+      skipped:   everything.flatMap(r => r.skipped),
     };
   }
 

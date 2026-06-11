@@ -164,12 +164,21 @@ npx @strifero/contextengine --tool gemini
 # Write files for every supported agent at once
 npx @strifero/contextengine --tool all
 
-# Re-sync after your stack changes (preserves your edits)
+# Re-sync .claude/ after your stack changes (claude only, preserves your edits)
 npx @strifero/contextengine --update
+
+# Regenerate other targets from scratch (existing files are never
+# overwritten without this flag)
+npx @strifero/contextengine --tool agents --force
+
+# Skip agent generation (Claude Code only)
+npx @strifero/contextengine --no-agents
 
 # Specific directory
 npx @strifero/contextengine --dir /path/to/project
 ```
+
+Run `npx @strifero/contextengine --help` for the full flag list (`--dir`, `--tool`, `--update`, `--force`, `--no-agents`, `--version`, `--help`).
 
 ---
 
@@ -180,13 +189,13 @@ git add AGENTS.md .claude/ .cursor/ .github/copilot-instructions.md
 git commit -m "add AI context files via contextengine"
 ```
 
-Every contributor who clones the repo gets full AI context from day one. When the stack changes, re-run with `--update`.
+Every contributor who clones the repo gets full AI context from day one. When the stack changes, re-run with `--update` for `.claude/` (preserves your edits) or `--force` for the other targets (regenerates from scratch — commit first if you've edited them).
 
 ---
 
 ## Why auto-generate?
 
-The honest critique of auto-generated context files: they rot, they inflate every session with boilerplate, and a stale `CLAUDE.md` is worse than none. ContextEngine treats its output as a starting point, not a finished document. On first run it scans your lockfiles, configs, and dependencies and writes `AGENTS.md`, `CLAUDE.md`, and the matching skill files. Everything past the detected-stack summary is yours to edit; `--update` reconciles on the next run instead of overwriting.
+The honest critique of auto-generated context files: they rot, they inflate every session with boilerplate, and a stale `CLAUDE.md` is worse than none. ContextEngine treats its output as a starting point, not a finished document. On first run it scans your lockfiles, configs, and dependencies and writes `AGENTS.md`, `CLAUDE.md`, and the matching skill files. Everything past the detected-stack summary is yours to edit. For `.claude/`, `--update` reconciles on the next run instead of overwriting; for the other targets, existing files are never touched unless you pass `--force`.
 
 The baseline context cost stays small. Skill files in `.claude/skills/` are lazy-loaded by description match, so Claude Code only pulls in a skill when the task touches it. A dozen skills on disk costs you the CLAUDE.md header plus the one or two skills the agent actually selects. `AGENTS.md` and the tool-specific equivalents are single files capped at a few KB, biased toward stack-derived facts (versions, scripts, conventions) and away from prose. The generated file is short enough to read; the repo is still the source of truth.
 
@@ -232,12 +241,13 @@ Generated output files for common stacks:
 
 ## Contributing
 
-Skills are plain markdown files in `src/skills/`. To add a stack:
+Skills are plain markdown strings exported from `src/skills.ts`. To add a stack:
 
-1. Create `src/skills/<name>.ts`
+1. Add the skill content to `src/skills.ts`
 2. Add detection to `src/detect.ts`
 3. Wire up in `src/registry.ts`
-4. Open a PR
+4. Add a fixture under `tests/fixtures/` and run `npm run test:update`
+5. Open a PR
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 

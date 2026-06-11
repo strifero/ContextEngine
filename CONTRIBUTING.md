@@ -47,11 +47,19 @@ import { ..., SKILL_MYSTACK } from './skills.js';
 
 The Cursor generator uses the same skill content automatically — no changes needed unless you want custom frontmatter.
 
-### 5. Open a PR
+### 5. Add a snapshot fixture
+
+Create a minimal project under `tests/fixtures/mystack/` (just the files your
+detection logic looks for), then run `npm run test:update` to generate the
+snapshots under `tests/snapshots/mystack/` and commit them. CI fails on any
+fixture without committed snapshots.
+
+### 6. Open a PR
 
 - One stack per PR
 - Include a brief description of what the skill covers
-- Test it: `npm run build && node dist/index.js --dir /path/to/project-using-mystack`
+- Sanity-check by hand: `npm run build && node dist/index.js --dir /path/to/project-using-mystack`
+- Make sure `npm test` is green (snapshot + unit tests)
 
 ## Improving Existing Skills
 
@@ -67,8 +75,10 @@ Good skill content:
 
 ```bash
 npm install
-npm run dev       # watch mode
-npm run build     # compile to dist/
+npm run dev           # watch mode
+npm run build         # compile to dist/
+npm test              # build + snapshot tests + unit tests
+npm run test:update   # rewrite snapshots after an intentional output change
 node dist/index.js --dir /path/to/test-project
 ```
 

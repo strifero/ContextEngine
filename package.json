@@ -1,6 +1,6 @@
 {
   "name": "@strifero/contextengine",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Auto-generate CLAUDE.md, .cursorrules, and copilot-instructions from your actual codebase. One command gives Claude Code, Cursor, and Copilot full project context.",
   "keywords": [
     "claude-md",
@@ -34,7 +34,6 @@
   "bin": {
     "contextengine": "./dist/index.js"
   },
-  "main": "./dist/index.js",
   "files": [
     "dist",
     "README.md",
@@ -44,9 +43,9 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/index.js",
-    "test": "npm run build && node tests/run.mjs",
+    "test": "npm run build && node tests/run.mjs && node tests/unit.mjs",
     "test:update": "npm run build && node tests/run.mjs --update",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm test"
   },
   "dependencies": {
     "picocolors": "^1.1.1"

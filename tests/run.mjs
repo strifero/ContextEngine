@@ -108,12 +108,12 @@ for (const fixture of fixtures) {
     cpSync(fixtureDir, projectDir, { recursive: true });
     const preExisting = new Set(walk(projectDir));
 
-    // Detect against the copied project dir, not the source fixture, so
-    // anything that depends on disk state (lockfiles, config files) sees
-    // the same directory the generator writes into.
-    const detection = await detectStack(projectDir);
-
     try {
+      // Detect against the copied project dir, not the source fixture, so
+      // anything that depends on disk state (lockfiles, config files) sees
+      // the same directory the generator writes into.
+      const detection = await detectStack(projectDir);
+
       await generateFiles({
         projectDir,
         detection,
@@ -124,11 +124,17 @@ for (const fixture of fixtures) {
       const actual = serialize(projectDir, detection.techs, preExisting);
       const snapFile = join(SNAPSHOTS_DIR, fixture, `${tool}.snap`);
 
-      if (!existsSync(snapFile) || UPDATE) {
+      if (UPDATE) {
         mkdirSync(dirname(snapFile), { recursive: true });
         writeFileSync(snapFile, actual, 'utf-8');
         written++;
-        console.log(`  ${UPDATE ? 'updated' : 'wrote'}  ${fixture}/${tool}`);
+        console.log(`  updated  ${fixture}/${tool}`);
+      } else if (!existsSync(snapFile)) {
+        // A missing snapshot is a failure, not a silent write: otherwise a
+        // new fixture or tool target passes CI without verifying anything.
+        failed++;
+        failures.push({ fixture, tool, expected: '(no snapshot on disk — run `npm run test:update` and commit the result)', actual: '(omitted)' });
+        console.log(`  MISSING  ${fixture}/${tool}`);
       } else {
         const expected = normalize(readFileSync(snapFile, 'utf-8'));
         if (actual === expected) {
