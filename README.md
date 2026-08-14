@@ -12,6 +12,8 @@ npx @strifero/contextengine
 
 Free. Open source. Runs entirely on your machine. No account required.
 
+> **Status: stable, maintenance mode.** ContextEngine is feature-complete and fully tested. Bug reports are welcome and will be fixed; no new features are planned.
+
 ---
 
 ## See It In Action
